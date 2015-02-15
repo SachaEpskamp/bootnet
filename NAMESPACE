@@ -1,0 +1,8 @@
+exportPattern("^[[:alpha:]]+")
+import(IsingFit)
+import(IsingSampler)
+import(qgraph)
+import(dplyr)
+import(magrittr)
+import(ggplot2)
+importFrom(gtools, "mixedorder")
