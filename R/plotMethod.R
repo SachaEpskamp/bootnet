@@ -3,7 +3,7 @@ plot.bootnet <- function(
   types = c("strength", "closeness", "betweenness"),
   plot = c("line","interval"),
   sampleColor = "darkred",
-  samplelwd = 1.5,
+  samplelwd = 1.1,
   bootColor = "black",
   bootAlpha = 0.01,
   bootlwd = 1
