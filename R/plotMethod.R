@@ -9,7 +9,6 @@ plot.bootnet <- function(
   bootlwd = 1
   ){
 
-  browser()
   # Start plot:
   if (plot[[1]]=="line"){
     sampleTable <- x[['sampleTable']] %>% dplyr::filter(type %in% types)
