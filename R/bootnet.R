@@ -61,15 +61,17 @@ bootnet <- function(
     if (missing(prepFun)){
       prepFun <- switch(default,
                         EBICglasso = qgraph::cor_auto,
-                        IsingFit = binarize
+                        IsingFit = binarize,
+                        pcor = qgraph::cor_auto
       )      
     }
     
     # prepArgs:
     if (missing(prepArgs)){
       prepArgs <- switch(default,
-                         EBICglasso = list(),
-                         IsingFit = list()
+                         EBICglasso = list(verbose=FALSE),
+                         IsingFit = list(),
+                         pcor = list(verbose=FALSE)
       )
     }
     
@@ -77,7 +79,8 @@ bootnet <- function(
     if (missing(estFun)){
       estFun <- switch(default,
                        EBICglasso = qgraph::EBICglasso,
-                       IsingFit = IsingFit::IsingFit
+                       IsingFit = IsingFit::IsingFit,
+                       pcor = corpcor::cor2pcor
       )
     }
     
@@ -85,7 +88,8 @@ bootnet <- function(
     if (missing(estArgs)){
       estArgs <- switch(default,
                         EBICglasso = list(n = nrow(data), returnAllResults = TRUE),
-                        IsingFit = list(plot = FALSE, progress = FALSE)
+                        IsingFit = list(plot = FALSE, progress = FALSE),
+                        pcor = list()
       )
     }
     
@@ -93,7 +97,8 @@ bootnet <- function(
     if (missing(graphFun)){
       graphFun <- switch(default,
                          EBICglasso = function(x)x[['optnet']],
-                         IsingFit = function(x)x[['weiadj']]
+                         IsingFit = function(x)x[['weiadj']],
+                         pcor = identity
       )
     }
     
@@ -101,7 +106,8 @@ bootnet <- function(
     if (missing(graphArgs)){
       graphArgs <- switch(default,
                           EBICglasso = list(),
-                          IsingFit = list()
+                          IsingFit = list(),
+                          pcor = list()
       )
     }
     
@@ -109,15 +115,24 @@ bootnet <- function(
     if (missing(intFun)){
       intFun <- switch(default,
                        EBICglasso = null,
-                       IsingFit = function(x)x[['thresholds']]
+                       IsingFit = function(x)x[['thresholds']],
+                       pcor = null
       )
     }
     
     
   }
   
+  if (missing(prepFun)){
+    prepFun <- identity
+  }
+  
+  if (missing(prepArgs)){
+    prepArgs <- list()
+  }
+  
   if (missing(graphFun)){
-    graphFun <- function(x)x
+    graphFun <- identitiy
   }
   
   if (missing(graphArgs)){

@@ -6,7 +6,7 @@ summary.bootnet <- function(
   
   tab <- x$bootTable %>% 
     dplyr::filter(type %in% types) %>%
-    dplyr::group_by(type, node1, node2) %>%
+    dplyr::group_by(type, node1, node2, id) %>%
     dplyr::summarize(
         mean = mean(value),
         var = var(value),
