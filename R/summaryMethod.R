@@ -10,6 +10,8 @@ summary.bootnet <- function(
     dplyr::summarize(
         mean = mean(value),
         var = var(value),
+        sd = sd(value),
+        prop0 = mean(value == 0),
         q1 = quantile(value,1/100),
         q2.5 = quantile(value, 2.5/100),
         q5 = quantile(value, 5/100),
