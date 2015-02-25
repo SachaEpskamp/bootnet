@@ -10,7 +10,8 @@ This function can be used to plot bootnet results by plotting all bootstrapped s
 \usage{
 \method{plot}{bootnet}(x, types = c("strength", "closeness", "betweenness"), 
         plot = c("line","interval"), sampleColor = "darkred", samplelwd = 1.5, 
-        bootColor = "black", bootAlpha = 0.01, bootlwd = 1)
+        bootColor = "black", bootAlpha = 0.01, bootlwd = 1, order = c("id","value"),
+        decreasing = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -38,6 +39,12 @@ Alpha of the bootstrap lines
   \item{bootlwd}{
 Line width of the bootstrap lines
 }
+  \item{order}{
+    String indicating how to order nodes. \code{"id"} will order nodes based on their name and \code{"value"} will order nodes based on the first entry in \code{type}.
+  }
+  \item{decreasing}{
+    Logical indicating if the ordering is decreasing or increasing.
+  }
 }
 
 \value{
