@@ -10,8 +10,7 @@ plot.bootnet <- function(
   order = c("id","value"),
   decreasing = TRUE
   ){
-
-
+  # Some comment
   # Start plot:
   if (plot[[1]]=="line"){
     sampleTable <- x[['sampleTable']] %>% dplyr::filter(type %in% types) %>% mutate(type = factor(type, levels = types))
