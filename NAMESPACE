@@ -1,12 +1,20 @@
-exportPattern("^[[:alpha:]]+")
+# exportPattern("^[[:alpha:]]+")
+# Exports:
+export(bootnet)
+export(null)
+export(binarize)
+
+# Methods:
 S3method(summary, bootnet)
 S3method(plot, bootnet)
 S3method(print, bootnet)
 S3method(summary, bootnetResult)
 S3method(plot, bootnetResult)
 S3method(print, bootnetResult)
+
+# Imports:
 import(IsingFit)
-import(IsingSampler)
+# import(IsingSampler) TODO
 import(qgraph)
 import(dplyr)
 import(ggplot2)

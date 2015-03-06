@@ -1,4 +1,4 @@
-print.bootnet <- function(x){
+print.bootnet <- function(x, ...){
   name <- deparse(substitute(x))[[1]]
   if (nchar(name) > 10) name <- "object"
   cat("=== bootnet results ===")

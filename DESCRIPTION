@@ -1,10 +1,12 @@
 Package: bootnet
 Type: Package
-Title: Bootstrap methods for various network estimation routines
+Title: Bootstrap Methods for Various Network Estimation Routines
 Version: 0.1
-Date: 2015-02-15
+Date: 2015-03-04
 Author: Sacha Epskamp
-Maintainer: Sacha Epskamp <sacha.epskamp@gmail.com>
-Imports: IsingSampler, IsingFit, qgraph, dplyr, gtools, corpcor
-Description: This package can be used to bootstrap standard errors on various network estimation routines, such as EBICglasso from the qgraph package and IsingFit from the IsingFit package.
-License: What license is it under?
+Maintainer: Sacha Epskamp <mail@sachaepskamp.com>
+Depends: ggplot2, R (>= 3.0.0)
+Imports: IsingFit, qgraph, dplyr (>= 0.3.0.2), gtools, corpcor
+Suggests: psych
+Description: Bootstrap standard errors on various network estimation routines, such as EBICglasso from the qgraph package and IsingFit from the IsingFit package.
+License: GPL-2

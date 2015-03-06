@@ -4,27 +4,24 @@
 Summarize bootnet results
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Creates a data frame (wrapped as \code{\link[dplyr]{tbl_df}}) containing summarized results of the bootstraps.
 }
 \usage{
-\method{summary}{bootnet}(x, types = c("edge", "intercept", "strength", "closeness", "betweenness", "distance"))
+\method{summary}{bootnet}(object, types = c("edge", "intercept", "strength", 
+                            "closeness", "betweenness", "distance"), ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{
+  \item{object}{
 A \code{bootnet} object
 }
   \item{types}{
 The types of statistics to include in the summary table
 }
+\item{\dots}{Not used.}
 }
 \value{
 A \code{tbl_df} (data frame) containing summarized statistics.
 }
 \author{
 Sacha Epskamp <mail@sachaepskamp.com>
-}
-
-\examples{
-
 }

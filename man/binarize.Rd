@@ -32,7 +32,3 @@ A binarized data frame
 \author{
 Sacha Epskamp <mail@sachaepskamp.com>
 }
-
-\examples{
-
-}

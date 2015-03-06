@@ -9,9 +9,9 @@ This function can be used to plot bootnet results by plotting all bootstrapped s
 }
 \usage{
 \method{plot}{bootnet}(x, types = c("strength", "closeness", "betweenness"), 
-        plot = c("line","interval"), sampleColor = "darkred", samplelwd = 1.5, 
+        plot = c("line","interval"), sampleColor = "darkred", samplelwd = 1.1, 
         bootColor = "black", bootAlpha = 0.01, bootlwd = 1, order = c("id","value"),
-        decreasing = TRUE)
+        decreasing = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,7 +21,7 @@ A \code{bootnet} object
   \item{types}{
 The types of statistics to plot. \code{c("intercept", "strength", "closeness", "betweenness") } plots all nodewise statistics whereas \code{c("edge","distance") } plots all pairwise statistics.
 }
-\code{plot}{
+\item{plot}{
 Character string indicating what to plot. \code{"line"} will produce a line graph and \code{"interval"} a 95\% confidence interval graph
 }
   \item{sampleColor}{
@@ -45,6 +45,7 @@ Line width of the bootstrap lines
   \item{decreasing}{
     Logical indicating if the ordering is decreasing or increasing.
   }
+  \item{\dots}{Not used.}
 }
 
 \value{
@@ -52,8 +53,4 @@ A \code{ggplot2} object.
 }
 \author{
 Sacha Epskamp <mail@sachaepskamp.com>
-}
-
-\examples{
-
 }

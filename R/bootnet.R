@@ -67,9 +67,19 @@ bootnet <- function(
     }
     
     # prepArgs:
+    qgraphVersion <- packageDescription("qgraph")$Version
+    qgraphVersion <- as.numeric(strsplit(qgraphVersion,split="\\.|\\-")[[1]])
+    if (length(qgraphVersion)==1) qgraphVersion <- c(qgraphVersion,0)
+    if (length(qgraphVersion)==2) qgraphVersion <- c(qgraphVersion,0)
+    goodVersion <- 
+      (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) | 
+      (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
+      qgraphVersion[[1]] > 1
+    
+    newqgraph <- 
     if (missing(prepArgs)){
       prepArgs <- switch(default,
-                         EBICglasso = list(verbose=FALSE),
+                         EBICglasso = ifelse(goodVersion,list(verbose=FALSE),list()),
                          IsingFit = list(),
                          pcor = list(verbose=FALSE)
       )
@@ -132,7 +142,7 @@ bootnet <- function(
   }
   
   if (missing(graphFun)){
-    graphFun <- identitiy
+    graphFun <- identity
   }
   
   if (missing(graphArgs)){
@@ -191,7 +201,7 @@ bootnet <- function(
     close(pb)
   }
   
-  
+
   ### Compute the full parameter table!!
   if (verbose){
     message("Computing statistics...")
