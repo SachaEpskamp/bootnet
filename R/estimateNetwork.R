@@ -6,7 +6,6 @@ estimateNetwork <- function(
   estFun, # function that results in a network
   estArgs # arguments sent to the graph estimation function (if missing automatically sample size is included)
 ){
-
   # Compute input:
   input <- do.call(prepFun, c(list(data), prepArgs))
   

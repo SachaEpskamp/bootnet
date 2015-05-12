@@ -74,5 +74,7 @@ statTable <- function(x, name, alpha = 1){
     tables[[i]]$id <- ifelse(tables[[i]]$node2=='',paste0("N: ",tables[[i]]$node1),paste0("E: ",tables[[i]]$node1, "--", tables[[i]]$node2))
   }
   
-  return(dplyr::rbind_all(tables))
+  tab <- dplyr::rbind_all(tables)
+  tab$nNode <- x$nNodes
+  return(tab)
 }

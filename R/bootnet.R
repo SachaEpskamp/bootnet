@@ -1,3 +1,11 @@
+ifElse <- function(statement,true,false){
+  if (statement){
+    return(true)
+  } else {
+    return(false)
+  }
+}
+
 ### function to bootstrap networks ###
 # Input: 
 ## data that can be bootstrapped
@@ -11,7 +19,8 @@
 bootnet <- function(
   data, # Dataset
   nBoots = 1000, # Number of bootstrap samples.
-  default, # Default method to use. EBICglasso, IsingFit, concentration, some more....
+  default = c("none", "EBICglasso", "IsingFit", "pcor"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
+  type = c("observation","node"),
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs = list(), # list with arguments for the correlation function
   estFun, # function that results in a network
@@ -22,8 +31,17 @@ bootnet <- function(
   intArgs, # Set to null if missing
   verbose = TRUE, # messages on what is being done?
   labels, # if missing taken from colnames
-  alpha = 1# centrality alpha
+  alpha = 1, # centrality alpha
+  nNodes = 2:(ncol(data)-1) # if type = "node", defaults to 2:(p-1)
 ){
+  default <- match.arg(default)
+  type <- match.arg(type)
+  N <- ncol(data)
+  
+  if (type == "node" & N < 3){
+    stop("Node-wise bootstrapping requires at least three nodes.")
+  }
+  
   # First test if data is a data frame:
   if (!(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
@@ -50,13 +68,13 @@ bootnet <- function(
   
   
   ### DEFAULT OPTIONS ###
-  if (missing(default)){
+  if ((default == "none")){
     if (missing(prepFun) | missing(prepArgs) | missing(estFun) | missing(estArgs)){
       stop("If 'default' is not set, 'prepFun', 'prepArgs', 'estFun' and 'estArgs' may not be missing.")
     }
   }
-
-  if (!missing(default)){
+  
+  if (!(default == "none")){
     # prepFun:
     if (missing(prepFun)){
       prepFun <- switch(default,
@@ -77,13 +95,13 @@ bootnet <- function(
       qgraphVersion[[1]] > 1
     
     newqgraph <- 
-    if (missing(prepArgs)){
-      prepArgs <- switch(default,
-                         EBICglasso = ifelse(goodVersion,list(verbose=FALSE),list()),
-                         IsingFit = list(),
-                         pcor = list(verbose=FALSE)
-      )
-    }
+      if (missing(prepArgs)){
+        prepArgs <- switch(default,
+                           EBICglasso = ifElse(goodVersion,list(verbose=FALSE),list()),
+                           IsingFit = list(),
+                           pcor = list(verbose=FALSE)
+        )
+      }
     
     # estFun:
     if (missing(estFun)){
@@ -166,7 +184,8 @@ bootnet <- function(
     graph = do.call(graphFun,c(list(res), graphArgs)),
     intercepts = do.call(intFun,c(list(res), intArgs)),
     results = res,
-    labels = labels
+    labels = labels,
+    nNodes = ncol(data)
   )
   class(sampleResult) <- c("bootnetResult", "list")
   
@@ -174,63 +193,144 @@ bootnet <- function(
     stop("bootnet does not support directed graphs")
   }
   
-  # Bootstrap results:
-  bootResults <- vector("list", nBoots)
   
-  if (verbose){
-    message("Bootstrapping...")
-    pb <- txtProgressBar(0,nBoots,style = 3)
-  }
-  
-  for (b in seq_len(nBoots)){
-    bootData <- data[sample(seq_len(nrow(data)), nrow(data), replace=TRUE), ]
-    res <- estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs)
-    bootResults[[b]] <- list(
-      graph = do.call(graphFun,c(list(res), graphArgs)),
-      intercepts = do.call(intFun,c(list(res), intArgs)),
-      results = res,
-      labels = labels
-    )
-    class(bootResults[[b]]) <- c("bootnetResult", "list")
+#   ### Observation-wise bootstrapping!
+#   if (type == "observation"){
+    # Bootstrap results:
+    bootResults <- vector("list", nBoots)
     
     if (verbose){
-      setTxtProgressBar(pb, b)
+      message("Bootstrapping...")
+      pb <- txtProgressBar(0,nBoots,style = 3)
     }
-  }
-  if (verbose){
-    close(pb)
-  }
-  
+    
+    for (b in seq_len(nBoots)){
+      if (type == "observation"){
+        nNode <- ncol(data)
+        inSample <- seq_len(N)
+        bootData <- data[sample(seq_len(nrow(data)), nrow(data), replace=TRUE), ]        
+      } else {
+        nNode <- sample(nNodes,1)
+        inSample <- sort(sample(seq_len(N),nNode))
+        bootData <- data[,inSample, drop=FALSE]
+      }
 
-  ### Compute the full parameter table!!
-  if (verbose){
-    message("Computing statistics...")
-    pb <- txtProgressBar(0,nBoots+1,style = 3)
-  }
-  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha)
-  if (verbose){
-    setTxtProgressBar(pb, 1)
-  }
-  statTableBoots <- vector("list", nBoots)
-  for (b in seq_len(nBoots)){
-    statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha)    
+      res <- estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs)
+      bootResults[[b]] <- list(
+        graph = do.call(graphFun,c(list(res), graphArgs)),
+        intercepts = do.call(intFun,c(list(res), intArgs)),
+        results = res,
+        labels = labels[inSample],
+        nNodes = nNode
+      )
+      
+      class(bootResults[[b]]) <- c("bootnetResult", "list")
+      
+      if (verbose){
+        setTxtProgressBar(pb, b)
+      }
+    }
     if (verbose){
-      setTxtProgressBar(pb, b+1)
+      close(pb)
     }
-  }
-  if (verbose){
-    close(pb)
-  }
-  
-  # Ordereing by node name to make nice paths:
-
-  Result <- list(
-    sampleTable = statTableOrig,
-    bootTable =  dplyr::rbind_all(statTableBoots),
-    sample = sampleResult,
-    boots = bootResults)
-  
-  class(Result) <- "bootnet"
-  
-  return(Result)
+    
+    
+    ### Compute the full parameter table!!
+    if (verbose){
+      message("Computing statistics...")
+      pb <- txtProgressBar(0,nBoots+1,style = 3)
+    }
+    statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha)
+    if (verbose){
+      setTxtProgressBar(pb, 1)
+    }
+    statTableBoots <- vector("list", nBoots)
+    for (b in seq_len(nBoots)){
+      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha)    
+      if (verbose){
+        setTxtProgressBar(pb, b+1)
+      }
+    }
+    if (verbose){
+      close(pb)
+    }
+    
+    # Ordereing by node name to make nice paths:
+    
+    Result <- list(
+      sampleTable = statTableOrig,
+      bootTable =  dplyr::rbind_all(statTableBoots),
+      sample = sampleResult,
+      boots = bootResults,
+      type = type)
+    
+    class(Result) <- "bootnet"
+    
+    return(Result)
+#   } else {
+#     
+#     ### Nodewise bootstrapping!
+#     
+#     # Bootstrap results:
+#     bootResults <- vector("list", nBoots)
+#     
+#     # Original centrality:
+#     origCentrality <- centrality(sampleResult$graph)
+#     
+#     # Setup the bootstrap table
+#     N <- ncol(data)
+#     simResults <- data.frame(id = seq_len(nBoots), nNodes = sample(nNodes,nBoots,TRUE))
+#     simResults[c("corStrength","corBetweenness","corCloseness","corSPL")] <- NA
+#     Strength <- Closeness <- Betweenness <- matrix(NA, nrow(simResults), N)
+#     colnames(Strength) <- colnames(Closeness) <- colnames(Betweenness) <- labels
+#     
+#     
+#     if (verbose){
+#       message("Bootstrapping...")
+#       pb <- txtProgressBar(0,nBoots,style = 3)
+#     }
+#     
+#     
+#     for (b in seq_len(nBoots)){
+#       nNodes <- simResults$nNodes[b]
+#       inSample <- sort(sample(seq_len(N),nNodes))
+#       bootData <- data[,inSample, drop=FALSE]
+#       res <- estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs)
+#       bootResults[[b]] <- list(
+#         graph = do.call(graphFun,c(list(res), graphArgs)),
+#         intercepts = do.call(intFun,c(list(res), intArgs)),
+#         results = res,
+#         labels = labels
+#       )
+#       
+#       class(bootResults[[b]]) <- c("bootnetResult", "list")
+#       
+#       if (verbose){
+#         setTxtProgressBar(pb, b) 
+#       }
+#     }
+#     
+#     if (verbose){
+#       close(pb)
+#     }
+#     
+#     browser()
+#     
+#   
+#       simCentrality <- centrality(bootResults[[b]]$graph)
+#       simResults$corStrength[b] <- cor(origCentrality$OutDegree[inSample], simCentrality$OutDegree)
+#       simResults$corBetweenness[b] <- cor(origCentrality$Betweenness[inSample], simCentrality$Betweenness)
+#       simResults$corCloseness[b] <- cor(origCentrality$Closeness[inSample], simCentrality$Closeness)
+#       simResults$corSPL[b] <- cor(origCentrality$ShortestPathLengths[inSample,inSample][upper.tri(origCentrality$ShortestPathLengths[inSample,inSample], diag=FALSE)], simCentrality$ShortestPathLengths[upper.tri(simCentrality$ShortestPathLengths, diag=FALSE)])
+#       
+#       Strength[b,inSample] <- simCentrality$OutDegree
+#       Closeness[b,inSample] <- simCentrality$Closeness
+#       Betweenness[b, inSample] <- simCentrality$Betweenness
+#       
+# 
+#     
+#     
+#     browser()
+#     
+#   }
 }
