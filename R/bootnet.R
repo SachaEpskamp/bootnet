@@ -195,17 +195,22 @@ bootnet <- function(
   }
   
   
-#   ### Observation-wise bootstrapping!
-#   if (type == "observation"){
-    # Bootstrap results:
-    bootResults <- vector("list", nBoots)
+  #   ### Observation-wise bootstrapping!
+  #   if (type == "observation"){
+  # Bootstrap results:
+  bootResults <- vector("list", nBoots)
+  
+  if (verbose){
+    message("Bootstrapping...")
+    pb <- txtProgressBar(0,nBoots,style = 3)
+  }
+  
+  for (b in seq_len(nBoots)){
     
-    if (verbose){
-      message("Bootstrapping...")
-      pb <- txtProgressBar(0,nBoots,style = 3)
-    }
-    
-    for (b in seq_len(nBoots)){
+    tryLimit <- 10
+    tryCount <- 0
+    repeat{
+      
       if (type == "observation"){
         nNode <- ncol(data)
         inSample <- seq_len(N)
@@ -215,123 +220,133 @@ bootnet <- function(
         inSample <- sort(sample(seq_len(N),nNode))
         bootData <- data[,inSample, drop=FALSE]
       }
-
-      res <- estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs)
-      bootResults[[b]] <- list(
-        graph = do.call(graphFun,c(list(res), graphArgs)),
-        intercepts = do.call(intFun,c(list(res), intArgs)),
-        results = res,
-        labels = labels[inSample],
-        nNodes = nNode
-      )
       
-      class(bootResults[[b]]) <- c("bootnetResult", "list")
+      res <- try(estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs))
+      if (is(res, "try-error")){
+        if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")
+        
+        warning("Error in bootstrap; retrying")
+        tryCount <- tryCount + 1
+      } else {
+        break
+      }
       
-      if (verbose){
-        setTxtProgressBar(pb, b)
-      }
     }
+    bootResults[[b]] <- list(
+      graph = do.call(graphFun,c(list(res), graphArgs)),
+      intercepts = do.call(intFun,c(list(res), intArgs)),
+      results = res,
+      labels = labels[inSample],
+      nNodes = nNode
+    )
+    
+    class(bootResults[[b]]) <- c("bootnetResult", "list")
+    
     if (verbose){
-      close(pb)
+      setTxtProgressBar(pb, b)
     }
-    
-    
-    ### Compute the full parameter table!!
+  }
+  if (verbose){
+    close(pb)
+  }
+  
+  
+  ### Compute the full parameter table!!
+  if (verbose){
+    message("Computing statistics...")
+    pb <- txtProgressBar(0,nBoots+1,style = 3)
+  }
+  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality)
+  if (verbose){
+    setTxtProgressBar(pb, 1)
+  }
+  statTableBoots <- vector("list", nBoots)
+  for (b in seq_len(nBoots)){
+    statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)    
     if (verbose){
-      message("Computing statistics...")
-      pb <- txtProgressBar(0,nBoots+1,style = 3)
+      setTxtProgressBar(pb, b+1)
     }
-    statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality)
-    if (verbose){
-      setTxtProgressBar(pb, 1)
-    }
-    statTableBoots <- vector("list", nBoots)
-    for (b in seq_len(nBoots)){
-      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)    
-      if (verbose){
-        setTxtProgressBar(pb, b+1)
-      }
-    }
-    if (verbose){
-      close(pb)
-    }
-    
-    # Ordereing by node name to make nice paths:
-    
-    Result <- list(
-      sampleTable = statTableOrig,
-      bootTable =  dplyr::rbind_all(statTableBoots),
-      sample = sampleResult,
-      boots = bootResults,
-      type = type)
-    
-    class(Result) <- "bootnet"
-    
-    return(Result)
-#   } else {
-#     
-#     ### Nodewise bootstrapping!
-#     
-#     # Bootstrap results:
-#     bootResults <- vector("list", nBoots)
-#     
-#     # Original centrality:
-#     origCentrality <- centrality(sampleResult$graph)
-#     
-#     # Setup the bootstrap table
-#     N <- ncol(data)
-#     simResults <- data.frame(id = seq_len(nBoots), nNodes = sample(nNodes,nBoots,TRUE))
-#     simResults[c("corStrength","corBetweenness","corCloseness","corSPL")] <- NA
-#     Strength <- Closeness <- Betweenness <- matrix(NA, nrow(simResults), N)
-#     colnames(Strength) <- colnames(Closeness) <- colnames(Betweenness) <- labels
-#     
-#     
-#     if (verbose){
-#       message("Bootstrapping...")
-#       pb <- txtProgressBar(0,nBoots,style = 3)
-#     }
-#     
-#     
-#     for (b in seq_len(nBoots)){
-#       nNodes <- simResults$nNodes[b]
-#       inSample <- sort(sample(seq_len(N),nNodes))
-#       bootData <- data[,inSample, drop=FALSE]
-#       res <- estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs)
-#       bootResults[[b]] <- list(
-#         graph = do.call(graphFun,c(list(res), graphArgs)),
-#         intercepts = do.call(intFun,c(list(res), intArgs)),
-#         results = res,
-#         labels = labels
-#       )
-#       
-#       class(bootResults[[b]]) <- c("bootnetResult", "list")
-#       
-#       if (verbose){
-#         setTxtProgressBar(pb, b) 
-#       }
-#     }
-#     
-#     if (verbose){
-#       close(pb)
-#     }
-#     
-#     browser()
-#     
-#   
-#       simCentrality <- centrality(bootResults[[b]]$graph)
-#       simResults$corStrength[b] <- cor(origCentrality$OutDegree[inSample], simCentrality$OutDegree)
-#       simResults$corBetweenness[b] <- cor(origCentrality$Betweenness[inSample], simCentrality$Betweenness)
-#       simResults$corCloseness[b] <- cor(origCentrality$Closeness[inSample], simCentrality$Closeness)
-#       simResults$corSPL[b] <- cor(origCentrality$ShortestPathLengths[inSample,inSample][upper.tri(origCentrality$ShortestPathLengths[inSample,inSample], diag=FALSE)], simCentrality$ShortestPathLengths[upper.tri(simCentrality$ShortestPathLengths, diag=FALSE)])
-#       
-#       Strength[b,inSample] <- simCentrality$OutDegree
-#       Closeness[b,inSample] <- simCentrality$Closeness
-#       Betweenness[b, inSample] <- simCentrality$Betweenness
-#       
-# 
-#     
-#     
-#     browser()
-#     
-#   }
+  }
+  if (verbose){
+    close(pb)
+  }
+  
+  # Ordereing by node name to make nice paths:
+  
+  Result <- list(
+    sampleTable = statTableOrig,
+    bootTable =  dplyr::rbind_all(statTableBoots),
+    sample = sampleResult,
+    boots = bootResults,
+    type = type)
+  
+  class(Result) <- "bootnet"
+  
+  return(Result)
+  #   } else {
+  #     
+  #     ### Nodewise bootstrapping!
+  #     
+  #     # Bootstrap results:
+  #     bootResults <- vector("list", nBoots)
+  #     
+  #     # Original centrality:
+  #     origCentrality <- centrality(sampleResult$graph)
+  #     
+  #     # Setup the bootstrap table
+  #     N <- ncol(data)
+  #     simResults <- data.frame(id = seq_len(nBoots), nNodes = sample(nNodes,nBoots,TRUE))
+  #     simResults[c("corStrength","corBetweenness","corCloseness","corSPL")] <- NA
+  #     Strength <- Closeness <- Betweenness <- matrix(NA, nrow(simResults), N)
+  #     colnames(Strength) <- colnames(Closeness) <- colnames(Betweenness) <- labels
+  #     
+  #     
+  #     if (verbose){
+  #       message("Bootstrapping...")
+  #       pb <- txtProgressBar(0,nBoots,style = 3)
+  #     }
+  #     
+  #     
+  #     for (b in seq_len(nBoots)){
+  #       nNodes <- simResults$nNodes[b]
+  #       inSample <- sort(sample(seq_len(N),nNodes))
+  #       bootData <- data[,inSample, drop=FALSE]
+  #       res <- estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs)
+  #       bootResults[[b]] <- list(
+  #         graph = do.call(graphFun,c(list(res), graphArgs)),
+  #         intercepts = do.call(intFun,c(list(res), intArgs)),
+  #         results = res,
+  #         labels = labels
+  #       )
+  #       
+  #       class(bootResults[[b]]) <- c("bootnetResult", "list")
+  #       
+  #       if (verbose){
+  #         setTxtProgressBar(pb, b) 
+  #       }
+  #     }
+  #     
+  #     if (verbose){
+  #       close(pb)
+  #     }
+  #     
+  #     browser()
+  #     
+  #   
+  #       simCentrality <- centrality(bootResults[[b]]$graph)
+  #       simResults$corStrength[b] <- cor(origCentrality$OutDegree[inSample], simCentrality$OutDegree)
+  #       simResults$corBetweenness[b] <- cor(origCentrality$Betweenness[inSample], simCentrality$Betweenness)
+  #       simResults$corCloseness[b] <- cor(origCentrality$Closeness[inSample], simCentrality$Closeness)
+  #       simResults$corSPL[b] <- cor(origCentrality$ShortestPathLengths[inSample,inSample][upper.tri(origCentrality$ShortestPathLengths[inSample,inSample], diag=FALSE)], simCentrality$ShortestPathLengths[upper.tri(simCentrality$ShortestPathLengths, diag=FALSE)])
+  #       
+  #       Strength[b,inSample] <- simCentrality$OutDegree
+  #       Closeness[b,inSample] <- simCentrality$Closeness
+  #       Betweenness[b, inSample] <- simCentrality$Betweenness
+  #       
+  # 
+  #     
+  #     
+  #     browser()
+  #     
+  #   }
 }
