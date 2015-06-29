@@ -126,7 +126,7 @@ bootnet <- function(
       graphFun <- switch(default,
                          EBICglasso = function(x)x[['optnet']],
                          IsingFit = function(x)x[['weiadj']],
-                         pcor = identity
+                         pcor = function(x)as.matrix(Matrix::forceSymmetric(x))
       )
     }
     
