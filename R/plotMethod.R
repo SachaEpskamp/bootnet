@@ -1,3 +1,14 @@
+combRank <- function(..., fun = dplyr::min_rank){
+  
+  dots <- list(...)
+  ranks <- lapply(dots, fun)
+  for (i in seq_along(ranks)){
+    ranks[[i]] <- (ranks[[i]]/max(ranks[[i]]))/10^i
+  }
+  return(fun(Reduce("+",ranks)))
+}
+
+
 plot.bootnet <- function(
   x, # bootnet object,
   statistics = c("strength", "closeness", "betweenness"),
@@ -8,7 +19,7 @@ plot.bootnet <- function(
   bootAlpha = 0.01,
   bootlwd = 0.9,
   areaAlpha = 0.2,
-  order = c("id","value"),
+  order = c("id","sample","mean"),
   decreasing = TRUE,
   perNode = FALSE,
   quantile = 2.5,
@@ -97,10 +108,14 @@ plot.bootnet <- function(
     ### Ordering:
     if (order[[1]]=="id"){
       sampleTable$order <- match(as.character(sampleTable$id),gtools::mixedsort(as.character(sampleTable$id)))
-    } else if (order[[1]]=="value"){
+    } else if (order[[1]]%in%c("sample","mean")){
       # Summarize first:
-      summary <- sampleTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(value = ~value[type==statistics[[1]]])
-      summary$order <- dplyr::min_rank(summary$value)
+      summary <- sampleTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(mean = ~mean(mean), value = ~value[type==statistics[[1]]])
+      if (order[[1]] == "sample"){
+        summary$order <- combRank(summary$value,summary$mean,fun=dplyr::min_rank)
+      } else {
+        summary$order <- dplyr::min_rank(summary$mean)
+      }
       sampleTable <- sampleTable %>% dplyr::left_join(dplyr::select_(summary,~id,~order), by = "id")
     } else stop(paste("'order'",order[[1]],"Not supported"))
     
@@ -139,10 +154,14 @@ plot.bootnet <- function(
     ### Ordering:
     if (order[[1]]=="id"){
       sumTable$order <- match(as.character(sumTable$id),gtools::mixedsort(as.character(sumTable$id)))
-    } else if (order[[1]]=="value"){
+    } else if (order[[1]]%in%c("sample","mean")){
       # Summarize first:
-      summary <- sumTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(sample = ~sample[type==statistics[[1]]])
-      summary$order <- dplyr::min_rank(summary$sample)
+      summary <- sumTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(sample = ~sample[type==statistics[[1]]], mean = ~mean(mean))
+      if (order[[1]]=="sample"){
+        summary$order <- combRank(summary$sample,summary$mean,fun=dplyr::min_rank)
+      } else {
+        summary$order <- dplyr::min_rank(summary$mean)
+      }
       sumTable <- sumTable %>% dplyr::left_join(dplyr::select_(summary,~id,~order), by = "id")
     } else stop(paste("'order'",order[[1]],"Not supported"))
     
