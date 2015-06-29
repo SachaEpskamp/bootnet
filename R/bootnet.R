@@ -97,9 +97,9 @@ bootnet <- function(
     newqgraph <- 
       if (missing(prepArgs)){
         prepArgs <- switch(default,
-                           EBICglasso = ifElse(goodVersion,list(verbose=FALSE),list()),
+                           EBICglasso = ifElse(goodVersion&&identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),list()),
                            IsingFit = list(),
-                           pcor = list(verbose=FALSE)
+                           pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),list())
         )
       }
     
