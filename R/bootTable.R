@@ -7,7 +7,7 @@
 # node2
 # value
 
-statTable <- function(x, name, alpha = 1){
+statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
   stopifnot(is(x, "bootnetResult"))
   tables <- list()
   
@@ -31,48 +31,52 @@ statTable <- function(x, name, alpha = 1){
       value = x[['intercepts']]
     ))
   } 
-  # Centrality analysis:
-  cent <- qgraph::centrality(x[['graph']], alpha = alpha)
-
-  # strength:
-  tables$strength <- dplyr::tbl_df(data.frame(
-    name = name,
-    type = "strength",
-    node1 = x[['labels']],
-    node2 = '',
-    value = cent[['OutDegree']]
-  ))
   
-  # closeness:
-  tables$closeness <- dplyr::tbl_df(data.frame(
-    name = name,
-    type = "closeness",
-    node1 = x[['labels']],
-    node2 = '',
-    value = cent[['Closeness']]
-  ))
+  if (computeCentrality){
+    # Centrality analysis:
+    cent <- qgraph::centrality(x[['graph']], alpha = alpha)
+    
+    # strength:
+    tables$strength <- dplyr::tbl_df(data.frame(
+      name = name,
+      type = "strength",
+      node1 = x[['labels']],
+      node2 = '',
+      value = cent[['OutDegree']]
+    ))
+    
+    # closeness:
+    tables$closeness <- dplyr::tbl_df(data.frame(
+      name = name,
+      type = "closeness",
+      node1 = x[['labels']],
+      node2 = '',
+      value = cent[['Closeness']]
+    ))
+    
+    
+    # betweenness:
+    tables$betweenness <- dplyr::tbl_df(data.frame(
+      name = name,
+      type = "betweenness",
+      node1 = x[['labels']],
+      node2 = '',
+      value = cent[['Betweenness']]
+    ))
+    
+    tables$sp <- dplyr::tbl_df(data.frame(
+      name = name,
+      type = "distance",
+      node1 = x[['labels']][ind[,1]],
+      node2 = x[['labels']][ind[,2]],
+      value = cent[['ShortestPathLengths']][upper.tri(cent[['ShortestPathLengths']], diag=FALSE)]
+    ))
+    
   
-  
-  # betweenness:
-  tables$betweenness <- dplyr::tbl_df(data.frame(
-    name = name,
-    type = "betweenness",
-    node1 = x[['labels']],
-    node2 = '',
-    value = cent[['Betweenness']]
-  ))
-  
-  tables$sp <- dplyr::tbl_df(data.frame(
-    name = name,
-    type = "distance",
-    node1 = x[['labels']][ind[,1]],
-    node2 = x[['labels']][ind[,2]],
-    value = cent[['ShortestPathLengths']][upper.tri(cent[['ShortestPathLengths']], diag=FALSE)]
-  ))
-  
+  }
   for (i in seq_along(tables)){
     tables[[i]]$id <- ifelse(tables[[i]]$node2=='',paste0("N: ",tables[[i]]$node1),paste0("E: ",tables[[i]]$node1, "--", tables[[i]]$node2))
-  }
+  }  
   
   tab <- dplyr::rbind_all(tables)
   tab$nNode <- x$nNodes

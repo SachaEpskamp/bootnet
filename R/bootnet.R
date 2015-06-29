@@ -32,7 +32,8 @@ bootnet <- function(
   verbose = TRUE, # messages on what is being done?
   labels, # if missing taken from colnames
   alpha = 1, # centrality alpha
-  nNodes = 2:(ncol(data)-1) # if type = "node", defaults to 2:(p-1)
+  nNodes = 2:(ncol(data)-1), # if type = "node", defaults to 2:(p-1)
+  computeCentrality = TRUE
 ){
   default <- match.arg(default)
   type <- match.arg(type)
@@ -240,13 +241,13 @@ bootnet <- function(
       message("Computing statistics...")
       pb <- txtProgressBar(0,nBoots+1,style = 3)
     }
-    statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha)
+    statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality)
     if (verbose){
       setTxtProgressBar(pb, 1)
     }
     statTableBoots <- vector("list", nBoots)
     for (b in seq_len(nBoots)){
-      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha)    
+      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)    
       if (verbose){
         setTxtProgressBar(pb, b+1)
       }
