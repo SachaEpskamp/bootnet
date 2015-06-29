@@ -103,7 +103,7 @@ plot.bootnet <- function(
       # Summarize first:
       summary <- sampleTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(mean = ~mean(mean), value = ~value[type==statistics[[1]]])
       if (order[[1]] == "sample"){
-        summary$order <- order(summary$value,summary$mean)
+        summary$order <- order(order(summary$value,summary$mean))
       } else {
         summary$order <- dplyr::min_rank(summary$mean)
       }
@@ -149,7 +149,7 @@ plot.bootnet <- function(
       # Summarize first:
       summary <- sumTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(sample = ~sample[type==statistics[[1]]], mean = ~mean(mean))
       if (order[[1]]=="sample"){
-        summary$order <- order(summary$sample,summary$mean)
+        summary$order <- order(order(summary$sample,summary$mean))
       } else {
         summary$order <- dplyr::min_rank(summary$mean)
       }
