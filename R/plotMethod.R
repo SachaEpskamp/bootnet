@@ -90,7 +90,6 @@ plot.bootnet <- function(
     }
   }
   
-  # Some comment
   # Start plot:
   if (plot[[1]]=="line"){
     sampleTable <- x[['sampleTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
@@ -139,7 +138,6 @@ plot.bootnet <- function(
     return(g)
   } else if (plot[[1]] %in% c("interval","area")){
     # Compute summary stats:
-    
     sumTable <- summary(x, statistics = statistics)  %>% ungroup %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
     
     ### Ordering:

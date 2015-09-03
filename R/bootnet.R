@@ -6,6 +6,11 @@ ifElse <- function(statement,true,false){
   }
 }
 
+noDiag <- function(x){
+  diag(x) <- 0
+  return(x)
+}
+
 ### function to bootstrap networks ###
 # Input: 
 ## data that can be bootstrapped
@@ -20,7 +25,8 @@ bootnet <- function(
   data, # Dataset
   nBoots = 1000, # Number of bootstrap samples.
   default = c("none", "EBICglasso", "IsingFit", "pcor"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
-  type = c("observation","node"),
+  type = c("nonparametric","parametric","node"), # Bootstrap method to use
+  model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs = list(), # list with arguments for the correlation function
   estFun, # function that results in a network
@@ -37,8 +43,10 @@ bootnet <- function(
 ){
   default <- match.arg(default)
   type <- match.arg(type)
+  model <- match.arg(model)
   N <- ncol(data)
   
+
   if (type == "node" & N < 3){
     stop("Node-wise bootstrapping requires at least three nodes.")
   }
@@ -78,29 +86,40 @@ bootnet <- function(
   if (!(default == "none")){
     # prepFun:
     if (missing(prepFun)){
+#       prepFun <- switch(default,
+#                         EBICglasso = qgraph::cor_auto,
+#                         IsingFit = binarize,
+#                         pcor = qgraph::cor_auto
+      # )
       prepFun <- switch(default,
-                        EBICglasso = qgraph::cor_auto,
+                        EBICglasso = cor,
                         IsingFit = binarize,
-                        pcor = qgraph::cor_auto
+                        pcor = cor
       )      
     }
     
     # prepArgs:
-    qgraphVersion <- packageDescription("qgraph")$Version
-    qgraphVersion <- as.numeric(strsplit(qgraphVersion,split="\\.|\\-")[[1]])
-    if (length(qgraphVersion)==1) qgraphVersion <- c(qgraphVersion,0)
-    if (length(qgraphVersion)==2) qgraphVersion <- c(qgraphVersion,0)
-    goodVersion <- 
-      (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) | 
-      (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
-      qgraphVersion[[1]] > 1
+#     qgraphVersion <- packageDescription("qgraph")$Version
+#     qgraphVersion <- as.numeric(strsplit(qgraphVersion,split="\\.|\\-")[[1]])
+#     if (length(qgraphVersion)==1) qgraphVersion <- c(qgraphVersion,0)
+#     if (length(qgraphVersion)==2) qgraphVersion <- c(qgraphVersion,0)
+#     goodVersion <- 
+#       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) | 
+#       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
+#       qgraphVersion[[1]] > 1
     
     newqgraph <- 
       if (missing(prepArgs)){
         prepArgs <- switch(default,
-                           EBICglasso = ifElse(goodVersion&&identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),list()),
+                           EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),list()),
                            IsingFit = list(),
                            pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),list())
+        )
+        
+        prepArgs <- switch(default,
+                           EBICglasso = list(use = "pairwise.complete.obs"),
+                           IsingFit = list(),
+                           pcor =  list(use = "pairwise.complete.obs")
         )
       }
     
@@ -176,6 +195,16 @@ bootnet <- function(
     intArgs <- list()
   }
   
+  ## For parametric bootstrap, detect model
+  if (type == "parametric" & model == "detect"){
+    if (default != "none"){
+      model <- ifelse(grepl("ising",default,ignore.case=TRUE),"Ising","GGM")
+    } else {
+      model <- ifelse(any(grepl("ising",deparse(estFun),ignore.case=TRUE)),"Ising","GGM")
+    }
+    message(paste0("model set to '",model,"'"))
+  }
+  
   # Estimate sample result:
   if (verbose){
     message("Estimating sample network...")
@@ -211,10 +240,26 @@ bootnet <- function(
     tryCount <- 0
     repeat{
       
-      if (type == "observation"){
+      if (type != "node"){
         nNode <- ncol(data)
         inSample <- seq_len(N)
-        bootData <- data[sample(seq_len(nrow(data)), nrow(data), replace=TRUE), ]        
+        
+        if (type == "parametric"){
+ 
+          if (model == "Ising"){
+            bootData <- IsingSampler(nrow(data), noDiag(sampleResult$graph), sampleResult$intercepts)
+            
+          } else if (model == "GGM") {
+            g <- -sampleResult$graph
+            diag(g) <- 1
+            bootData <- mvtnorm::rmvnorm(nrow(data), sigma = corpcor::pseudoinverse(g))
+          
+          } else stop(paste0("Model '",model,"' not supported."))
+          
+        } else {
+          bootData <- data[sample(seq_len(nrow(data)), nrow(data), replace=TRUE), ]        
+        }
+        
       } else {
         nNode <- sample(nNodes,1)
         inSample <- sort(sample(seq_len(N),nNode))

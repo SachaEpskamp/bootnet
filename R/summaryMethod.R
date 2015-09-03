@@ -7,7 +7,7 @@ summary.bootnet <- function(
 ){
 
   # Returns quantiles for type = "observation" and correlations with original for type = "node"
-  if (object$type == "observation"){
+  if (object$type != "node"){
     tab <- object$bootTable %>% 
       dplyr::filter_(~type %in% statistics) %>%
       dplyr::group_by_(~type, ~node1, ~node2, ~id) %>%
