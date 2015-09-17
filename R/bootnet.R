@@ -298,10 +298,11 @@ bootnet <- function(
     }
     BootGraph <- do.call(graphFun,c(list(res), graphArgs))
     if (scaleAdjust == 1){
-
-      BootGraph[upper.tri(BootGraph,diag=FALSE)] <- BootGraph[upper.tri(BootGraph,diag=FALSE)] * sum(abs(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])) /
-      sum(abs(BootGraph[upper.tri(BootGraph,diag=FALSE)]))
-      BootGraph[lower.tri(BootGraph,diag=FALSE)] <- t(BootGraph)[lower.tri(BootGraph,diag=FALSE)]
+      if (!all(BootGraph[upper.tri(BootGraph,diag=FALSE)] == 0)){
+        BootGraph[upper.tri(BootGraph,diag=FALSE)] <- BootGraph[upper.tri(BootGraph,diag=FALSE)] * sum(abs(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])) /
+          sum(abs(BootGraph[upper.tri(BootGraph,diag=FALSE)]))
+        BootGraph[lower.tri(BootGraph,diag=FALSE)] <- t(BootGraph)[lower.tri(BootGraph,diag=FALSE)]        
+      }
     }
     bootResults[[b]] <- list(
       graph = BootGraph,

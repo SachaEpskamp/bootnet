@@ -26,3 +26,5 @@ importFrom(corpcor, "pseudoinverse")
 importFrom(mvtnorm, "rmvnorm")
 importFrom(IsingSampler, "EstimateIsing")
 importFrom(abind,"abind")
+
+export(centrality)
