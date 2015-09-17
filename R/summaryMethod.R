@@ -12,9 +12,9 @@ summary.bootnet <- function(
       dplyr::filter_(~type %in% statistics) %>%
       dplyr::group_by_(~type, ~node1, ~node2, ~id) %>%
       dplyr::summarize_(
-        mean = ~mean(value),
-        var = ~var(value),
-        sd = ~sd(value),
+        mean = ~mean(value,na.rm=TRUE),
+        var = ~var(value,na.rm=TRUE),
+        sd = ~sd(value,na.rm=TRUE),
         prop0 = ~mean(value == 0),
         q1 = ~quantile(value,1/100, na.rm = TRUE),
         q2.5 = ~quantile(value, 2.5/100, na.rm = TRUE),
@@ -38,9 +38,9 @@ summary.bootnet <- function(
     if (perNode){
       tab <- tab %>% group_by_(~id, ~type, ~nNode)  %>%
         dplyr::summarize_(
-          mean = ~mean(value),
-          var = ~var(value),
-          sd = ~sd(value),
+          mean = ~mean(value,na.rm=TRUE),
+          var = ~var(value,na.rm=TRUE),
+          sd = ~sd(value,na.rm=TRUE),
           q1 = ~quantile(value,1/100, na.rm = TRUE),
           q2.5 = ~quantile(value, 2.5/100, na.rm = TRUE),
           q5 = ~quantile(value, 5/100, na.rm = TRUE),
@@ -57,9 +57,9 @@ summary.bootnet <- function(
         summarize_(cor = ~cor(value,sample, use = "pairwise.complete.obs")) %>%
         dplyr::group_by_(~nNode, ~type) %>%
         dplyr::summarize_(
-          mean = ~mean(cor),
-          var = ~var(cor),
-          sd = ~sd(cor),
+          mean = ~mean(cor,na.rm=TRUE),
+          var = ~var(cor,na.rm=TRUE),
+          sd = ~sd(cor,na.rm=TRUE),
           q1 = ~quantile(cor,1/100, na.rm = TRUE),
           q2.5 = ~quantile(cor, 2.5/100, na.rm = TRUE),
           q5 = ~quantile(cor, 5/100, na.rm = TRUE),

@@ -16,6 +16,7 @@ S3method(print, bootnetResult)
 import(IsingFit)
 # import(IsingSampler) TODO
 import(qgraph)
+import(igraph)
 import(dplyr)
 import(ggplot2)
 importFrom(gtools, "mixedorder")
