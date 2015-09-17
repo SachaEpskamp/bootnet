@@ -24,8 +24,8 @@ noDiag <- function(x){
 bootnet <- function(
   data, # Dataset
   nBoots = 1000, # Number of bootstrap samples.
-  default = c("none", "EBICglasso", "IsingFit", "pcor"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
-  type = c("nonparametric","parametric","node"), # Bootstrap method to use
+  default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
+  type = c("nonparametric","parametric","node","jackknife","subsample"), # Bootstrap method to use
   model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs = list(), # list with arguments for the correlation function
@@ -39,12 +39,22 @@ bootnet <- function(
   labels, # if missing taken from colnames
   alpha = 1, # centrality alpha
   nNodes = 2:(ncol(data)-1), # if type = "node", defaults to 2:(p-1)
-  computeCentrality = TRUE
+  computeCentrality = TRUE,
+  propBoot = 1, # M out of N
+  subsampleSize,
+  replacement = TRUE,
+  scaleAdjust = FALSE
 ){
+  if (default[[1]]=="glasso") default <- "EBICglasso"
   default <- match.arg(default)
   type <- match.arg(type)
   model <- match.arg(model)
   N <- ncol(data)
+  
+  if (type == "jackknife"){
+    message("Jacknife overwrites nBoot to sample size")
+    nBoots <- nrow(data)
+  }
   
 
   if (type == "node" & N < 3){
@@ -86,16 +96,16 @@ bootnet <- function(
   if (!(default == "none")){
     # prepFun:
     if (missing(prepFun)){
-#       prepFun <- switch(default,
-#                         EBICglasso = qgraph::cor_auto,
-#                         IsingFit = binarize,
-#                         pcor = qgraph::cor_auto
-      # )
       prepFun <- switch(default,
-                        EBICglasso = cor,
+                        EBICglasso = qgraph::cor_auto,
                         IsingFit = binarize,
-                        pcor = cor
-      )      
+                        pcor = qgraph::cor_auto
+      )
+#       prepFun <- switch(default,
+#                         EBICglasso = cor,
+#                         IsingFit = binarize,
+#                         pcor = cor
+#       )      
     }
     
     # prepArgs:
@@ -108,27 +118,27 @@ bootnet <- function(
 #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
 #       qgraphVersion[[1]] > 1
     
-    newqgraph <- 
+
       if (missing(prepArgs)){
         prepArgs <- switch(default,
-                           EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),list()),
+                           EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
+                                              ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
                            IsingFit = list(),
-                           pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),list())
+                           pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
+                                          ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
+                           IsingLL = list()
         )
         
-        prepArgs <- switch(default,
-                           EBICglasso = list(use = "pairwise.complete.obs"),
-                           IsingFit = list(),
-                           pcor =  list(use = "pairwise.complete.obs")
-        )
+      
       }
     
     # estFun:
     if (missing(estFun)){
       estFun <- switch(default,
                        EBICglasso = qgraph::EBICglasso,
+                       pcor = corpcor::cor2pcor,
                        IsingFit = IsingFit::IsingFit,
-                       pcor = corpcor::cor2pcor
+                       IsingLL = IsingSampler::EstimateIsing
       )
     }
     
@@ -137,7 +147,8 @@ bootnet <- function(
       estArgs <- switch(default,
                         EBICglasso = list(n = nrow(data), returnAllResults = TRUE),
                         IsingFit = list(plot = FALSE, progress = FALSE),
-                        pcor = list()
+                        pcor = list(),
+                        IsingLL = list(method = "ll")
       )
     }
     
@@ -146,7 +157,8 @@ bootnet <- function(
       graphFun <- switch(default,
                          EBICglasso = function(x)x[['optnet']],
                          IsingFit = function(x)x[['weiadj']],
-                         pcor = function(x)as.matrix(Matrix::forceSymmetric(x))
+                         pcor = function(x)as.matrix(Matrix::forceSymmetric(x)),
+                         IsingLL = function(x)x[['graph']]
       )
     }
     
@@ -155,7 +167,8 @@ bootnet <- function(
       graphArgs <- switch(default,
                           EBICglasso = list(),
                           IsingFit = list(),
-                          pcor = list()
+                          pcor = list(),
+                          IsingLL = list()
       )
     }
     
@@ -164,7 +177,8 @@ bootnet <- function(
       intFun <- switch(default,
                        EBICglasso = null,
                        IsingFit = function(x)x[['thresholds']],
-                       pcor = null
+                       pcor = null,
+                       IsingLL = function(x) x[['thresholds']]
       )
     }
     
@@ -210,8 +224,9 @@ bootnet <- function(
     message("Estimating sample network...")
   }
   res <- estimateNetwork(data, prepFun, prepArgs, estFun, estArgs)
+  sampleGraph <- do.call(graphFun,c(list(res), graphArgs))
   sampleResult <- list(
-    graph = do.call(graphFun,c(list(res), graphArgs)),
+    graph = sampleGraph,
     intercepts = do.call(intFun,c(list(res), intArgs)),
     results = res,
     labels = labels,
@@ -244,20 +259,24 @@ bootnet <- function(
         nNode <- ncol(data)
         inSample <- seq_len(N)
         
-        if (type == "parametric"){
+        if (type == "subsample"){
+          bootData <- data[sample(seq_len(nrow(data)), subsampleSize, replace=FALSE), ]        
+        } else if (type == "jackknife"){
+          bootData <- data[-b,,drop=FALSE]    
+        } else if (type == "parametric"){
  
           if (model == "Ising"){
-            bootData <- IsingSampler(nrow(data), noDiag(sampleResult$graph), sampleResult$intercepts)
+            bootData <- IsingSampler(round(propBoot*nrow(data)), noDiag(sampleResult$graph), sampleResult$intercepts)
             
           } else if (model == "GGM") {
             g <- -sampleResult$graph
             diag(g) <- 1
-            bootData <- mvtnorm::rmvnorm(nrow(data), sigma = corpcor::pseudoinverse(g))
+            bootData <- mvtnorm::rmvnorm(round(propBoot*nrow(data)), sigma = corpcor::pseudoinverse(g))
           
           } else stop(paste0("Model '",model,"' not supported."))
           
         } else {
-          bootData <- data[sample(seq_len(nrow(data)), nrow(data), replace=TRUE), ]        
+          bootData <- data[sample(seq_len(nrow(data)), round(propBoot*nrow(data)), replace=replacement), ]        
         }
         
       } else {
@@ -277,8 +296,15 @@ bootnet <- function(
       }
       
     }
+    BootGraph <- do.call(graphFun,c(list(res), graphArgs))
+    if (scaleAdjust == 1){
+
+      BootGraph[upper.tri(BootGraph,diag=FALSE)] <- BootGraph[upper.tri(BootGraph,diag=FALSE)] * sum(abs(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])) /
+      sum(abs(BootGraph[upper.tri(BootGraph,diag=FALSE)]))
+      BootGraph[lower.tri(BootGraph,diag=FALSE)] <- t(BootGraph)[lower.tri(BootGraph,diag=FALSE)]
+    }
     bootResults[[b]] <- list(
-      graph = do.call(graphFun,c(list(res), graphArgs)),
+      graph = BootGraph,
       intercepts = do.call(intFun,c(list(res), intArgs)),
       results = res,
       labels = labels[inSample],
@@ -293,6 +319,27 @@ bootnet <- function(
   }
   if (verbose){
     close(pb)
+  }
+  
+  
+  if (isTRUE(scaleAdjust) || scaleAdjust == 2){
+    if (verbose){
+      message("Applying bias-adjustment correction")
+    }
+    bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
+    needAdjust <- apply(bootGraphs,1:2,function(x)min(x)<=0&max(x)>=0)
+    needAdjust <- needAdjust[upper.tri(needAdjust,diag=FALSE)]
+    if (any(needAdjust)){
+      # adjust <- which(needAdjust & upper.tri(needAdjust,diag=FALSE),arr.ind=TRUE)
+      sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
+      for (b in seq_along(bootResults)){
+          bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
+          bootRank <- order(order(bootEdges))
+          bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- ifelse(needAdjust,sampleDistribution[bootRank],bootEdges)
+          bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
+      }
+    }
+    
   }
   
   

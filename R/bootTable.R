@@ -21,6 +21,15 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
     value = x[['graph']][upper.tri(x[['graph']], diag=FALSE)]
     ))
   
+  
+  tables$length <- dplyr::tbl_df(data.frame(
+    name = name,
+    type = "length",
+    node1 = x[['labels']][ind[,1]],
+    node2 = x[['labels']][ind[,2]],
+    value = abs(1/abs(x[['graph']][upper.tri(x[['graph']], diag=FALSE)]))
+  ))
+  
   # Intercepts:
   if (!is.null(x[['intercepts']])){
     tables$intercepts <- dplyr::tbl_df(data.frame(

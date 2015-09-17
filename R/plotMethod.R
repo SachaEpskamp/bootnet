@@ -9,12 +9,14 @@ plot.bootnet <- function(
   bootColor = "black",
   bootAlpha = 0.01,
   bootlwd = 0.9,
-  areaAlpha = 0.2,
+  areaAlpha = 0.1,
   order = c("id","sample","mean"),
   decreasing = TRUE,
   perNode = FALSE,
   quantile = 2.5,
   legendNcol = 2, # Only for perNode plots.
+  labels=TRUE,
+  legend = TRUE,
   ...
 ){
   plot <- match.arg(plot)
@@ -32,17 +34,25 @@ plot.bootnet <- function(
     maxArea <- paste0("q",100-quantile)
     
     if (plot == "area"){
-      
+
       if (perNode){
         g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
           facet_grid(type ~ ., scales = "free") +
           geom_ribbon(colour = NA, alpha = areaAlpha) +
           geom_line( lwd = samplelwd) + geom_point() +
           theme_bw() + 
-          xlab("# of nodes sampled") + ylab("") + 
-          scale_x_reverse() + 
-          guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) 
-        
+          xlab("% of nodes sampled") + ylab("") + 
+          guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
+          scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
+                          limits = c( ncol(x$sample$graph)-1, 2))
+
+        if (identical(FALSE,legend)){
+          g <- g + theme(legend.position = "none")
+        }
+        if (identical(FALSE,labels)){
+          g <- g + theme(axis.text.y = element_blank())
+          
+        }
         return(g)
         
       } else {
@@ -50,10 +60,19 @@ plot.bootnet <- function(
           geom_ribbon(colour = NA, alpha = areaAlpha) +
           geom_line( lwd = samplelwd) + geom_point() +
           theme_bw() + 
-          xlab("# of nodes sampled") + ylab("Average correlation with original sample") + 
-          scale_x_reverse() + 
-          ylim(0,1)
+          xlab("% of nodes sampled") + ylab("Average correlation with original sample")+ 
+          ylim(-1,1) + geom_hline(yintercept = 0) + 
+          scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
+                          limits = c( ncol(x$sample$graph)-1, 2))
         
+        
+        if (identical(FALSE,legend)){
+          g <- g + theme(legend.position = "none")
+        }
+        if (identical(FALSE,labels)){
+          g <- g + theme(axis.text.y = element_blank())
+          
+        }
         return(g)
       } 
     } else if (plot == "interval") {
@@ -64,23 +83,40 @@ plot.bootnet <- function(
           facet_grid(type ~ ., scales = "free") +
           geom_errorbar(position =  position_dodge(width = 0.4)) +
           geom_point(position =  position_dodge(width = 0.4)) +
+          geom_line(position =  position_dodge(width = 0.4)) +
           theme_bw() + 
-          xlab("# of nodes sampled") + ylab("") + 
-          scale_x_reverse() + 
-          guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) 
+          xlab("% of nodes sampled") + ylab("") + 
+          guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
+          scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
+                          limits = c( ncol(x$sample$graph)-1, 1))
         
-        
+        if (identical(FALSE,legend)){
+          g <- g + theme(legend.position = "none")
+        }
+        if (identical(FALSE,labels)){
+          g <- g + theme(axis.text.y = element_blank())
+          
+        }
         return(g)
         
       } else {
         g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
           geom_errorbar(position =  position_dodge(width = 0.4)) +
           geom_point(position =  position_dodge(width = 0.4)) +
+          geom_line(position =  position_dodge(width = 0.4)) +
           theme_bw() + 
-          xlab("# of nodes sampled") + ylab("Average correlation with original sample") + 
-          scale_x_reverse() + 
-          ylim(0,1)
-        
+         geom_hline(yintercept = 0) +
+          xlab("% of nodes sampled") + ylab("Average correlation with original sample") + 
+          scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
+                          limits = c( ncol(x$sample$graph)-1, 1)) +
+          ylim(-1,1)
+        if (identical(FALSE,legend)){
+          g <- g + theme(legend.position = "none")
+        }
+        if (identical(FALSE,labels)){
+          g <- g + theme(axis.text.y = element_blank())
+          
+        }
         return(g)
       }
       
@@ -94,17 +130,20 @@ plot.bootnet <- function(
   if (plot[[1]]=="line"){
     sampleTable <- x[['sampleTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
     bootTable <- x[['bootTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
-    
+
     ### Ordering:
     if (order[[1]]=="id"){
       sampleTable$order <- match(as.character(sampleTable$id),gtools::mixedsort(as.character(sampleTable$id)))
     } else if (order[[1]]%in%c("sample","mean")){
       # Summarize first:
-      summary <- sampleTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(mean = ~mean(mean), value = ~value[type==statistics[[1]]])
+      summarySample <- sampleTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_( value = ~value[type==statistics[[1]]])
+      summaryBoot <- bootTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_( mean = ~mean(value))
+      summary <- left_join(summarySample,summaryBoot,by="id")
       if (order[[1]] == "sample"){
         summary$order <- order(order(summary$value,summary$mean))
       } else {
-        summary$order <- dplyr::min_rank(summary$mean)
+        # summary$order <- dplyr::min_rank(summary$mean)
+        summary$order <-  order(order(summary$mean))
       }
       sampleTable <- sampleTable %>% dplyr::left_join(dplyr::select_(summary,~id,~order), by = "id")
     } else stop(paste("'order'",order[[1]],"Not supported"))
@@ -134,6 +173,14 @@ plot.bootnet <- function(
       theme_bw() + 
       xlab("") +
       ylab("")
+    
+    if (identical(FALSE,legend)){
+      g <- g + theme(legend.position = "none")
+    }
+    if (identical(FALSE,labels)){
+      g <- g + theme(axis.text.y = element_blank())
+      
+    }
     
     return(g)
   } else if (plot[[1]] %in% c("interval","area")){
@@ -194,7 +241,13 @@ plot.bootnet <- function(
         xlab("") +
         ylab("") + 
         scale_y_continuous(breaks = seq(1:length(levels(sumTable$id))), labels = levels(sumTable$id))
-    
+      if (identical(FALSE,legend)){
+        g <- g + theme(legend.position = "none")
+      }
+      if (identical(FALSE,labels)){
+        g <- g + theme(axis.text.y = element_blank())
+        
+      }
       
       return(g)
       
@@ -207,6 +260,14 @@ plot.bootnet <- function(
         theme_bw() + 
         xlab("") +
         ylab("")
+      
+      if (identical(FALSE,legend)){
+        g <- g + theme(legend.position = "none")
+      }
+      if (identical(FALSE,labels)){
+        g <- g + theme(axis.text.y = element_blank())
+        
+      }
       
       return(g)
       
