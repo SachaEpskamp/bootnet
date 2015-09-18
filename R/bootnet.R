@@ -25,7 +25,7 @@ bootnet <- function(
   data, # Dataset
   nBoots = 1000, # Number of bootstrap samples.
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
-  type = c("nonparametric","parametric","node","jackknife","subsample"), # Bootstrap method to use
+  type = c("nonparametric","parametric","node"), # Bootstrap method to use
   model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs = list(), # list with arguments for the correlation function
@@ -41,9 +41,9 @@ bootnet <- function(
   nNodes = 2:(ncol(data)-1), # if type = "node", defaults to 2:(p-1)
   computeCentrality = TRUE,
   propBoot = 1, # M out of N
-  subsampleSize,
-  replacement = TRUE,
-  scaleAdjust = FALSE
+  # subsampleSize,
+  replacement = TRUE
+  # scaleAdjust = FALSE
 ){
   if (default[[1]]=="glasso") default <- "EBICglasso"
   default <- match.arg(default)
@@ -297,13 +297,13 @@ bootnet <- function(
       
     }
     BootGraph <- do.call(graphFun,c(list(res), graphArgs))
-    if (scaleAdjust == 1){
-      if (!all(BootGraph[upper.tri(BootGraph,diag=FALSE)] == 0)){
-        BootGraph[upper.tri(BootGraph,diag=FALSE)] <- BootGraph[upper.tri(BootGraph,diag=FALSE)] * sum(abs(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])) /
-          sum(abs(BootGraph[upper.tri(BootGraph,diag=FALSE)]))
-        BootGraph[lower.tri(BootGraph,diag=FALSE)] <- t(BootGraph)[lower.tri(BootGraph,diag=FALSE)]        
-      }
-    }
+#     if (scaleAdjust == 1){
+#       if (!all(BootGraph[upper.tri(BootGraph,diag=FALSE)] == 0)){
+#         BootGraph[upper.tri(BootGraph,diag=FALSE)] <- BootGraph[upper.tri(BootGraph,diag=FALSE)] * sum(abs(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])) /
+#           sum(abs(BootGraph[upper.tri(BootGraph,diag=FALSE)]))
+#         BootGraph[lower.tri(BootGraph,diag=FALSE)] <- t(BootGraph)[lower.tri(BootGraph,diag=FALSE)]        
+#       }
+#     }
     bootResults[[b]] <- list(
       graph = BootGraph,
       intercepts = do.call(intFun,c(list(res), intArgs)),
@@ -323,25 +323,25 @@ bootnet <- function(
   }
   
   
-  if (isTRUE(scaleAdjust) || scaleAdjust == 2){
-    if (verbose){
-      message("Applying bias-adjustment correction")
-    }
-    bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
-    needAdjust <- apply(bootGraphs,1:2,function(x)min(x)<=0&max(x)>=0)
-    needAdjust <- needAdjust[upper.tri(needAdjust,diag=FALSE)]
-    if (any(needAdjust)){
-      # adjust <- which(needAdjust & upper.tri(needAdjust,diag=FALSE),arr.ind=TRUE)
-      sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
-      for (b in seq_along(bootResults)){
-          bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
-          bootRank <- order(order(bootEdges))
-          bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- ifelse(needAdjust,sampleDistribution[bootRank],bootEdges)
-          bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
-      }
-    }
-    
-  }
+#   if (isTRUE(scaleAdjust) || scaleAdjust == 2){
+#     if (verbose){
+#       message("Applying bias-adjustment correction")
+#     }
+#     bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
+#     needAdjust <- apply(bootGraphs,1:2,function(x)min(x)<=0&max(x)>=0)
+#     needAdjust <- needAdjust[upper.tri(needAdjust,diag=FALSE)]
+#     if (any(needAdjust)){
+#       # adjust <- which(needAdjust & upper.tri(needAdjust,diag=FALSE),arr.ind=TRUE)
+#       sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
+#       for (b in seq_along(bootResults)){
+#           bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
+#           bootRank <- order(order(bootEdges))
+#           bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- ifelse(needAdjust,sampleDistribution[bootRank],bootEdges)
+#           bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
+#       }
+#     }
+#     
+#   }
   
   
   ### Compute the full parameter table!!

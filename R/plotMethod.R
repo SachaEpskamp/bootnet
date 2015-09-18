@@ -3,7 +3,9 @@
 plot.bootnet <- function(
   x, # bootnet object,
   statistics = c("strength", "closeness", "betweenness"),
-  plot = c("area","line","interval"),
+  plot = c("area","interval","line"),
+  CIstyle = c("default","SE","quantiles"),
+  # CIwidth = c("95%","99%","90%","75%"),
   sampleColor = "darkred",
   samplelwd = 1,
   bootColor = "black",
@@ -13,7 +15,7 @@ plot.bootnet <- function(
   order = c("id","sample","mean"),
   decreasing = TRUE,
   perNode = FALSE,
-  quantile = 2.5,
+  # quantile = 2.5,
   legendNcol = 2, # Only for perNode plots.
   labels=TRUE,
   legend = TRUE,
@@ -21,18 +23,42 @@ plot.bootnet <- function(
 ){
   plot <- match.arg(plot)
   order <- match.arg(order)
+  CIstyle <- match.arg(CIstyle)
+  # CIwidth <- match.arg(CIwidth)
   
-  if (!quantile %in% c(2.5,1,5,25,50)){
-    stop("Only quantiles 1, 2.5, 5, 25 and 50 are supported.")
+  if (CIstyle=="default"){
+    if(x$type=="node"){
+      CIstyle <- "quantiles"
+    } else {
+      if (!"edge"%in%statistics){
+        CIstyle <- "SE"
+      } else {
+        CIstyle <- "quantiles"
+      }
+    }
   }
+  
+  if (any(statistics%in%c("strength", "closeness", "betweenness")) & any(statistics%in%c("edge","distance"))){
+    stop("Plotting both centrality CIs and edge/distance CIs together is not supported.")
+  }
+  
+#   if (!quantile %in% c(2.5,1,5,25,50)){
+#     stop("Only quantiles 1, 2.5, 5, 25 and 50 are supported.")
+#   }
   
   ### Nodewise plots:
   if (x$type == "node"){
     # Summarize:
     Sum <- summary(x, statistic=statistics,perNode=perNode)
-    minArea <- paste0("q",quantile)
-    maxArea <- paste0("q",100-quantile)
     
+    if (CIstyle == "SE"){
+      minArea <- "CIlower"
+      maxArea <- "CIupper"
+    } else {
+      minArea <- "q2.5"
+      maxArea <- "q97.5"  
+    }
+
     if (plot == "area"){
 
       if (perNode){
@@ -217,9 +243,18 @@ plot.bootnet <- function(
     # Some fancy transformation:
     revTable <- function(x) x[nrow(x):1,]
     
+    if (CIstyle == "SE"){
+      minArea <- "CIlower"
+      maxArea <- "CIupper"
+    } else {
+      minArea <- "q2.5"
+      maxArea <- "q97.5"  
+    }
+    
+
     sumTable2 <- dplyr::rbind_list(
-      sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~q2.5),
-      revTable(sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~q97.5))
+      sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = as.formula(paste0("~",minArea))),
+      revTable(sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = as.formula(paste0("~",maxArea))))
     )
     
     
