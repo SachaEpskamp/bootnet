@@ -30,21 +30,26 @@ plot.bootnet <- function(
     if(x$type=="node"){
       CIstyle <- "quantiles"
     } else {
-      if (!"edge"%in%statistics){
-        CIstyle <- "SE"
-      } else {
-        CIstyle <- "quantiles"
-      }
+      CIstyle <- ifelse(statistics %in% c("closeness","strength"),"SE","quantile")
     }
+  } else {
+    if (x$type=="node" & any(CIstyle == "SE")){
+      stop("'SE' style confidence intervals not supported for node dropping.")
+      CIstyle <- "quantile"
+    }
+  }
+  
+  if (x$type != "node"){
+    CIstyle <- rep(CIstyle,length=length(statistics))
   }
   
   if (any(statistics%in%c("strength", "closeness", "betweenness")) & any(statistics%in%c("edge","distance"))){
     stop("Plotting both centrality CIs and edge/distance CIs together is not supported.")
   }
   
-#   if (!quantile %in% c(2.5,1,5,25,50)){
-#     stop("Only quantiles 1, 2.5, 5, 25 and 50 are supported.")
-#   }
+  #   if (!quantile %in% c(2.5,1,5,25,50)){
+  #     stop("Only quantiles 1, 2.5, 5, 25 and 50 are supported.")
+  #   }
   
   ### Nodewise plots:
   if (x$type == "node"){
@@ -58,9 +63,9 @@ plot.bootnet <- function(
       minArea <- "q2.5"
       maxArea <- "q97.5"  
     }
-
+    
     if (plot == "area"){
-
+      
       if (perNode){
         g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
           facet_grid(type ~ ., scales = "free") +
@@ -71,7 +76,7 @@ plot.bootnet <- function(
           guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
           scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
                           limits = c( ncol(x$sample$graph)-1, 2))
-
+        
         if (identical(FALSE,legend)){
           g <- g + theme(legend.position = "none")
         }
@@ -131,7 +136,7 @@ plot.bootnet <- function(
           geom_point(position =  position_dodge(width = 0.4)) +
           geom_line(position =  position_dodge(width = 0.4)) +
           theme_bw() + 
-         geom_hline(yintercept = 0) +
+          geom_hline(yintercept = 0) +
           xlab("% of nodes sampled") + ylab("Average correlation with original sample") + 
           scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
                           limits = c( ncol(x$sample$graph)-1, 1)) +
@@ -156,7 +161,7 @@ plot.bootnet <- function(
   if (plot[[1]]=="line"){
     sampleTable <- x[['sampleTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
     bootTable <- x[['bootTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
-
+    
     ### Ordering:
     if (order[[1]]=="id"){
       sampleTable$order <- match(as.character(sampleTable$id),gtools::mixedsort(as.character(sampleTable$id)))
@@ -243,24 +248,30 @@ plot.bootnet <- function(
     # Some fancy transformation:
     revTable <- function(x) x[nrow(x):1,]
     
-    if (CIstyle == "SE"){
-      minArea <- "CIlower"
-      maxArea <- "CIupper"
-    } else {
-      minArea <- "q2.5"
-      maxArea <- "q97.5"  
-    }
-    
 
+#     if (CIstyle == "SE"){
+#       minArea <- "CIlower"
+#       maxArea <- "CIupper"
+#     } else {
+#       minArea <- "q2.5"
+#       maxArea <- "q97.5"  
+#     }
+
+    sumTable <- sumTable %>% mutate_(
+      lbound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIlower,q2.5),
+      ubound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIupper, q97.5)
+    )
+    
+    
     sumTable2 <- dplyr::rbind_list(
-      sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = as.formula(paste0("~",minArea))),
-      revTable(sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = as.formula(paste0("~",maxArea))))
+      sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~lbound),
+      revTable(sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~ubound))
     )
     
     
     #     sumTable <- sumTable[gtools::mixedorder(sumTable$id),] 
     #     sumTable$id <- factor(gsub("^(E|N): ","",as.character(sumTable$id)), levels = gsub("^(E|N): ","",unique(gtools::mixedsort(as.character(sumTable$id)))))
-
+    
     if (plot == "area"){
       
       
