@@ -42,7 +42,8 @@ bootnet <- function(
   computeCentrality = TRUE,
   propBoot = 1, # M out of N
   # subsampleSize,
-  replacement = TRUE
+  replacement = TRUE,
+  edgeResample = FALSE # If true, only resample edges from original estimate
   # scaleAdjust = FALSE
 ){
   if (default[[1]]=="glasso") default <- "EBICglasso"
@@ -56,7 +57,7 @@ bootnet <- function(
     nBoots <- nrow(data)
   }
   
-
+  
   if (type == "node" & N < 3){
     stop("Node-wise bootstrapping requires at least three nodes.")
   }
@@ -101,36 +102,36 @@ bootnet <- function(
                         IsingFit = binarize,
                         pcor = qgraph::cor_auto
       )
-#       prepFun <- switch(default,
-#                         EBICglasso = cor,
-#                         IsingFit = binarize,
-#                         pcor = cor
-#       )      
+      #       prepFun <- switch(default,
+      #                         EBICglasso = cor,
+      #                         IsingFit = binarize,
+      #                         pcor = cor
+      #       )      
     }
     
     # prepArgs:
-#     qgraphVersion <- packageDescription("qgraph")$Version
-#     qgraphVersion <- as.numeric(strsplit(qgraphVersion,split="\\.|\\-")[[1]])
-#     if (length(qgraphVersion)==1) qgraphVersion <- c(qgraphVersion,0)
-#     if (length(qgraphVersion)==2) qgraphVersion <- c(qgraphVersion,0)
-#     goodVersion <- 
-#       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) | 
-#       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
-#       qgraphVersion[[1]] > 1
+    #     qgraphVersion <- packageDescription("qgraph")$Version
+    #     qgraphVersion <- as.numeric(strsplit(qgraphVersion,split="\\.|\\-")[[1]])
+    #     if (length(qgraphVersion)==1) qgraphVersion <- c(qgraphVersion,0)
+    #     if (length(qgraphVersion)==2) qgraphVersion <- c(qgraphVersion,0)
+    #     goodVersion <- 
+    #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) | 
+    #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
+    #       qgraphVersion[[1]] > 1
     
-
-      if (missing(prepArgs)){
-        prepArgs <- switch(default,
-                           EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
-                                              ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
-                           IsingFit = list(),
-                           pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
-                                          ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
-                           IsingLL = list()
-        )
-        
+    
+    if (missing(prepArgs)){
+      prepArgs <- switch(default,
+                         EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
+                                             ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
+                         IsingFit = list(),
+                         pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
+                                        ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
+                         IsingLL = list()
+      )
       
-      }
+      
+    }
     
     # estFun:
     if (missing(estFun)){
@@ -264,7 +265,7 @@ bootnet <- function(
         } else if (type == "jackknife"){
           bootData <- data[-b,,drop=FALSE]    
         } else if (type == "parametric"){
- 
+          
           if (model == "Ising"){
             bootData <- IsingSampler(round(propBoot*nrow(data)), noDiag(sampleResult$graph), sampleResult$intercepts)
             
@@ -272,7 +273,7 @@ bootnet <- function(
             g <- -sampleResult$graph
             diag(g) <- 1
             bootData <- mvtnorm::rmvnorm(round(propBoot*nrow(data)), sigma = corpcor::pseudoinverse(g))
-          
+            
           } else stop(paste0("Model '",model,"' not supported."))
           
         } else {
@@ -297,13 +298,13 @@ bootnet <- function(
       
     }
     BootGraph <- do.call(graphFun,c(list(res), graphArgs))
-#     if (scaleAdjust == 1){
-#       if (!all(BootGraph[upper.tri(BootGraph,diag=FALSE)] == 0)){
-#         BootGraph[upper.tri(BootGraph,diag=FALSE)] <- BootGraph[upper.tri(BootGraph,diag=FALSE)] * sum(abs(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])) /
-#           sum(abs(BootGraph[upper.tri(BootGraph,diag=FALSE)]))
-#         BootGraph[lower.tri(BootGraph,diag=FALSE)] <- t(BootGraph)[lower.tri(BootGraph,diag=FALSE)]        
-#       }
-#     }
+    #     if (scaleAdjust == 1){
+    #       if (!all(BootGraph[upper.tri(BootGraph,diag=FALSE)] == 0)){
+    #         BootGraph[upper.tri(BootGraph,diag=FALSE)] <- BootGraph[upper.tri(BootGraph,diag=FALSE)] * sum(abs(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])) /
+    #           sum(abs(BootGraph[upper.tri(BootGraph,diag=FALSE)]))
+    #         BootGraph[lower.tri(BootGraph,diag=FALSE)] <- t(BootGraph)[lower.tri(BootGraph,diag=FALSE)]        
+    #       }
+    #     }
     bootResults[[b]] <- list(
       graph = BootGraph,
       intercepts = do.call(intFun,c(list(res), intArgs)),
@@ -323,26 +324,37 @@ bootnet <- function(
   }
   
   
-#   if (isTRUE(scaleAdjust) || scaleAdjust == 2){
-#     if (verbose){
-#       message("Applying bias-adjustment correction")
-#     }
-#     bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
-#     needAdjust <- apply(bootGraphs,1:2,function(x)min(x)<=0&max(x)>=0)
-#     needAdjust <- needAdjust[upper.tri(needAdjust,diag=FALSE)]
-#     if (any(needAdjust)){
-#       # adjust <- which(needAdjust & upper.tri(needAdjust,diag=FALSE),arr.ind=TRUE)
-#       sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
-#       for (b in seq_along(bootResults)){
-#           bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
-#           bootRank <- order(order(bootEdges))
-#           bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- ifelse(needAdjust,sampleDistribution[bootRank],bootEdges)
-#           bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
-#       }
-#     }
-#     
-#   }
-  
+  #   if (isTRUE(scaleAdjust) || scaleAdjust == 2){
+  #     if (verbose){
+  #       message("Applying bias-adjustment correction")
+  #     }
+  #     bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
+  #     needAdjust <- apply(bootGraphs,1:2,function(x)min(x)<=0&max(x)>=0)
+  #     needAdjust <- needAdjust[upper.tri(needAdjust,diag=FALSE)]
+  #     if (any(needAdjust)){
+  #       # adjust <- which(needAdjust & upper.tri(needAdjust,diag=FALSE),arr.ind=TRUE)
+  #       sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
+  #       for (b in seq_along(bootResults)){
+  #           bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
+  #           bootRank <- order(order(bootEdges))
+  #           bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- ifelse(needAdjust,sampleDistribution[bootRank],bootEdges)
+  #           bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
+  #       }
+  #     }
+  #     
+  #   }
+  if (edgeResample){
+    bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
+    
+    sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
+    for (b in seq_along(bootResults)){
+      bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
+      bootRank <- order(order(bootEdges))
+      bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- sampleDistribution[bootRank]
+      bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
+    }
+    
+  }
   
   ### Compute the full parameter table!!
   if (verbose){
