@@ -5,6 +5,7 @@ plot.bootnet <- function(
   statistics = c("strength", "closeness", "betweenness"),
   plot = c("area","interval","line"),
   CIstyle = c("default","SE","quantiles"),
+  rank = FALSE,
   # CIwidth = c("95%","99%","90%","75%"),
   sampleColor = "darkred",
   samplelwd = 1,
@@ -27,11 +28,16 @@ plot.bootnet <- function(
   # CIwidth <- match.arg(CIwidth)
   
   if (CIstyle=="default"){
-    if(x$type=="node"){
+    if (rank){
       CIstyle <- "quantiles"
     } else {
-      CIstyle <- ifelse(statistics %in% c("closeness","strength"),"SE","quantile")
+      if(x$type=="node"){
+        CIstyle <- "quantiles"
+      } else {
+        CIstyle <- ifelse(statistics %in% c("closeness","strength"),"SE","quantile")
+      }
     }
+
   } else {
     if (x$type=="node" & any(CIstyle == "SE")){
       stop("'SE' style confidence intervals not supported for node dropping.")
@@ -54,7 +60,7 @@ plot.bootnet <- function(
   ### Nodewise plots:
   if (x$type == "node"){
     # Summarize:
-    Sum <- summary(x, statistic=statistics,perNode=perNode)
+    Sum <- summary(x, statistic=statistics,perNode=perNode,rank=rank)
     
     if (CIstyle == "SE"){
       minArea <- "CIlower"
@@ -216,7 +222,7 @@ plot.bootnet <- function(
     return(g)
   } else if (plot[[1]] %in% c("interval","area")){
     # Compute summary stats:
-    sumTable <- summary(x, statistics = statistics)  %>% ungroup %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
+    sumTable <- summary(x, statistics = statistics,rank=rank)  %>% ungroup %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
     
     ### Ordering:
     if (order[[1]]=="id"){

@@ -25,7 +25,7 @@ bootnet <- function(
   data, # Dataset
   nBoots = 1000, # Number of bootstrap samples.
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
-  type = c("nonparametric","parametric","node"), # Bootstrap method to use
+  type = c("nonparametric","parametric","node","jackknife"), # Bootstrap method to use
   model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs = list(), # list with arguments for the correlation function
@@ -383,7 +383,8 @@ bootnet <- function(
     bootTable =  dplyr::rbind_all(statTableBoots),
     sample = sampleResult,
     boots = bootResults,
-    type = type)
+    type = type,
+    sampleSize = nrow(data))
   
   class(Result) <- "bootnet"
   

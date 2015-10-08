@@ -89,5 +89,12 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
   
   tab <- dplyr::rbind_all(tables)
   tab$nNode <- x$nNodes
+  
+  # Compute rank:
+  tab <- tab %>% group_by(type) %>%
+    mutate(rank_avg = rank(value,ties.method = "average"),
+           rank_min = rank(value,ties.method = "min"),
+           rank_max = rank(value,ties.method = "max"))
+  
   return(tab)
 }
