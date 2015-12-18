@@ -10,7 +10,7 @@
 statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
   stopifnot(is(x, "bootnetResult"))
   tables <- list()
-
+  
   # edges:
   ind <- which(upper.tri(x[['graph']], diag=FALSE), arr.ind=TRUE)
   tables$edges <- dplyr::tbl_df(data.frame(
@@ -89,6 +89,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
   
   tab <- dplyr::rbind_all(tables)
   tab$nNode <- x$nNodes
+  tab$nPerson <- x$nPerson
   
   # Compute rank:
   tab <- tab %>% group_by(type) %>%

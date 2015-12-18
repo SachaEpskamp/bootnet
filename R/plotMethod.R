@@ -31,7 +31,7 @@ plot.bootnet <- function(
     if (rank){
       CIstyle <- "quantiles"
     } else {
-      if(x$type=="node"){
+      if(x$type %in% c("person","node")){
         CIstyle <- "quantiles"
       } else {
         CIstyle <- ifelse(statistics %in% c("closeness","strength"),"SE","quantile")
@@ -45,7 +45,7 @@ plot.bootnet <- function(
     }
   }
   
-  if (x$type != "node"){
+  if (! x$type %in% c("person","node")){
     CIstyle <- rep(CIstyle,length=length(statistics))
   }
   
@@ -56,10 +56,11 @@ plot.bootnet <- function(
   #   if (!quantile %in% c(2.5,1,5,25,50)){
   #     stop("Only quantiles 1, 2.5, 5, 25 and 50 are supported.")
   #   }
-  
-  ### Nodewise plots:
-  if (x$type == "node"){
+
+  ### Nodewise or personwise plots:
+  if (x$type %in% c("person","node")){
     # Summarize:
+
     Sum <- summary(x, statistic=statistics,perNode=perNode,rank=rank)
     
     if (CIstyle == "SE"){
@@ -73,15 +74,29 @@ plot.bootnet <- function(
     if (plot == "area"){
       
       if (perNode){
-        g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
-          facet_grid(type ~ ., scales = "free") +
-          geom_ribbon(colour = NA, alpha = areaAlpha) +
-          geom_line( lwd = samplelwd) + geom_point() +
-          theme_bw() + 
-          xlab("% of nodes sampled") + ylab("") + 
-          guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
-          scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
-                          limits = c( ncol(x$sample$graph)-1, 2))
+        
+        if (x$type == "node"){
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
+            facet_grid(type ~ ., scales = "free") +
+            geom_ribbon(colour = NA, alpha = areaAlpha) +
+            geom_line( lwd = samplelwd) + geom_point() +
+            theme_bw() + 
+            xlab("% of nodes sampled") + ylab("") + 
+            guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")))          
+        } else {
+          
+          g <- ggplot(Sum, aes_string(x = 'nPerson', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
+            facet_grid(type ~ ., scales = "free") +
+            geom_ribbon(colour = NA, alpha = areaAlpha) +
+            geom_line( lwd = samplelwd) + geom_point() +
+            theme_bw() + 
+            xlab("% of people sampled") + ylab("") + 
+            guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")))
+          
+        }
+
         
         if (identical(FALSE,legend)){
           g <- g + theme(legend.position = "none")
@@ -93,14 +108,26 @@ plot.bootnet <- function(
         return(g)
         
       } else {
-        g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
-          geom_ribbon(colour = NA, alpha = areaAlpha) +
-          geom_line( lwd = samplelwd) + geom_point() +
-          theme_bw() + 
-          xlab("% of nodes sampled") + ylab("Average correlation with original sample")+ 
-          ylim(-1,1) + geom_hline(yintercept = 0) + 
-          scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
-                          limits = c( ncol(x$sample$graph)-1, 2))
+        if (x$type == "node"){
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
+            geom_ribbon(colour = NA, alpha = areaAlpha) +
+            geom_line( lwd = samplelwd) + geom_point() +
+            theme_bw() + 
+            xlab("% of nodes sampled") + ylab("Average correlation with original sample")+ 
+            ylim(-1,1) + geom_hline(yintercept = 0) + 
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")))
+          
+        } else {
+  
+          g <- ggplot(Sum, aes_string(x = 'nPerson', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
+            geom_ribbon(colour = NA, alpha = areaAlpha) +
+            geom_line( lwd = samplelwd) + geom_point() +
+            theme_bw() + 
+            xlab("% of people sampled") + ylab("Average correlation with original sample")+ 
+            ylim(-1,1) + geom_hline(yintercept = 0) + 
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) *  x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")))
+          
+        }
         
         
         if (identical(FALSE,legend)){
@@ -116,16 +143,33 @@ plot.bootnet <- function(
       
       if (perNode){
         
-        g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
-          facet_grid(type ~ ., scales = "free") +
-          geom_errorbar(position =  position_dodge(width = 0.4)) +
-          geom_point(position =  position_dodge(width = 0.4)) +
-          geom_line(position =  position_dodge(width = 0.4)) +
-          theme_bw() + 
-          xlab("% of nodes sampled") + ylab("") + 
-          guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
-          scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
-                          limits = c( ncol(x$sample$graph)-1, 1))
+        if (x$type == "node"){
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
+            facet_grid(type ~ ., scales = "free") +
+            geom_errorbar(position =  position_dodge(width = 0.4)) +
+            geom_point(position =  position_dodge(width = 0.4)) +
+            geom_line(position =  position_dodge(width = 0.4)) +
+            theme_bw() + 
+            xlab("% of nodes sampled") + ylab("") + 
+            guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
+                            limits = c( ncol(x$sample$graph)-1, 1))
+          
+        } else {
+          
+          g <- ggplot(Sum, aes_string(x = 'nPeople', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
+            facet_grid(type ~ ., scales = "free") +
+            geom_errorbar(position =  position_dodge(width = 0.4)) +
+            geom_point(position =  position_dodge(width = 0.4)) +
+            geom_line(position =  position_dodge(width = 0.4)) +
+            theme_bw() + 
+            xlab("% of people sampled") + ylab("") + 
+            guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) *  x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")),
+                            limits = c( ncol(x$sample$graph)-1, 1))
+          
+          
+        }
         
         if (identical(FALSE,legend)){
           g <- g + theme(legend.position = "none")
@@ -137,16 +181,33 @@ plot.bootnet <- function(
         return(g)
         
       } else {
-        g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
-          geom_errorbar(position =  position_dodge(width = 0.4)) +
-          geom_point(position =  position_dodge(width = 0.4)) +
-          geom_line(position =  position_dodge(width = 0.4)) +
-          theme_bw() + 
-          geom_hline(yintercept = 0) +
-          xlab("% of nodes sampled") + ylab("Average correlation with original sample") + 
-          scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
-                          limits = c( ncol(x$sample$graph)-1, 1)) +
-          ylim(-1,1)
+        
+        if (x$type == "node"){
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
+            geom_errorbar(position =  position_dodge(width = 0.4)) +
+            geom_point(position =  position_dodge(width = 0.4)) +
+            geom_line(position =  position_dodge(width = 0.4)) +
+            theme_bw() + 
+            geom_hline(yintercept = 0) +
+            xlab("% of nodes sampled") + ylab("Average correlation with original sample") + 
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
+                            limits = c( ncol(x$sample$graph)-1, 1)) +
+            ylim(-1,1)          
+        } else {
+          
+          g <- ggplot(Sum, aes_string(x = 'nPeople', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
+            geom_errorbar(position =  position_dodge(width = 0.4)) +
+            geom_point(position =  position_dodge(width = 0.4)) +
+            geom_line(position =  position_dodge(width = 0.4)) +
+            theme_bw() + 
+            geom_hline(yintercept = 0) +
+            xlab("% of people sampled") + ylab("Average correlation with original sample") + 
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
+                            limits = c( ncol(x$sample$graph)-1, 1)) +
+            ylim(-1,1)
+          
+        }
+
         if (identical(FALSE,legend)){
           g <- g + theme(legend.position = "none")
         }

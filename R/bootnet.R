@@ -25,7 +25,7 @@ bootnet <- function(
   data, # Dataset
   nBoots = 1000, # Number of bootstrap samples.
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
-  type = c("nonparametric","parametric","node","jackknife"), # Bootstrap method to use
+  type = c("nonparametric","parametric","node","person","jackknife"), # Bootstrap method to use
   model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs = list(), # list with arguments for the correlation function
@@ -51,10 +51,11 @@ bootnet <- function(
   type <- match.arg(type)
   model <- match.arg(model)
   N <- ncol(data)
+  Np <- nrow(data)
   
   if (type == "jackknife"){
     message("Jacknife overwrites nBoot to sample size")
-    nBoots <- nrow(data)
+    nBoots <- Np
   }
   
   
@@ -146,7 +147,7 @@ bootnet <- function(
     # estArgs:
     if (missing(estArgs)){
       estArgs <- switch(default,
-                        EBICglasso = list(n = nrow(data), returnAllResults = TRUE),
+                        EBICglasso = list(n = Np, returnAllResults = TRUE),
                         IsingFit = list(plot = FALSE, progress = FALSE),
                         pcor = list(),
                         IsingLL = list(method = "ll")
@@ -231,7 +232,8 @@ bootnet <- function(
     intercepts = do.call(intFun,c(list(res), intArgs)),
     results = res,
     labels = labels,
-    nNodes = ncol(data)
+    nNodes = ncol(data),
+    nPerson = Np
   )
   class(sampleResult) <- c("bootnetResult", "list")
   
@@ -256,34 +258,47 @@ bootnet <- function(
     tryCount <- 0
     repeat{
       
-      if (type != "node"){
+      if (! type %in% c("node","person")){
         nNode <- ncol(data)
         inSample <- seq_len(N)
         
         if (type == "subsample"){
-          bootData <- data[sample(seq_len(nrow(data)), subsampleSize, replace=FALSE), ]        
+          bootData <- data[sample(seq_len(Np), subsampleSize, replace=FALSE), ]    
+          nPerson <- subsampleSize
         } else if (type == "jackknife"){
           bootData <- data[-b,,drop=FALSE]    
+          nPerson <- Np - 1
         } else if (type == "parametric"){
-          
+          nPerson <- Np
           if (model == "Ising"){
-            bootData <- IsingSampler(round(propBoot*nrow(data)), noDiag(sampleResult$graph), sampleResult$intercepts)
+            bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts)
             
           } else if (model == "GGM") {
             g <- -sampleResult$graph
             diag(g) <- 1
-            bootData <- mvtnorm::rmvnorm(round(propBoot*nrow(data)), sigma = corpcor::pseudoinverse(g))
+            bootData <- mvtnorm::rmvnorm(round(propBoot*Np), sigma = corpcor::pseudoinverse(g))
             
           } else stop(paste0("Model '",model,"' not supported."))
           
         } else {
-          bootData <- data[sample(seq_len(nrow(data)), round(propBoot*nrow(data)), replace=replacement), ]        
+          nPerson <- Np
+          bootData <- data[sample(seq_len(Np), round(propBoot*Np), replace=replacement), ]        
         }
         
-      } else {
+      } else if (type == "node") {
+        # Nodewise
+        nPerson <- Np
         nNode <- sample(nNodes,1)
-        inSample <- sort(sample(seq_len(N),nNode))
+        inSample <- sort(sample(seq_len(N-1),nNode))
         bootData <- data[,inSample, drop=FALSE]
+      } else {
+        # Personwise:
+        nNode <- ncol(data)
+        nPerson <- sample(round(seq(0.1,0.9,by=0.1) * Np), 1)
+        inSample <- 1:N
+        persSample <- sort(sample(seq_len(Np),nPerson))
+        bootData <- data[persSample,,drop=FALSE]
+         
       }
       
       res <- try(estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs))
@@ -310,7 +325,8 @@ bootnet <- function(
       intercepts = do.call(intFun,c(list(res), intArgs)),
       results = res,
       labels = labels[inSample],
-      nNodes = nNode
+      nNodes = nNode,
+      nPerson = nPerson
     )
     
     class(bootResults[[b]]) <- c("bootnetResult", "list")
@@ -384,7 +400,7 @@ bootnet <- function(
     sample = sampleResult,
     boots = bootResults,
     type = type,
-    sampleSize = nrow(data))
+    sampleSize = Np)
   
   class(Result) <- "bootnet"
   

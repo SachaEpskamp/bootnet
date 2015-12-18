@@ -26,7 +26,7 @@ summary.bootnet <- function(
   }
 
   # Returns quantiles for type = "observation" and correlations with original for type = "node"
-  if (object$type != "node"){
+  if (!object$type %in% c("person","node")){
 #     tab <- object$bootTable %>% 
 #       dplyr::filter_(~type %in% statistics) %>%
 #       dplyr::group_by_(~type, ~node1, ~node2, ~id) %>%
@@ -101,7 +101,7 @@ summary.bootnet <- function(
       dplyr::left_join(object$sampleTable %>% dplyr::select_(~type,~id,~node1,~node2,sample = ~value), by=c("id","type","node1","node2"))
     
     if (perNode){
-      tab <- tab %>% group_by_(~id, ~type, ~nNode)  %>%
+      tab <- tab %>% group_by_(~id, ~type, ~nNode, ~nPerson)  %>%
         dplyr::summarize_(
           mean = ~mean(value,na.rm=TRUE),
           var = ~var(value,na.rm=TRUE),
@@ -115,12 +115,12 @@ summary.bootnet <- function(
           q95 = ~quantile(value, 95/100, na.rm = TRUE),
           q97.5 = ~quantile(value, 97.5/100, na.rm = TRUE),
           q99 = ~quantile(value, 99/100, na.rm = TRUE)
-        ) %>% mutate_(CIlower = ~mean - 2*sd, CIupper = ~mean + 2*sd) %>% arrange_(~nNode)
+        ) %>% mutate_(CIlower = ~mean - 2*sd, CIupper = ~mean + 2*sd) %>% arrange_(~nNode,~nPerson)
       
     } else {
-      tab <- tab %>% group_by_(~name, ~type, ~nNode)  %>%
+      tab <- tab %>% group_by_(~name, ~type, ~nNode, ~nPerson)  %>%
         summarize_(cor = ~cor(value,sample, use = "pairwise.complete.obs")) %>%
-        dplyr::group_by_(~nNode, ~type) %>%
+        dplyr::group_by_(~nNode, ~nPerson, ~type) %>%
         dplyr::summarize_(
           mean = ~mean(cor,na.rm=TRUE),
           var = ~var(cor,na.rm=TRUE),
@@ -134,7 +134,7 @@ summary.bootnet <- function(
           q95 = ~quantile(cor, 95/100, na.rm = TRUE),
           q97.5 = ~quantile(cor, 97.5/100, na.rm = TRUE),
           q99 = ~quantile(cor, 99/100, na.rm = TRUE)
-        ) %>% arrange_(~nNode)
+        ) %>% arrange_(~nNode, ~nPerson)
       
     }
   }
