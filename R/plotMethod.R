@@ -2,7 +2,7 @@
 
 plot.bootnet <- function(
   x, # bootnet object,
-  statistics = c("strength", "closeness", "betweenness"),
+  statistics, # "edge" for normal bootstrap, c("strength","closeness","betweenness") for node and person
   plot = c("area","interval","line"),
   CIstyle = c("default","SE","quantiles"),
   rank = FALSE,
@@ -20,8 +20,19 @@ plot.bootnet <- function(
   legendNcol = 2, # Only for perNode plots.
   labels=TRUE,
   legend = TRUE,
+  subsetRange = c(100,0),
+  area = !perNode,
   ...
 ){
+  if (missing(statistics)){
+    if (! x$type %in% c("person","node")){
+      statistics <- "edge"
+    } else {
+      statistics <-  c("strength","closeness","betweenness") 
+    }
+    
+    
+  }
   plot <- match.arg(plot)
   order <- match.arg(order)
   CIstyle <- match.arg(CIstyle)
@@ -60,8 +71,21 @@ plot.bootnet <- function(
   ### Nodewise or personwise plots:
   if (x$type %in% c("person","node")){
     # Summarize:
-
+  
+    if (perNode){
+      x$bootTable <- rbind(x$bootTable,x$sampleTable)
+      
+    }
     Sum <- summary(x, statistic=statistics,perNode=perNode,rank=rank)
+    
+    if (x$type == "node"){
+      Sum <- Sum[Sum$nNode <= (max(subsetRange)/100)*ncol(x$sample$graph),]
+      Sum <- Sum[Sum$nNode >= (min(subsetRange)/100)*ncol(x$sample$graph),]
+    } else {
+      Sum <- Sum[Sum$nPerson <= (max(subsetRange)/100)*x$sample$nPerson,]
+      Sum <- Sum[Sum$nPerson >= (min(subsetRange)/100)*x$sample$nPerson,]
+    }
+    
     
     if (CIstyle == "SE"){
       minArea <- "CIlower"
@@ -77,23 +101,33 @@ plot.bootnet <- function(
         
         if (x$type == "node"){
           g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
-            facet_grid(type ~ ., scales = "free") +
-            geom_ribbon(colour = NA, alpha = areaAlpha) +
+            facet_grid(type ~ ., scales = "free") 
+          
+          if (area){
+            g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
+          }
+          
+          g <- g + 
             geom_line( lwd = samplelwd) + geom_point() +
             theme_bw() + 
             xlab("% of nodes sampled") + ylab("") + 
             guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")))          
+          
+          
         } else {
           
           g <- ggplot(Sum, aes_string(x = 'nPerson', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
-            facet_grid(type ~ ., scales = "free") +
-            geom_ribbon(colour = NA, alpha = areaAlpha) +
-            geom_line( lwd = samplelwd) + geom_point() +
-            theme_bw() + 
+            facet_grid(type ~ ., scales = "free")          
+          if (area){
+            g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
+          }
+      
+          g <- g + 
+            geom_line( lwd = samplelwd) + geom_point() +theme_bw() + 
             xlab("% of people sampled") + ylab("") + 
             guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
-            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")))
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")))
           
         }
 
@@ -109,8 +143,12 @@ plot.bootnet <- function(
         
       } else {
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
-            geom_ribbon(colour = NA, alpha = areaAlpha) +
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))         
+          if (area){
+            g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
+          }
+          
+          g <- g + 
             geom_line( lwd = samplelwd) + geom_point() +
             theme_bw() + 
             xlab("% of nodes sampled") + ylab("Average correlation with original sample")+ 
@@ -118,9 +156,13 @@ plot.bootnet <- function(
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")))
           
         } else {
-  
-          g <- ggplot(Sum, aes_string(x = 'nPerson', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
-            geom_ribbon(colour = NA, alpha = areaAlpha) +
+ 
+          g <- ggplot(Sum, aes_string(x = 'nPerson', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))         
+          if (area){
+            g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
+          }
+          
+          g <- g + 
             geom_line( lwd = samplelwd) + geom_point() +
             theme_bw() + 
             xlab("% of people sampled") + ylab("Average correlation with original sample")+ 
@@ -222,6 +264,10 @@ plot.bootnet <- function(
     } else {
       stop("'line' plot not supported for node-wise bootstraps")
     }
+  }
+
+  if (any(statistics %in% c("strength","closeness","betweenness"))){
+    warning("Bootstrapping CIs on centrality indices is NOT consistent. Interpret these plots with care.")
   }
   
   # Start plot:
