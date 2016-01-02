@@ -110,7 +110,7 @@ plot.bootnet <- function(
           g <- g + 
             geom_line( lwd = samplelwd) + geom_point() +
             theme_bw() + 
-            xlab("% of nodes sampled") + ylab("") + 
+            xlab("Sampled nodes") + ylab("") + 
             guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")))          
           
@@ -125,7 +125,7 @@ plot.bootnet <- function(
       
           g <- g + 
             geom_line( lwd = samplelwd) + geom_point() +theme_bw() + 
-            xlab("% of people sampled") + ylab("") + 
+            xlab("Sampled people") + ylab("") + 
             guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")))
           
