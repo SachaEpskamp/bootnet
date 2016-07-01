@@ -95,6 +95,7 @@ summary.bootnet <- function(
     
     
   } else {
+
     # Nodewise
     tab <- object$bootTable %>% 
       dplyr::filter_(~type %in% statistics) %>% 
@@ -119,7 +120,7 @@ summary.bootnet <- function(
       
     } else {
       tab <- tab %>% group_by_(~name, ~type, ~nNode, ~nPerson)  %>%
-        summarize_(cor = ~cor(value,sample, use = "pairwise.complete.obs")) %>%
+        summarize_(cor = ~ suppressWarnings(cor(value,sample, use = "pairwise.complete.obs"))) %>%
         dplyr::group_by_(~nNode, ~nPerson, ~type) %>%
         dplyr::summarize_(
           mean = ~mean(cor,na.rm=TRUE),

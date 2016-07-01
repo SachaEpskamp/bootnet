@@ -8,8 +8,14 @@ Bootstrapped network estimation
 This function can be used to bootstrap network estimation methods so that the spread of parameter and centrality estimates can be assessed. 
 }
 \usage{
-bootnet(data, nBoots = 1000, default, prepFun, prepArgs = list(), estFun, estArgs, 
-          graphFun, graphArgs, intFun, intArgs, verbose = TRUE, labels, alpha = 1)
+bootnet(data, nBoots = 1000, 
+    default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"), 
+    type = c("nonparametric","parametric","node","person","jackknife"),
+    model = c("detect","GGM","Ising"), prepFun, prepArgs = list(), estFun, estArgs, 
+    graphFun, graphArgs, intFun, intArgs, verbose = TRUE, labels, alpha = 1, 
+    subNodes = 2:(ncol(data)-1), subPersons = round(seq(0.25,0.95,length=10)*nrow(data)), 
+    computeCentrality = TRUE, propBoot = 1, 
+    replacement = TRUE, edgeResample = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,6 +33,12 @@ A string indicating the method to use. Specifying a \code{default} sets default 
 \item{\code{"pcor"}}{Partial correlation network (non-regularized Gaussian Markov random field), using \code{\link[corpcor]{cor2pcor}} from the corpcor package.}
 }
 See details section for a more detailed description.
+}
+\item{type}{
+ The kind of bootstrap method to use.
+}
+\item{model}{
+ The modeling framework to use. Automatically detects if data is binary or not.
 }
   \item{prepFun}{
 A function that takes as input the raw data and returns whatever the estimation function needs (as first argument). Typically this function is used to correlate or binarize the data. Defaults to \code{\link{identity}} if omitted and \code{default} is not set.
@@ -61,6 +73,24 @@ A character vector containing the node labels. If omitted the column names of th
   \item{alpha}{
   The centrality tuning parameter as used in \code{\link[qgraph]{centrality}}.
 }
+  \item{subNodes}{
+    Range of nodes to sample in node-drop bootstrap
+  }
+  \item{subPersons}{
+  Range of persons to sample in person-drop bootstrap
+  }
+  \item{computeCentrality}{
+    Logical, should centrality be computed?  
+  }
+  \item{propBoot}{
+    Proportion of persons to sample in bootstraps. Set to lower than 1 for m out of n bootstrap
+  }
+    \item{replacement}{
+      Logical, should replacement be used in bootstrap sampling?
+  }
+  \item{edgeResample}{
+      Logical, if \code{TRUE} only the order of edges based on bootstraps is retained and parameter values of the original network are mapped to this new order.
+  }
 }
 
 \details{
@@ -127,13 +157,8 @@ bfiSub <- bfi[,11:15]
 
 # 10 bootstraps (using Pearson correlations to speed up):
 Results <- bootnet(bfiSub, nBoot = 5, default = "EBICglasso", prepFun = cor, 
-                      prepArgs = list(use = "pairwise.complete.obs"))
+                   prepArgs = list(use = "pairwise.complete.obs"))
 
-\dontrun{
-# 1000 bootstraps (using Pearson correlations to speed up):
-Results <- bootnet(bfiSub, nBoot = 1000, default = "EBICglasso", prepFun = cor, 
-                      prepArgs = list(use = "pairwise.complete.obs"))
-}
 
 # Results:
 print(Results)
@@ -153,12 +178,35 @@ summary(Results)
 # Summary of strength only:
 summary(Results, "strength")
 
-# Plots of centrality measures:
-plot(Results, c("strength", "closeness", "betweenness"), plot = "line")
-plot(Results, c("strength", "closeness", "betweenness"), plot = "interval")
+# Plots of edges:
+plot(Results, plot = "area", order = "sample")
+plot(Results, plot = "interval", order = "sample")
 
-# Plots arranged by strength:
-plot(Results, c("strength"), plot = "line", order = "value")
-plot(Results, c("strength"), plot = "interval", order = "value")
+#### Centrality ####
 
+# Node-drop:
+# 100 bootstraps (using Pearson correlations to speed up):
+NodeDrop <- bootnet(bfiSub, nBoot = 25, default = "EBICglasso", prepFun = cor, 
+                   prepArgs = list(use = "pairwise.complete.obs"), type = "node")
+
+# Person-drop:
+PersonDrop <- bootnet(bfiSub, nBoot = 25, default = "EBICglasso", prepFun = cor, 
+                    prepArgs = list(use = "pairwise.complete.obs"), type = "node")
+
+\dontrun{
+  # 1000 bootstraps (using Pearson correlations to speed up):
+  NodeDrop <- bootnet(bfiSub, nBoot = 1000, default = "EBICglasso", prepFun = cor, 
+                      prepArgs = list(use = "pairwise.complete.obs"), type = "node")
+  
+  # Person-drop:
+  PersonDrop <- bootnet(bfiSub, nBoot = 1000, default = "EBICglasso", prepFun = cor, 
+                        prepArgs = list(use = "pairwise.complete.obs"), type = "node")
+}
+
+# Plot:
+plot(NodeDrop) # Correlation with original
+plot(NodeDrop, perNode = TRUE) # Value per sampling level
+
+plot(PersonDrop) # Correlation with original
+plot(PersonDrop, perNode = TRUE) # Value per sampling level
 }

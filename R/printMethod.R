@@ -1,7 +1,7 @@
 print.bootnet <- function(x, ...){
   name <- deparse(substitute(x))[[1]]
   if (nchar(name) > 10) name <- "object"
-  cat("=== bootnet results ===")
+  cat("=== bootnet Results ===")
   cat("\nNumber of nodes:",nrow(x[['sample']][['graph']]),
       "\nNumber of non-zero edges in sample:",sum(x[['sample']][['graph']][upper.tri(x[['sample']][['graph']],diag=FALSE)]==0) ,
       "\nSparsity in sample:",mean(x[['sample']][['graph']][upper.tri(x[['sample']][['graph']],diag=FALSE)]) ,

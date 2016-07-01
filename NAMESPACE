@@ -13,11 +13,9 @@ S3method(plot, bootnetResult)
 S3method(print, bootnetResult)
 
 # Imports:
-import(IsingFit)
-# import(IsingSampler) TODO
-import(qgraph)
-import(igraph)
 import(dplyr)
+importFrom(IsingFit,"IsingFit")
+import(qgraph)
 import(ggplot2)
 importFrom(gtools, "mixedorder")
 importFrom(corpcor, "cor2pcor")
@@ -26,5 +24,10 @@ importFrom(corpcor, "pseudoinverse")
 importFrom(mvtnorm, "rmvnorm")
 importFrom(IsingSampler, "EstimateIsing")
 importFrom(abind,"abind")
+importFrom(Matrix,"forceSymmetric")
 
-export(centrality)
+#export(centrality)
+
+ importFrom("methods", "is")
+  importFrom("stats", "cor")
+  importFrom("utils", "setTxtProgressBar", "txtProgressBar")

@@ -38,7 +38,8 @@ bootnet <- function(
   verbose = TRUE, # messages on what is being done?
   labels, # if missing taken from colnames
   alpha = 1, # centrality alpha
-  nNodes = 2:(ncol(data)-1), # if type = "node", defaults to 2:(p-1)
+  subNodes = 2:(ncol(data)-1), # if type = "node", defaults to 2:(p-1)
+  subPersons = round(seq(0.25,0.95,length=10) * nrow(data)),
   computeCentrality = TRUE,
   propBoot = 1, # M out of N
   # subsampleSize,
@@ -262,10 +263,7 @@ bootnet <- function(
         nNode <- ncol(data)
         inSample <- seq_len(N)
         
-        if (type == "subsample"){
-          bootData <- data[sample(seq_len(Np), subsampleSize, replace=FALSE), ]    
-          nPerson <- subsampleSize
-        } else if (type == "jackknife"){
+        if (type == "jackknife"){
           bootData <- data[-b,,drop=FALSE]    
           nPerson <- Np - 1
         } else if (type == "parametric"){
@@ -288,24 +286,24 @@ bootnet <- function(
       } else if (type == "node") {
         # Nodewise
         nPerson <- Np
-        nNode <- sample(nNodes,1)
-        inSample <- sort(sample(seq_len(N-1),nNode))
+        nNode <- sample(subNodes,1)
+        inSample <- sort(sample(seq_len(N),nNode))
         bootData <- data[,inSample, drop=FALSE]
       } else {
         # Personwise:
         nNode <- ncol(data)
-        nPerson <- sample(round(seq(0.1,0.9,by=0.1) * Np), 1)
+        nPerson <- sample(subPersons,1)
         inSample <- 1:N
         persSample <- sort(sample(seq_len(Np),nPerson))
         bootData <- data[persSample,,drop=FALSE]
          
       }
       
-      res <- try(estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs))
+      res <- suppressWarnings(try(estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs)))
       if (is(res, "try-error")){
         if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")
         
-        warning("Error in bootstrap; retrying")
+        # warning("Error in bootstrap; retrying")
         tryCount <- tryCount + 1
       } else {
         break
@@ -393,10 +391,9 @@ bootnet <- function(
   }
   
   # Ordereing by node name to make nice paths:
-  
   Result <- list(
-    sampleTable = statTableOrig,
-    bootTable =  dplyr::rbind_all(statTableBoots),
+    sampleTable = ungroup(statTableOrig),
+    bootTable =  ungroup(dplyr::rbind_all(statTableBoots)),
     sample = sampleResult,
     boots = bootResults,
     type = type,

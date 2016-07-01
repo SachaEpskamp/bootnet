@@ -98,7 +98,7 @@ plot.bootnet <- function(
     if (plot == "area"){
       
       if (perNode){
-        
+      
         if (x$type == "node"){
           g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
             facet_grid(type ~ ., scales = "free") 
@@ -142,6 +142,8 @@ plot.bootnet <- function(
         return(g)
         
       } else {
+ 
+        Sum <- Sum %>% filter(!is.na(mean))
         if (x$type == "node"){
           g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))         
           if (area){
@@ -272,6 +274,7 @@ plot.bootnet <- function(
   
   # Start plot:
   if (plot[[1]]=="line"){
+
     sampleTable <- x[['sampleTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
     bootTable <- x[['bootTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
     

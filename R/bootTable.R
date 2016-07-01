@@ -8,6 +8,9 @@
 # value
 
 statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
+  type <- NULL
+  value <- NULL
+  
   stopifnot(is(x, "bootnetResult"))
   tables <- list()
   
@@ -18,7 +21,8 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
     type = "edge",
     node1 = x[['labels']][ind[,1]],
     node2 = x[['labels']][ind[,2]],
-    value = x[['graph']][upper.tri(x[['graph']], diag=FALSE)]
+    value = x[['graph']][upper.tri(x[['graph']], diag=FALSE)],
+    stringsAsFactors = FALSE
     ))
   
   
@@ -27,7 +31,8 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
     type = "length",
     node1 = x[['labels']][ind[,1]],
     node2 = x[['labels']][ind[,2]],
-    value = abs(1/abs(x[['graph']][upper.tri(x[['graph']], diag=FALSE)]))
+    value = abs(1/abs(x[['graph']][upper.tri(x[['graph']], diag=FALSE)])),
+    stringsAsFactors = FALSE
   ))
   
   # Intercepts:
@@ -37,13 +42,14 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
       type = "intercept",
       node1 = x[['labels']],
       node2 = '',
-      value = x[['intercepts']]
+      value = x[['intercepts']],
+      stringsAsFactors = FALSE
     ))
   } 
   
   if (computeCentrality){
     # Centrality analysis:
-    cent <- bootnet::centrality(x[['graph']], alpha = alpha)
+    cent <- qgraph::centrality(x[['graph']], alpha = alpha)
     
     # strength:
     tables$strength <- dplyr::tbl_df(data.frame(
@@ -51,7 +57,8 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
       type = "strength",
       node1 = x[['labels']],
       node2 = '',
-      value = cent[['OutDegree']]
+      value = cent[['OutDegree']],
+      stringsAsFactors = FALSE
     ))
     
     # closeness:
@@ -60,7 +67,8 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
       type = "closeness",
       node1 = x[['labels']],
       node2 = '',
-      value = cent[['Closeness']]
+      value = cent[['Closeness']],
+      stringsAsFactors = FALSE
     ))
     
     
@@ -70,7 +78,8 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
       type = "betweenness",
       node1 = x[['labels']],
       node2 = '',
-      value = cent[['Betweenness']]
+      value = cent[['Betweenness']],
+      stringsAsFactors = FALSE
     ))
     
     tables$sp <- dplyr::tbl_df(data.frame(
@@ -78,7 +87,8 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
       type = "distance",
       node1 = x[['labels']][ind[,1]],
       node2 = x[['labels']][ind[,2]],
-      value = cent[['ShortestPathLengths']][upper.tri(cent[['ShortestPathLengths']], diag=FALSE)]
+      value = cent[['ShortestPathLengths']][upper.tri(cent[['ShortestPathLengths']], diag=FALSE)],
+      stringsAsFactors = FALSE
     ))
     
   

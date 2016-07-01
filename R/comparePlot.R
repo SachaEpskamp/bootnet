@@ -5,6 +5,9 @@ comparePlot <- function(
   decreasing = TRUE
 
 ){
+  value <- NULL
+  graph <- NULL
+  
   order <- match.arg(order)
   
   dots <- list(...)
