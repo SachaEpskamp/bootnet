@@ -1,7 +1,7 @@
 # bootnetResult methods:
-print.bootnetResult <- function(x, ...){
-  print(x[['graph']])
-}
+# print.bootnetResult <- function(x, ...){
+#   print(x[['graph']])
+# }
 
 summary.bootnetResult <- function(object, ...){
   cat("\nNumber of nodes:",nrow(object[['graph']]),

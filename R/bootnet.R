@@ -26,6 +26,7 @@ bootnet <- function(
   nBoots = 1000, # Number of bootstrap samples.
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
   type = c("nonparametric","parametric","node","person","jackknife"), # Bootstrap method to use
+  nCores = 1,
   model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs = list(), # list with arguments for the correlation function
@@ -51,6 +52,21 @@ bootnet <- function(
   default <- match.arg(default)
   type <- match.arg(type)
   model <- match.arg(model)
+  
+  # If data is bootnetResult, extract:
+  if (is(data,"bootnetResult")){
+    default <- data$input$default
+    prepFun <- data$input$prepFun
+    prepArgs <- data$input$prepArgs
+    estFun <- data$input$estFun
+    estArgs <- data$input$estArgs
+    graphFun <- data$input$graphFun
+    graphArgs <- data$input$graphArgs
+    intFun <- data$input$intFun
+    intArgs <- data$input$intArgs
+    data <- data$input$data
+  }
+  
   N <- ncol(data)
   Np <- nrow(data)
   
@@ -89,128 +105,128 @@ bootnet <- function(
   }
   
   
-  ### DEFAULT OPTIONS ###
-  if ((default == "none")){
-    if (missing(prepFun) | missing(prepArgs) | missing(estFun) | missing(estArgs)){
-      stop("If 'default' is not set, 'prepFun', 'prepArgs', 'estFun' and 'estArgs' may not be missing.")
-    }
-  }
-  
-  if (!(default == "none")){
-    # prepFun:
-    if (missing(prepFun)){
-      prepFun <- switch(default,
-                        EBICglasso = qgraph::cor_auto,
-                        IsingFit = binarize,
-                        pcor = qgraph::cor_auto
-      )
-      #       prepFun <- switch(default,
-      #                         EBICglasso = cor,
-      #                         IsingFit = binarize,
-      #                         pcor = cor
-      #       )      
-    }
-    
-    # prepArgs:
-    #     qgraphVersion <- packageDescription("qgraph")$Version
-    #     qgraphVersion <- as.numeric(strsplit(qgraphVersion,split="\\.|\\-")[[1]])
-    #     if (length(qgraphVersion)==1) qgraphVersion <- c(qgraphVersion,0)
-    #     if (length(qgraphVersion)==2) qgraphVersion <- c(qgraphVersion,0)
-    #     goodVersion <- 
-    #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) | 
-    #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
-    #       qgraphVersion[[1]] > 1
-    
-    
-    if (missing(prepArgs)){
-      prepArgs <- switch(default,
-                         EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
-                                             ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
-                         IsingFit = list(),
-                         pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
-                                        ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
-                         IsingLL = list()
-      )
-      
-      
-    }
-    
-    # estFun:
-    if (missing(estFun)){
-      estFun <- switch(default,
-                       EBICglasso = qgraph::EBICglasso,
-                       pcor = corpcor::cor2pcor,
-                       IsingFit = IsingFit::IsingFit,
-                       IsingLL = IsingSampler::EstimateIsing
-      )
-    }
-    
-    # estArgs:
-    if (missing(estArgs)){
-      estArgs <- switch(default,
-                        EBICglasso = list(n = Np, returnAllResults = TRUE),
-                        IsingFit = list(plot = FALSE, progress = FALSE),
-                        pcor = list(),
-                        IsingLL = list(method = "ll")
-      )
-    }
-    
-    # graphFun:
-    if (missing(graphFun)){
-      graphFun <- switch(default,
-                         EBICglasso = function(x)x[['optnet']],
-                         IsingFit = function(x)x[['weiadj']],
-                         pcor = function(x)as.matrix(Matrix::forceSymmetric(x)),
-                         IsingLL = function(x)x[['graph']]
-      )
-    }
-    
-    # graphArgs:
-    if (missing(graphArgs)){
-      graphArgs <- switch(default,
-                          EBICglasso = list(),
-                          IsingFit = list(),
-                          pcor = list(),
-                          IsingLL = list()
-      )
-    }
-    
-    # intFun:
-    if (missing(intFun)){
-      intFun <- switch(default,
-                       EBICglasso = null,
-                       IsingFit = function(x)x[['thresholds']],
-                       pcor = null,
-                       IsingLL = function(x) x[['thresholds']]
-      )
-    }
-    
-    
-  }
-  
-  if (missing(prepFun)){
-    prepFun <- identity
-  }
-  
-  if (missing(prepArgs)){
-    prepArgs <- list()
-  }
-  
-  if (missing(graphFun)){
-    graphFun <- identity
-  }
-  
-  if (missing(graphArgs)){
-    graphArgs <- list()
-  }
-  
-  if (missing(intFun)){
-    intFun <- null
-  }
-  
-  if (missing(intArgs)){
-    intArgs <- list()
-  }
+#   ### DEFAULT OPTIONS ###
+#   if ((default == "none")){
+#     if (missing(prepFun) | missing(prepArgs) | missing(estFun) | missing(estArgs)){
+#       stop("If 'default' is not set, 'prepFun', 'prepArgs', 'estFun' and 'estArgs' may not be missing.")
+#     }
+#   }
+#   
+#   if (!(default == "none")){
+#     # prepFun:
+#     if (missing(prepFun)){
+#       prepFun <- switch(default,
+#                         EBICglasso = qgraph::cor_auto,
+#                         IsingFit = binarize,
+#                         pcor = qgraph::cor_auto
+#       )
+#       #       prepFun <- switch(default,
+#       #                         EBICglasso = cor,
+#       #                         IsingFit = binarize,
+#       #                         pcor = cor
+#       #       )      
+#     }
+#     
+#     # prepArgs:
+#     #     qgraphVersion <- packageDescription("qgraph")$Version
+#     #     qgraphVersion <- as.numeric(strsplit(qgraphVersion,split="\\.|\\-")[[1]])
+#     #     if (length(qgraphVersion)==1) qgraphVersion <- c(qgraphVersion,0)
+#     #     if (length(qgraphVersion)==2) qgraphVersion <- c(qgraphVersion,0)
+#     #     goodVersion <- 
+#     #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) | 
+#     #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
+#     #       qgraphVersion[[1]] > 1
+#     
+#     
+#     if (missing(prepArgs)){
+#       prepArgs <- switch(default,
+#                          EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
+#                                              ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
+#                          IsingFit = list(),
+#                          pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
+#                                         ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
+#                          IsingLL = list()
+#       )
+#       
+#       
+#     }
+#     
+#     # estFun:
+#     if (missing(estFun)){
+#       estFun <- switch(default,
+#                        EBICglasso = qgraph::EBICglasso,
+#                        pcor = corpcor::cor2pcor,
+#                        IsingFit = IsingFit::IsingFit,
+#                        IsingLL = IsingSampler::EstimateIsing
+#       )
+#     }
+#     
+#     # estArgs:
+#     if (missing(estArgs)){
+#       estArgs <- switch(default,
+#                         EBICglasso = list(n = Np, returnAllResults = TRUE),
+#                         IsingFit = list(plot = FALSE, progress = FALSE),
+#                         pcor = list(),
+#                         IsingLL = list(method = "ll")
+#       )
+#     }
+#     
+#     # graphFun:
+#     if (missing(graphFun)){
+#       graphFun <- switch(default,
+#                          EBICglasso = function(x)x[['optnet']],
+#                          IsingFit = function(x)x[['weiadj']],
+#                          pcor = function(x)as.matrix(Matrix::forceSymmetric(x)),
+#                          IsingLL = function(x)x[['graph']]
+#       )
+#     }
+#     
+#     # graphArgs:
+#     if (missing(graphArgs)){
+#       graphArgs <- switch(default,
+#                           EBICglasso = list(),
+#                           IsingFit = list(),
+#                           pcor = list(),
+#                           IsingLL = list()
+#       )
+#     }
+#     
+#     # intFun:
+#     if (missing(intFun)){
+#       intFun <- switch(default,
+#                        EBICglasso = null,
+#                        IsingFit = function(x)x[['thresholds']],
+#                        pcor = null,
+#                        IsingLL = function(x) x[['thresholds']]
+#       )
+#     }
+#     
+#     
+#   }
+#   
+#   if (missing(prepFun)){
+#     prepFun <- identity
+#   }
+#   
+#   if (missing(prepArgs)){
+#     prepArgs <- list()
+#   }
+#   
+#   if (missing(graphFun)){
+#     graphFun <- identity
+#   }
+#   
+#   if (missing(graphArgs)){
+#     graphArgs <- list()
+#   }
+#   
+#   if (missing(intFun)){
+#     intFun <- null
+#   }
+#   
+#   if (missing(intArgs)){
+#     intArgs <- list()
+#   }
   
   ## For parametric bootstrap, detect model
   if (type == "parametric" & model == "detect"){
@@ -226,18 +242,29 @@ bootnet <- function(
   if (verbose){
     message("Estimating sample network...")
   }
-  res <- estimateNetwork(data, prepFun, prepArgs, estFun, estArgs)
-  sampleGraph <- do.call(graphFun,c(list(res), graphArgs))
-  sampleResult <- list(
-    graph = sampleGraph,
-    intercepts = do.call(intFun,c(list(res), intArgs)),
-    results = res,
-    labels = labels,
-    nNodes = ncol(data),
-    nPerson = Np
-  )
-  class(sampleResult) <- c("bootnetResult", "list")
-  
+  sampleResult <- estimateNetwork(data, 
+                                 default = default,
+                                 prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+                                 prepArgs = prepArgs, # list with arguments for the correlation function
+                                 estFun = estFun, # function that results in a network
+                                 estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+                                 graphFun = graphFun, # set to identity if missing
+                                 graphArgs = graphArgs, # Set to null if missing
+                                 intFun = intFun, # Set to null if missing
+                                 intArgs = intArgs, # Set to null if missing
+                                 labels = labels)
+#   res <- estimateNetwork(data, prepFun, prepArgs, estFun, estArgs)
+#   sampleGraph <- do.call(graphFun,c(list(res), graphArgs))
+#   sampleResult <- list(
+#     graph = sampleGraph,
+#     intercepts = do.call(intFun,c(list(res), intArgs)),
+#     results = res,
+#     labels = labels,
+#     nNodes = ncol(data),
+#     nPerson = Np
+#   )
+#   class(sampleResult) <- c("bootnetResult", "list")
+#   
   if (!isSymmetric(sampleResult[['graph']])){
     stop("bootnet does not support directed graphs")
   }
@@ -299,7 +326,19 @@ bootnet <- function(
          
       }
       
-      res <- suppressWarnings(try(estimateNetwork(bootData, prepFun, prepArgs, estFun, estArgs)))
+      res <- suppressWarnings(try({
+        estimateNetwork(bootData, 
+                        default = default,
+                        prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+                        prepArgs = prepArgs, # list with arguments for the correlation function
+                        estFun = estFun, # function that results in a network
+                        estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+                        graphFun = graphFun, # set to identity if missing
+                        graphArgs = graphArgs, # Set to null if missing
+                        intFun = intFun, # Set to null if missing
+                        intArgs = intArgs, # Set to null if missing
+                        labels = labels)
+        }))
       if (is(res, "try-error")){
         if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")
         
@@ -310,24 +349,8 @@ bootnet <- function(
       }
       
     }
-    BootGraph <- do.call(graphFun,c(list(res), graphArgs))
-    #     if (scaleAdjust == 1){
-    #       if (!all(BootGraph[upper.tri(BootGraph,diag=FALSE)] == 0)){
-    #         BootGraph[upper.tri(BootGraph,diag=FALSE)] <- BootGraph[upper.tri(BootGraph,diag=FALSE)] * sum(abs(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])) /
-    #           sum(abs(BootGraph[upper.tri(BootGraph,diag=FALSE)]))
-    #         BootGraph[lower.tri(BootGraph,diag=FALSE)] <- t(BootGraph)[lower.tri(BootGraph,diag=FALSE)]        
-    #       }
-    #     }
-    bootResults[[b]] <- list(
-      graph = BootGraph,
-      intercepts = do.call(intFun,c(list(res), intArgs)),
-      results = res,
-      labels = labels[inSample],
-      nNodes = nNode,
-      nPerson = nPerson
-    )
     
-    class(bootResults[[b]]) <- c("bootnetResult", "list")
+    bootResults[[b]] <- res
     
     if (verbose){
       setTxtProgressBar(pb, b)
@@ -375,13 +398,14 @@ bootnet <- function(
     message("Computing statistics...")
     pb <- txtProgressBar(0,nBoots+1,style = 3)
   }
+
   statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality)
   if (verbose){
     setTxtProgressBar(pb, 1)
   }
   statTableBoots <- vector("list", nBoots)
   for (b in seq_len(nBoots)){
-    statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)    
+    statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)
     if (verbose){
       setTxtProgressBar(pb, b+1)
     }

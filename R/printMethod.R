@@ -17,3 +17,19 @@ print.bootnet <- function(x, ...){
       paste0("\nUse plot(",name,") to plot summarized statistics (see ?plot.bootnet for details)")
       )
 }
+
+print.bootnetResult <- function(x, ...){
+  name <- deparse(substitute(x))[[1]]
+  if (nchar(name) > 10) name <- "object"
+  cat("=== Estimated network ===")
+  cat("\nNumber of nodes:",nrow(x[['graph']]),
+      "\nNumber of non-zero edges:",sum(x[['graph']][upper.tri(x[['graph']],diag=FALSE)]==0) ,
+      "\nSparsity:",mean(x[['graph']][upper.tri(x[['graph']],diag=FALSE)]) ,
+      paste0("\nNetwork stored in ",name,"$graph"),
+      "\n",
+      paste0("\nDefault set used: ",x$input$default),     
+      "\n",
+      paste0("\nUse plot(",name,", layout = 'spring') to plot estimated network"),
+      paste0("\nUse bootnet(",name,") to bootstrap edge weights and centrality indices")
+  )
+}

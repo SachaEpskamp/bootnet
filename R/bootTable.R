@@ -13,7 +13,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
   
   stopifnot(is(x, "bootnetResult"))
   tables <- list()
-  
+
   # edges:
   ind <- which(upper.tri(x[['graph']], diag=FALSE), arr.ind=TRUE)
   tables$edges <- dplyr::tbl_df(data.frame(
@@ -49,7 +49,18 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
   
   if (computeCentrality){
     # Centrality analysis:
-    cent <- qgraph::centrality(x[['graph']], alpha = alpha)
+    if (all(x[['graph']]==0)){
+      cent <- list(
+        OutDegree = rep(0,ncol(x[['graph']])),
+        InDegree = rep(0,ncol(x[['graph']])),
+        Closeness = rep(0,ncol(x[['graph']])),
+        Betweenness = rep(0,ncol(x[['graph']])),
+        ShortestPathLengths = matrix(Inf,ncol(x[['graph']]),ncol(x[['graph']]))
+      )
+    } else {
+      cent <- qgraph::centrality(x[['graph']], alpha = alpha)
+      
+    }
     
     # strength:
     tables$strength <- dplyr::tbl_df(data.frame(

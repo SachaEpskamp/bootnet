@@ -3,6 +3,7 @@
 export(bootnet)
 export(null)
 export(binarize)
+export(estimateNetwork)
 
 # Methods:
 S3method(summary, bootnet)
@@ -14,6 +15,7 @@ S3method(print, bootnetResult)
 
 # Imports:
 import(dplyr)
+import(parallel)
 importFrom(IsingFit,"IsingFit")
 import(qgraph)
 import(ggplot2)
