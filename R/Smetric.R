@@ -23,13 +23,6 @@ Smetric <- function(x,cor=0.7){
     select(node1,node2,type,original = value)
     
   
-  View(x$bootTable %>%
-         filter(type %in% c("strength","closeness","betweenness")) %>%
-         left_join(sample,by=c("node1","node2","type")) %>% 
-         group_by(name,type,prop) %>% 
-         summarize(stability = cor0(value,original)) %>% 
-         group_by(prop,type) %>% 
-         summarize(P = mean(stability > cor)) )
   
   max0 <- function(x){
     if (length(x)==0)return(0) else return(max(x))

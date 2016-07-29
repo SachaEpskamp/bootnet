@@ -1,7 +1,7 @@
 # This function takes data as input and produced a network. It is used inside bootnet:
 estimateNetwork <- function(
   data,
-  default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"),
+  default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL", "huge","adalasso"),
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs = list(), # list with arguments for the correlation function
   estFun, # function that results in a network
@@ -16,6 +16,13 @@ estimateNetwork <- function(
 ){
   if (default[[1]]=="glasso") default <- "EBICglasso"
   default <- match.arg(default)
+  
+  # If NAs and default can't handle, stop:
+  if (any(is.na(data)) && default %in% c("huge","adalasso")){
+    stop(paste0("Missing data not supported for default set '",default,"'. Try using na.omit(data)."))
+  }
+  
+
   N <- ncol(data)
   Np <- nrow(data)
   
@@ -57,7 +64,10 @@ estimateNetwork <- function(
       prepFun <- switch(default,
                         EBICglasso = qgraph::cor_auto,
                         IsingFit = binarize,
-                        pcor = qgraph::cor_auto
+                        IsingLL = binarize,
+                        pcor = qgraph::cor_auto,
+                        huge = function(x)huge::huge.npn(na.omit(as.matrix(x)),verbose = FALSE),
+                        adalasso = identity
       )
       #       prepFun <- switch(default,
       #                         EBICglasso = cor,
@@ -84,7 +94,9 @@ estimateNetwork <- function(
                          IsingFit = list(),
                          pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
                                         ifElse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
-                         IsingLL = list()
+                         IsingLL = list(),
+                         huge = list(),
+                         adalasso = list()
       )
       
       
@@ -96,7 +108,9 @@ estimateNetwork <- function(
                        EBICglasso = qgraph::EBICglasso,
                        pcor = corpcor::cor2pcor,
                        IsingFit = IsingFit::IsingFit,
-                       IsingLL = IsingSampler::EstimateIsing
+                       IsingLL = IsingSampler::EstimateIsing,
+                       huge = function(x)huge::huge.select(huge::huge(x,method = "glasso",verbose=FALSE), criterion = "ebic",verbose = FALSE),
+                       adalasso = parcor::adalasso.net
       )
     }
     
@@ -106,7 +120,9 @@ estimateNetwork <- function(
                         EBICglasso = list(n = Np, returnAllResults = TRUE),
                         IsingFit = list(plot = FALSE, progress = FALSE),
                         pcor = list(),
-                        IsingLL = list(method = "ll")
+                        IsingLL = list(method = "ll"),
+                        huge = list(),
+                        adalasso = list()
       )
     }
     
@@ -116,7 +132,9 @@ estimateNetwork <- function(
                          EBICglasso = function(x)x[['optnet']],
                          IsingFit = function(x)x[['weiadj']],
                          pcor = function(x)as.matrix(Matrix::forceSymmetric(x)),
-                         IsingLL = function(x)x[['graph']]
+                         IsingLL = function(x)x[['graph']],
+                         huge = function(x)as.matrix(qgraph::wi2net(as.matrix(x$opt.icov))),
+                         adalasso = function(x)as.matrix(Matrix::forceSymmetric(x$pcor.adalasso))
       )
     }
     
@@ -126,7 +144,9 @@ estimateNetwork <- function(
                           EBICglasso = list(),
                           IsingFit = list(),
                           pcor = list(),
-                          IsingLL = list()
+                          IsingLL = list(),
+                          huge = list(),
+                          adalasso = list()
       )
     }
     
@@ -136,7 +156,9 @@ estimateNetwork <- function(
                        EBICglasso = null,
                        IsingFit = function(x)x[['thresholds']],
                        pcor = null,
-                       IsingLL = function(x) x[['thresholds']]
+                       IsingLL = function(x) x[['thresholds']],
+                       huge = null,
+                       adalasso = null
       )
     }
     

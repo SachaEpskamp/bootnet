@@ -265,7 +265,8 @@ bootnet <- function(
 #   )
 #   class(sampleResult) <- c("bootnetResult", "list")
 #   
-  if (!isSymmetric(sampleResult[['graph']])){
+
+  if (!isSymmetric(as.matrix(sampleResult[['graph']]))){
     stop("bootnet does not support directed graphs")
   }
   
@@ -273,113 +274,180 @@ bootnet <- function(
   #   ### Observation-wise bootstrapping!
   #   if (type == "observation"){
   # Bootstrap results:
-  bootResults <- vector("list", nBoots)
-  
-  if (verbose){
-    message("Bootstrapping...")
-    pb <- txtProgressBar(0,nBoots,style = 3)
-  }
-  
-  for (b in seq_len(nBoots)){
-    
-    tryLimit <- 10
-    tryCount <- 0
-    repeat{
-      
-      if (! type %in% c("node","person")){
-        nNode <- ncol(data)
-        inSample <- seq_len(N)
-        
-        if (type == "jackknife"){
-          bootData <- data[-b,,drop=FALSE]    
-          nPerson <- Np - 1
-        } else if (type == "parametric"){
-          nPerson <- Np
-          if (model == "Ising"){
-            bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts)
-            
-          } else if (model == "GGM") {
-            g <- -sampleResult$graph
-            diag(g) <- 1
-            bootData <- mvtnorm::rmvnorm(round(propBoot*Np), sigma = corpcor::pseudoinverse(g))
-            
-          } else stop(paste0("Model '",model,"' not supported."))
-          
-        } else {
-          nPerson <- Np
-          bootData <- data[sample(seq_len(Np), round(propBoot*Np), replace=replacement), ]        
-        }
-        
-      } else if (type == "node") {
-        # Nodewise
-        nPerson <- Np
-        nNode <- sample(subNodes,1)
-        inSample <- sort(sample(seq_len(N),nNode))
-        bootData <- data[,inSample, drop=FALSE]
-      } else {
-        # Personwise:
-        nNode <- ncol(data)
-        nPerson <- sample(subPersons,1)
-        inSample <- 1:N
-        persSample <- sort(sample(seq_len(Np),nPerson))
-        bootData <- data[persSample,,drop=FALSE]
-         
-      }
-      
-      res <- suppressWarnings(try({
-        estimateNetwork(bootData, 
-                        default = default,
-                        prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-                        prepArgs = prepArgs, # list with arguments for the correlation function
-                        estFun = estFun, # function that results in a network
-                        estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-                        graphFun = graphFun, # set to identity if missing
-                        graphArgs = graphArgs, # Set to null if missing
-                        intFun = intFun, # Set to null if missing
-                        intArgs = intArgs, # Set to null if missing
-                        labels = labels)
-        }))
-      if (is(res, "try-error")){
-        if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")
-        
-        # warning("Error in bootstrap; retrying")
-        tryCount <- tryCount + 1
-      } else {
-        break
-      }
-      
-    }
-    
-    bootResults[[b]] <- res
+  if (nCores == 1){
+    bootResults <- vector("list", nBoots)
     
     if (verbose){
-      setTxtProgressBar(pb, b)
+      message("Bootstrapping...")
+      pb <- txtProgressBar(0,nBoots,style = 3)
     }
+    
+    for (b in seq_len(nBoots)){
+      
+      tryLimit <- 10
+      tryCount <- 0
+      repeat{
+        
+        if (! type %in% c("node","person")){
+          nNode <- ncol(data)
+          inSample <- seq_len(N)
+          
+          if (type == "jackknife"){
+            bootData <- data[-b,,drop=FALSE]    
+            nPerson <- Np - 1
+          } else if (type == "parametric"){
+            nPerson <- Np
+            if (model == "Ising"){
+              bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts)
+              
+            } else if (model == "GGM") {
+              g <- -sampleResult$graph
+              diag(g) <- 1
+              bootData <- mvtnorm::rmvnorm(round(propBoot*Np), sigma = corpcor::pseudoinverse(g))
+              
+            } else stop(paste0("Model '",model,"' not supported."))
+            
+          } else {
+            nPerson <- Np
+            bootData <- data[sample(seq_len(Np), round(propBoot*Np), replace=replacement), ]        
+          }
+          
+        } else if (type == "node") {
+          # Nodewise
+          nPerson <- Np
+          nNode <- sample(subNodes,1)
+          inSample <- sort(sample(seq_len(N),nNode))
+          bootData <- data[,inSample, drop=FALSE]
+        } else {
+          # Personwise:
+          nNode <- ncol(data)
+          nPerson <- sample(subPersons,1)
+          inSample <- 1:N
+          persSample <- sort(sample(seq_len(Np),nPerson))
+          bootData <- data[persSample,,drop=FALSE]
+          
+        }
+        
+        res <- suppressWarnings(try({
+          estimateNetwork(bootData, 
+                          default = default,
+                          prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+                          prepArgs = prepArgs, # list with arguments for the correlation function
+                          estFun = estFun, # function that results in a network
+                          estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+                          graphFun = graphFun, # set to identity if missing
+                          graphArgs = graphArgs, # Set to null if missing
+                          intFun = intFun, # Set to null if missing
+                          intArgs = intArgs, # Set to null if missing
+                          labels = labels)
+        }))
+        if (is(res, "try-error")){
+          if (tryCount == tryLimit) {
+            stop("Maximum number of errors in bootstraps reached")
+          }
+          
+          # warning("Error in bootstrap; retrying")
+          tryCount <- tryCount + 1
+        } else {
+          break
+        }
+        
+      }
+      
+      bootResults[[b]] <- res
+      
+      if (verbose){
+        setTxtProgressBar(pb, b)
+      }
+    }
+    if (verbose){
+      close(pb)
+    }
+  } else {
+    if (verbose){
+      message("Bootstrapping...")
+    }
+    nClust <- nCores - 1
+    cl <- makePSOCKcluster(nClust)
+
+    clusterExport(cl, ls()[ls()!="cl"], envir = environment())
+    
+    # Run loop:
+    bootResults <- parLapply(cl, seq_len(nBoots), function(b){
+      
+      tryLimit <- 10
+      tryCount <- 0
+      repeat{
+        
+        if (! type %in% c("node","person")){
+          nNode <- ncol(data)
+          inSample <- seq_len(N)
+          
+          if (type == "jackknife"){
+            bootData <- data[-b,,drop=FALSE]    
+            nPerson <- Np - 1
+          } else if (type == "parametric"){
+            nPerson <- Np
+            if (model == "Ising"){
+              bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts)
+              
+            } else if (model == "GGM") {
+              g <- -sampleResult$graph
+              diag(g) <- 1
+              bootData <- mvtnorm::rmvnorm(round(propBoot*Np), sigma = corpcor::pseudoinverse(g))
+              
+            } else stop(paste0("Model '",model,"' not supported."))
+            
+          } else {
+            nPerson <- Np
+            bootData <- data[sample(seq_len(Np), round(propBoot*Np), replace=replacement), ]        
+          }
+          
+        } else if (type == "node") {
+          # Nodewise
+          nPerson <- Np
+          nNode <- sample(subNodes,1)
+          inSample <- sort(sample(seq_len(N),nNode))
+          bootData <- data[,inSample, drop=FALSE]
+        } else {
+          # Personwise:
+          nNode <- ncol(data)
+          nPerson <- sample(subPersons,1)
+          inSample <- 1:N
+          persSample <- sort(sample(seq_len(Np),nPerson))
+          bootData <- data[persSample,,drop=FALSE]
+          
+        }
+        
+        res <- suppressWarnings(try({
+          estimateNetwork(bootData, 
+                          default = default,
+                          prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+                          prepArgs = prepArgs, # list with arguments for the correlation function
+                          estFun = estFun, # function that results in a network
+                          estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+                          graphFun = graphFun, # set to identity if missing
+                          graphArgs = graphArgs, # Set to null if missing
+                          intFun = intFun, # Set to null if missing
+                          intArgs = intArgs, # Set to null if missing
+                          labels = labels)
+        }))
+        if (is(res, "try-error")){
+          if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")
+          
+          # warning("Error in bootstrap; retrying")
+          tryCount <- tryCount + 1
+        } else {
+          break
+        }
+        
+      }
+      
+      return(res)
+    })
   }
-  if (verbose){
-    close(pb)
-  }
+
   
-  
-  #   if (isTRUE(scaleAdjust) || scaleAdjust == 2){
-  #     if (verbose){
-  #       message("Applying bias-adjustment correction")
-  #     }
-  #     bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
-  #     needAdjust <- apply(bootGraphs,1:2,function(x)min(x)<=0&max(x)>=0)
-  #     needAdjust <- needAdjust[upper.tri(needAdjust,diag=FALSE)]
-  #     if (any(needAdjust)){
-  #       # adjust <- which(needAdjust & upper.tri(needAdjust,diag=FALSE),arr.ind=TRUE)
-  #       sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
-  #       for (b in seq_along(bootResults)){
-  #           bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
-  #           bootRank <- order(order(bootEdges))
-  #           bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- ifelse(needAdjust,sampleDistribution[bootRank],bootEdges)
-  #           bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
-  #       }
-  #     }
-  #     
-  #   }
   if (edgeResample){
     bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
     
@@ -396,23 +464,31 @@ bootnet <- function(
   ### Compute the full parameter table!!
   if (verbose){
     message("Computing statistics...")
-    pb <- txtProgressBar(0,nBoots+1,style = 3)
+  }
+  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality)
+  
+  if (nCores == 1){
+    if (verbose){
+      pb <- txtProgressBar(0,nBoots,style = 3)
+    }
+    statTableBoots <- vector("list", nBoots)
+    for (b in seq_len(nBoots)){
+      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)
+      if (verbose){
+        setTxtProgressBar(pb, b)
+      }
+    }
+    if (verbose){
+      close(pb)
+    }
+  }  else {
+    statTableBoots <- parLapply(cl,seq_len(nBoots),function(b){
+      statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)
+    })
+    # Stop the cluster:
+    stopCluster(cl)
   }
 
-  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality)
-  if (verbose){
-    setTxtProgressBar(pb, 1)
-  }
-  statTableBoots <- vector("list", nBoots)
-  for (b in seq_len(nBoots)){
-    statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)
-    if (verbose){
-      setTxtProgressBar(pb, b+1)
-    }
-  }
-  if (verbose){
-    close(pb)
-  }
   
   # Ordereing by node name to make nice paths:
   Result <- list(

@@ -5,7 +5,7 @@ Version: 0.3
 Author: Sacha Epskamp
 Maintainer: Sacha Epskamp <mail@sachaepskamp.com>
 Depends: ggplot2, R (>= 3.0.0)
-Imports: methods, IsingFit, qgraph, dplyr (>= 0.3.0.2), gtools, corpcor, IsingSampler, mvtnorm, abind, Matrix, parallel
+Imports: methods, IsingFit, qgraph, dplyr (>= 0.3.0.2), gtools, corpcor, IsingSampler, mvtnorm, abind, Matrix, parallel, huge, parcor
 Suggests: psych
 Description: Bootstrap standard errors on various network estimation routines, such as EBICglasso() from the 'qgraph' package and IsingFit() from the 'IsingFit' package.
 License: GPL-2

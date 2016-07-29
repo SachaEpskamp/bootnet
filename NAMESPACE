@@ -1,9 +1,14 @@
+# Defaults:
+importFrom(huge,"huge","huge.npn","huge.select")
+importFrom(parcor,"adalasso.net")
+
 # exportPattern("^[[:alpha:]]+")
 # Exports:
 export(bootnet)
 export(null)
 export(binarize)
 export(estimateNetwork)
+export(centralityCompare)
 
 # Methods:
 S3method(summary, bootnet)
