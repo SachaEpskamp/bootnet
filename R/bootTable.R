@@ -13,6 +13,9 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
   
   stopifnot(is(x, "bootnetResult"))
   tables <- list()
+  if (is.null(x[['labels']])){
+    x[['labels']] <- seq_len(ncol(x[['graph']]))
+  }
 
   # edges:
   ind <- which(upper.tri(x[['graph']], diag=FALSE), arr.ind=TRUE)
@@ -104,8 +107,12 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
     
   
   }
+#   for (i in seq_along(tables)){
+#     tables[[i]]$id <- ifelse(tables[[i]]$node2=='',paste0("N: ",tables[[i]]$node1),paste0("E: ",tables[[i]]$node1, "--", tables[[i]]$node2))
+#   }  
+  
   for (i in seq_along(tables)){
-    tables[[i]]$id <- ifelse(tables[[i]]$node2=='',paste0("N: ",tables[[i]]$node1),paste0("E: ",tables[[i]]$node1, "--", tables[[i]]$node2))
+    tables[[i]]$id <- ifelse(tables[[i]]$node2=='',tables[[i]]$node1,paste0(tables[[i]]$node1, "--", tables[[i]]$node2))
   }  
   
   tab <- dplyr::rbind_all(tables)

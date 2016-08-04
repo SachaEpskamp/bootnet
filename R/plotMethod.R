@@ -290,53 +290,50 @@ plot.bootnet <- function(
   ### DIFFERENCE PLOTS ####
   if (plot == "difference"){
     
+    if (any(statistics %in% c("strength","betweenness","closeness")) & any(statistics %in% c("edge","distance"))){
+      stop("'difference' plot can not be made for centrality index and edge weights/distances at the same time.")
+    }
     
-    cent <- x$bootTable %>% filter(type %in% statistics) %>% dplyr::select(name,node1,value,type)
-    fullTable <- expand.grid(name = unique(cent$name),node1=unique(cent$node1),node2=unique(cent$node1),type = unique(cent$type),
+    
+    cent <- x$bootTable %>% filter(type %in% statistics) %>% dplyr::select(name,id,value,type)
+    fullTable <- expand.grid(name = unique(cent$name),id1=unique(cent$id),id2=unique(cent$id),type = unique(cent$type),
                              stringsAsFactors = FALSE) 
     
     Quantiles <- fullTable %>% 
-      left_join(dplyr::select(cent,name,node1,value1=value,type),by=c("name","node1","type")) %>% 
-      left_join(dplyr::select(cent,name,node2=node1,value2=value,type),by=c("name","node2","type"))  %>%
-      group_by(node1,node2,type) %>%
+      left_join(dplyr::select(cent,name,id1=id,value1=value,type),by=c("name","id1","type")) %>% 
+      left_join(dplyr::select(cent,name,id2=id,value2=value,type),by=c("name","id2","type"))  %>%
+      group_by(id1,id2,type) %>%
       summarize(lower = quantile(value2-value1,0.025),upper = quantile(value2-value1,0.975)) %>%
       mutate(contain0 = 0 >= lower & 0 <= upper)
     
     #bootmean:
-    bootMeans <- x$bootTable %>% filter(type %in% statistics) %>%
-      group_by(node1,type) %>% summarize(mean = mean(value,na.rm=TRUE))
+    bootMeans <- x$bootTable %>% filter(type %in% statistics) %>% rename(id1=id) %>%
+      group_by(id1,type) %>% summarize(mean = mean(value,na.rm=TRUE))
     
-    sample <- x$sampleTable %>% filter(type %in% statistics) %>% dplyr::select(node1,value,type) %>% 
-      left_join(bootMeans,by=c("node1","type"))
+    sample <- x$sampleTable %>% filter(type %in% statistics) %>% dplyr::select(id1=id,value,type) %>% 
+      left_join(bootMeans,by=c("id1","type"))
     
     # Now for every node: minimal node equal to....
-    DF <- Quantiles %>% left_join(dplyr::select(sample,node2=node1,value,type), by = c("node2","type")) %>%
-      group_by(node1,type) %>% 
-      summarize(
-        minNode = node2[contain0][which.min(value[contain0])],
-        maxNode = node2[contain0][which.max(value[contain0])]
-      ) %>% left_join(sample,by=c("node1","type")) %>% ungroup %>%
-      mutate(valueMin = value[match(minNode,node1)], 
-             valueMax = value[match(maxNode,node1)],
-             rank = order(order(value,mean))) %>% arrange(rank)
+    DF <-  sample %>% group_by(type) %>%
+      mutate(rank = order(order(value,mean))) %>% arrange(rank)
     
     DF2 <- DF %>% filter(type == statistics[[1]])
     
     if (order == "sample"){
-      levels <- DF2$node1[order(DF2$value,decreasing = decreasing)]  
+      levels <- DF2$id1[order(DF2$value,decreasing = decreasing)]  
     } else if (order == "mean"){
-      levels <- DF2$node1[order(DF2$rank, decreasing=decreasing)]  
+      levels <- DF2$id1[order(DF2$rank, decreasing=decreasing)]  
     } else  if (order == "id"){
-      levels <- x$sample$labels
+      levels <- gtools::mixedsort(unique(sample$id1))
     }
     
-    Quantiles$node1 <- factor(Quantiles$node1,levels=levels)
-    Quantiles$node2 <- factor(Quantiles$node2,levels=levels)
-    Quantiles$fill <- ifelse(Quantiles$node1 == Quantiles$node2, "same",
+    Quantiles$id1 <- factor(Quantiles$id1,levels=levels)
+    Quantiles$id2 <- factor(Quantiles$id2,levels=levels)
+    Quantiles$fill <- ifelse(Quantiles$id1 == Quantiles$id2, "same",
                              ifelse(Quantiles$contain0,"nonsig","sig"))
-    DF$node2 <- DF$node1
-    DF$node1 <- factor(DF$node1,levels=levels)
-    DF$node2 <- factor(DF$node2,levels=levels)
+    DF$id2 <- DF$id1
+    DF$id1 <- factor(DF$id1,levels=levels)
+    DF$id2 <- factor(DF$id2,levels=levels)
     DF$label <- as.character(round(DF$value,2))
     DF$fill <- "same"
     
@@ -345,7 +342,7 @@ plot.bootnet <- function(
     DF$type <- factor(DF$type, levels = statistics)
     substr(lab,1,1) <- toupper(substr(lab,1,1))
 
-    g <- ggplot(Quantiles,aes(x=node1,y=node2,fill=fill)) + 
+    g <- ggplot(Quantiles,aes(x=id1,y=id2,fill=fill)) + 
       geom_tile(colour = 'white') + xlab("") + ylab("") + 
       scale_fill_manual(values = c("same" = "white","nonsig" = "lightgray","sig" = "black")) + 
       geom_text(data=DF,aes(label = label))+ theme(legend.position="none") + 
@@ -360,6 +357,77 @@ plot.bootnet <- function(
                                                                                                             0.8, angle = 270, hjust = 0, colour = "grey50"))
     
     return(g)
+    
+#     
+#     cent <- x$bootTable %>% filter(type %in% statistics) %>% dplyr::select(name,node1,value,type)
+#     fullTable <- expand.grid(name = unique(cent$name),node1=unique(cent$node1),node2=unique(cent$node1),type = unique(cent$type),
+#                              stringsAsFactors = FALSE) 
+#  
+#     Quantiles <- fullTable %>% 
+#       left_join(dplyr::select(cent,name,node1,value1=value,type),by=c("name","node1","type")) %>% 
+#       left_join(dplyr::select(cent,name,node2=node1,value2=value,type),by=c("name","node2","type"))  %>%
+#       group_by(node1,node2,type) %>%
+#       summarize(lower = quantile(value2-value1,0.025),upper = quantile(value2-value1,0.975)) %>%
+#       mutate(contain0 = 0 >= lower & 0 <= upper)
+#     
+#     #bootmean:
+#     bootMeans <- x$bootTable %>% filter(type %in% statistics) %>%
+#       group_by(node1,type) %>% summarize(mean = mean(value,na.rm=TRUE))
+#     
+#     sample <- x$sampleTable %>% filter(type %in% statistics) %>% dplyr::select(node1,value,type) %>% 
+#       left_join(bootMeans,by=c("node1","type"))
+#     
+#     # Now for every node: minimal node equal to....
+#     DF <- Quantiles %>% left_join(dplyr::select(sample,node2=node1,value,type), by = c("node2","type")) %>%
+#       group_by(node1,type) %>% 
+#       summarize(
+#         minNode = node2[contain0][which.min(value[contain0])],
+#         maxNode = node2[contain0][which.max(value[contain0])]
+#       ) %>% left_join(sample,by=c("node1","type")) %>% ungroup %>%
+#       mutate(valueMin = value[match(minNode,node1)], 
+#              valueMax = value[match(maxNode,node1)],
+#              rank = order(order(value,mean))) %>% arrange(rank)
+#     
+#     DF2 <- DF %>% filter(type == statistics[[1]])
+#     
+#     if (order == "sample"){
+#       levels <- DF2$node1[order(DF2$value,decreasing = decreasing)]  
+#     } else if (order == "mean"){
+#       levels <- DF2$node1[order(DF2$rank, decreasing=decreasing)]  
+#     } else  if (order == "id"){
+#       levels <- x$sample$labels
+#     }
+#     
+#     Quantiles$node1 <- factor(Quantiles$node1,levels=levels)
+#     Quantiles$node2 <- factor(Quantiles$node2,levels=levels)
+#     Quantiles$fill <- ifelse(Quantiles$node1 == Quantiles$node2, "same",
+#                              ifelse(Quantiles$contain0,"nonsig","sig"))
+#     DF$node2 <- DF$node1
+#     DF$node1 <- factor(DF$node1,levels=levels)
+#     DF$node2 <- factor(DF$node2,levels=levels)
+#     DF$label <- as.character(round(DF$value,2))
+#     DF$fill <- "same"
+#     
+#     lab <- statistics
+#     Quantiles$type <- factor(Quantiles$type, levels = statistics)
+#     DF$type <- factor(DF$type, levels = statistics)
+#     substr(lab,1,1) <- toupper(substr(lab,1,1))
+# 
+#     g <- ggplot(Quantiles,aes(x=node1,y=node2,fill=fill)) + 
+#       geom_tile(colour = 'white') + xlab("") + ylab("") + 
+#       scale_fill_manual(values = c("same" = "white","nonsig" = "lightgray","sig" = "black")) + 
+#       geom_text(data=DF,aes(label = label))+ theme(legend.position="none") + 
+#       facet_grid(~ type)
+#     
+#     
+#     base_size <- 9
+#     g <- g + theme_grey(base_size = base_size) + labs(x = "",
+#                                                       y = "") + scale_x_discrete(expand = c(0, 0)) +
+#       scale_y_discrete(expand = c(0, 0)) + theme(legend.position = "none",
+#                                                  axis.ticks = element_blank(), axis.text.x = element_text(size = base_size *
+#                                                                                                             0.8, angle = 270, hjust = 0, colour = "grey50"))
+#     
+#     return(g)
     
   } else {
     if (any(statistics %in% c("strength","closeness","betweenness"))){

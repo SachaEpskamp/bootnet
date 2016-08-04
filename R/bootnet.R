@@ -45,7 +45,10 @@ bootnet <- function(
   propBoot = 1, # M out of N
   # subsampleSize,
   replacement = TRUE,
-  edgeResample = FALSE # If true, only resample edges from original estimate
+  graph, # for parametric bootstrap
+  sampleSize, # for parametric bootstrap
+  intercepts # for parametric bootstrap,
+  # edgeResample = FALSE # If true, only resample edges from original estimate
   # scaleAdjust = FALSE
 ){
   if (default[[1]]=="glasso") default <- "EBICglasso"
@@ -54,21 +57,52 @@ bootnet <- function(
   model <- match.arg(model)
   
   # If data is bootnetResult, extract:
-  if (is(data,"bootnetResult")){
-    default <- data$input$default
-    prepFun <- data$input$prepFun
-    prepArgs <- data$input$prepArgs
-    estFun <- data$input$estFun
-    estArgs <- data$input$estArgs
-    graphFun <- data$input$graphFun
-    graphArgs <- data$input$graphArgs
-    intFun <- data$input$intFun
-    intArgs <- data$input$intArgs
-    data <- data$input$data
+  
+  # If data is missing, checks for parametric bootstrap:
+  if (missing(data)){
+    if (type != "parametric"){
+      warning("'data' can only be missing if type = 'parametric'. Setting type = 'parametric' and performing parametric bootstrap instead.")
+      type <- 'parametric'
+    }
+    
+    if (missing(graph)){
+      stop("'graph' may not be missing in parametric bootstrap when 'data' is missing.")
+    }
+    if (missing(sampleSize)){
+      stop("'sampleSize' may not be missing in parametric bootstrap when 'data' is missing.")
+    }
+    
+    
+    N <- ncol(graph)
+    Np <-  sampleSize
+    
+    if (missing(intercepts)){
+      intercepts <- rep(0, Np)
+    }
+    
+    manual <- TRUE
+  } else {
+    if (is(data,"bootnetResult")){
+      default <- data$input$default
+      prepFun <- data$input$prepFun
+      prepArgs <- data$input$prepArgs
+      estFun <- data$input$estFun
+      estArgs <- data$input$estArgs
+      graphFun <- data$input$graphFun
+      graphArgs <- data$input$graphArgs
+      intFun <- data$input$intFun
+      intArgs <- data$input$intArgs
+      data <- data$input$data
+    }
+    
+    
+    N <- ncol(data)
+    Np <- nrow(data)
+    
+    manual <- FALSE
   }
   
-  N <- ncol(data)
-  Np <- nrow(data)
+  
   
   if (type == "jackknife"){
     message("Jacknife overwrites nBoot to sample size")
@@ -81,155 +115,49 @@ bootnet <- function(
   }
   
   # First test if data is a data frame:
-  if (!(is.data.frame(data) || is.matrix(data))){
+  if (!manual && !(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
   }
   
   # If matrix coerce to data frame:
-  if (is.matrix(data)){
+  if (!manual && is.matrix(data)){
     data <- as.data.frame(data)
   }
   
   if (missing(labels)){
-    labels <- colnames(data)
+    if (manual){
+      labels <- colnames(graph)
+      if (is.null(labels)){
+        labels <- seq_len(ncol(graph))
+      }
+    } else {
+      labels <- colnames(data)    
+      if (is.null(labels)){
+        labels <- seq_len(ncol(data))
+      }
+    }
+    
+
   }
   
   # Check and remove any variable that is not ordered, integer or numeric:
-  goodColumns <- sapply(data, function(x) is.numeric(x) | is.ordered(x) | is.integer(x))
-  
-  if (!all(goodColumns)){
-    if (verbose){
-      warning(paste0("Removing non-numeric columns: ",paste(which(!goodColumns),collapse="; ")))
+  if (!manual){
+    goodColumns <- sapply(data, function(x) is.numeric(x) | is.ordered(x) | is.integer(x))
+    
+    if (!all(goodColumns)){
+      if (verbose){
+        warning(paste0("Removing non-numeric columns: ",paste(which(!goodColumns),collapse="; ")))
+      }
+      data <- data[,goodColumns,drop=FALSE]
     }
-    data <- data[,goodColumns,drop=FALSE]
   }
-  
-  
-#   ### DEFAULT OPTIONS ###
-#   if ((default == "none")){
-#     if (missing(prepFun) | missing(prepArgs) | missing(estFun) | missing(estArgs)){
-#       stop("If 'default' is not set, 'prepFun', 'prepArgs', 'estFun' and 'estArgs' may not be missing.")
-#     }
-#   }
-#   
-#   if (!(default == "none")){
-#     # prepFun:
-#     if (missing(prepFun)){
-#       prepFun <- switch(default,
-#                         EBICglasso = qgraph::cor_auto,
-#                         IsingFit = binarize,
-#                         pcor = qgraph::cor_auto
-#       )
-#       #       prepFun <- switch(default,
-#       #                         EBICglasso = cor,
-#       #                         IsingFit = binarize,
-#       #                         pcor = cor
-#       #       )      
-#     }
-#     
-#     # prepArgs:
-#     #     qgraphVersion <- packageDescription("qgraph")$Version
-#     #     qgraphVersion <- as.numeric(strsplit(qgraphVersion,split="\\.|\\-")[[1]])
-#     #     if (length(qgraphVersion)==1) qgraphVersion <- c(qgraphVersion,0)
-#     #     if (length(qgraphVersion)==2) qgraphVersion <- c(qgraphVersion,0)
-#     #     goodVersion <- 
-#     #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) | 
-#     #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
-#     #       qgraphVersion[[1]] > 1
-#     
-#     
-#     if (missing(prepArgs)){
-#       prepArgs <- switch(default,
-#                          EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
-#                                              ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
-#                          IsingFit = list(),
-#                          pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
-#                                         ifelse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
-#                          IsingLL = list()
-#       )
-#       
-#       
-#     }
-#     
-#     # estFun:
-#     if (missing(estFun)){
-#       estFun <- switch(default,
-#                        EBICglasso = qgraph::EBICglasso,
-#                        pcor = corpcor::cor2pcor,
-#                        IsingFit = IsingFit::IsingFit,
-#                        IsingLL = IsingSampler::EstimateIsing
-#       )
-#     }
-#     
-#     # estArgs:
-#     if (missing(estArgs)){
-#       estArgs <- switch(default,
-#                         EBICglasso = list(n = Np, returnAllResults = TRUE),
-#                         IsingFit = list(plot = FALSE, progress = FALSE),
-#                         pcor = list(),
-#                         IsingLL = list(method = "ll")
-#       )
-#     }
-#     
-#     # graphFun:
-#     if (missing(graphFun)){
-#       graphFun <- switch(default,
-#                          EBICglasso = function(x)x[['optnet']],
-#                          IsingFit = function(x)x[['weiadj']],
-#                          pcor = function(x)as.matrix(Matrix::forceSymmetric(x)),
-#                          IsingLL = function(x)x[['graph']]
-#       )
-#     }
-#     
-#     # graphArgs:
-#     if (missing(graphArgs)){
-#       graphArgs <- switch(default,
-#                           EBICglasso = list(),
-#                           IsingFit = list(),
-#                           pcor = list(),
-#                           IsingLL = list()
-#       )
-#     }
-#     
-#     # intFun:
-#     if (missing(intFun)){
-#       intFun <- switch(default,
-#                        EBICglasso = null,
-#                        IsingFit = function(x)x[['thresholds']],
-#                        pcor = null,
-#                        IsingLL = function(x) x[['thresholds']]
-#       )
-#     }
-#     
-#     
-#   }
-#   
-#   if (missing(prepFun)){
-#     prepFun <- identity
-#   }
-#   
-#   if (missing(prepArgs)){
-#     prepArgs <- list()
-#   }
-#   
-#   if (missing(graphFun)){
-#     graphFun <- identity
-#   }
-#   
-#   if (missing(graphArgs)){
-#     graphArgs <- list()
-#   }
-#   
-#   if (missing(intFun)){
-#     intFun <- null
-#   }
-#   
-#   if (missing(intArgs)){
-#     intArgs <- list()
-#   }
   
   ## For parametric bootstrap, detect model
   if (type == "parametric" & model == "detect"){
+    if (manual){
+      stop("'model' must be set in parametric bootstrap without 'data'.")
+    }
+    
     if (default != "none"){
       model <- ifelse(grepl("ising",default,ignore.case=TRUE),"Ising","GGM")
     } else {
@@ -239,33 +167,52 @@ bootnet <- function(
   }
   
   # Estimate sample result:
-  if (verbose){
-    message("Estimating sample network...")
+  if (!manual)
+  {
+    if (verbose){
+      message("Estimating sample network...")
+    }
+    sampleResult <- estimateNetwork(data, 
+                                    default = default,
+                                    prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+                                    prepArgs = prepArgs, # list with arguments for the correlation function
+                                    estFun = estFun, # function that results in a network
+                                    estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+                                    graphFun = graphFun, # set to identity if missing
+                                    graphArgs = graphArgs, # Set to null if missing
+                                    intFun = intFun, # Set to null if missing
+                                    intArgs = intArgs, # Set to null if missing
+                                    labels = labels)
+    
+    
+  } else {
+    args <- checkInput(
+      default = default,
+      prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+      prepArgs = prepArgs, # list with arguments for the correlation function
+      estFun=estFun, # function that results in a network
+      estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+      graphFun=graphFun, # set to identity if missing
+      graphArgs=graphArgs, # Set to null if missing
+      intFun=intFun, # Set to null if missing
+      intArgs=intArgs, # Set to null if missing
+      sampleSize = Np
+    )
+    
+    sampleResult <- list(
+      graph = graph,
+      intercepts = intercepts,
+      labels = labels,
+      nNodes = N,
+      nPerson = Np,
+      input = args
+    )
+    class(sampleResult) <- c("bootnetResult", "list")
+    
+    
   }
-  sampleResult <- estimateNetwork(data, 
-                                 default = default,
-                                 prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-                                 prepArgs = prepArgs, # list with arguments for the correlation function
-                                 estFun = estFun, # function that results in a network
-                                 estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-                                 graphFun = graphFun, # set to identity if missing
-                                 graphArgs = graphArgs, # Set to null if missing
-                                 intFun = intFun, # Set to null if missing
-                                 intArgs = intArgs, # Set to null if missing
-                                 labels = labels)
-#   res <- estimateNetwork(data, prepFun, prepArgs, estFun, estArgs)
-#   sampleGraph <- do.call(graphFun,c(list(res), graphArgs))
-#   sampleResult <- list(
-#     graph = sampleGraph,
-#     intercepts = do.call(intFun,c(list(res), intArgs)),
-#     results = res,
-#     labels = labels,
-#     nNodes = ncol(data),
-#     nPerson = Np
-#   )
-#   class(sampleResult) <- c("bootnetResult", "list")
-#   
-
+  
+  
   if (!isSymmetric(as.matrix(sampleResult[['graph']]))){
     stop("bootnet does not support directed graphs")
   }
@@ -289,7 +236,7 @@ bootnet <- function(
       repeat{
         
         if (! type %in% c("node","person")){
-          nNode <- ncol(data)
+          nNode <- N
           inSample <- seq_len(N)
           
           if (type == "jackknife"){
@@ -370,8 +317,22 @@ bootnet <- function(
     nClust <- nCores - 1
     cl <- makePSOCKcluster(nClust)
 
-    clusterExport(cl, ls()[ls()!="cl"], envir = environment())
+    # IF graph or data is missing, dummy graph:
+    if (missing(graph)){
+      graph <- matrix(0,N,N)
+    }
+    if (missing(data)){
+      graph <- matrix(0,Np,N)
+    }
+    if (missing(intercepts)){
+      intercepts <- rep(0,N)
+    }
+    if (missing(sampleSize)){
+      sampleSize <- Np
+    }
     
+    clusterExport(cl, ls()[ls()!="cl"], envir = environment())
+  
     # Run loop:
     bootResults <- parLapply(cl, seq_len(nBoots), function(b){
       
@@ -446,20 +407,20 @@ bootnet <- function(
       return(res)
     })
   }
-
   
-  if (edgeResample){
-    bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
-    
-    sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
-    for (b in seq_along(bootResults)){
-      bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
-      bootRank <- order(order(bootEdges))
-      bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- sampleDistribution[bootRank]
-      bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
-    }
-    
-  }
+  
+#   if (edgeResample){
+#     bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
+#     
+#     sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
+#     for (b in seq_along(bootResults)){
+#       bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
+#       bootRank <- order(order(bootEdges))
+#       bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- sampleDistribution[bootRank]
+#       bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
+#     }
+#     
+#   }
   
   ### Compute the full parameter table!!
   if (verbose){
@@ -488,7 +449,7 @@ bootnet <- function(
     # Stop the cluster:
     stopCluster(cl)
   }
-
+  
   
   # Ordereing by node name to make nice paths:
   Result <- list(

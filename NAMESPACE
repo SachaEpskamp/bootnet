@@ -9,6 +9,8 @@ export(null)
 export(binarize)
 export(estimateNetwork)
 export(centralityCompare)
+export(Smetric)
+
 
 # Methods:
 S3method(summary, bootnet)

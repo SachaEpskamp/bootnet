@@ -6,7 +6,7 @@ cor0 <- function(x,y,...){
   }
 }
 
-Smetric <- function(x,cor=0.7){
+Smetric <- function(x,cor=0.7, statistics = c("strength","closeness","betweenness")){
   
   if (!x$type %in% c("node","person")){
     stop("S-metric only available for person or node drop bootstrap")
@@ -19,7 +19,7 @@ Smetric <- function(x,cor=0.7){
   }
   
   sample <- x$sampleTable %>% 
-    filter(type %in% c("strength","closeness","betweenness")) %>%
+    filter(type %in% statistics) %>%
     select(node1,node2,type,original = value)
     
   
@@ -29,7 +29,7 @@ Smetric <- function(x,cor=0.7){
   }
   
   S <- x$bootTable %>%
-    filter(type %in% c("strength","closeness","betweenness")) %>%
+    filter(type %in% statistics) %>%
     left_join(sample,by=c("node1","node2","type")) %>% 
     group_by(name,type,prop) %>% 
     summarize(stability = cor0(value,original)) %>% 
