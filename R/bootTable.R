@@ -64,7 +64,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
       cent <- qgraph::centrality(x[['graph']], alpha = alpha)
       
     }
-    
+
     # strength:
     tables$strength <- dplyr::tbl_df(data.frame(
       name = name,
@@ -115,7 +115,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE){
     tables[[i]]$id <- ifelse(tables[[i]]$node2=='',tables[[i]]$node1,paste0(tables[[i]]$node1, "--", tables[[i]]$node2))
   }  
   
-  tab <- dplyr::rbind_all(tables)
+  tab <- dplyr::bind_rows(tables)
   tab$nNode <- x$nNodes
   tab$nPerson <- x$nPerson
   

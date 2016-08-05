@@ -29,7 +29,7 @@ bootnet <- function(
   nCores = 1,
   model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   prepFun, # Fun to produce the correlation or covariance matrix
-  prepArgs = list(), # list with arguments for the correlation function
+  prepArgs, # list with arguments for the correlation function
   estFun, # function that results in a network
   estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
   graphFun, # set to identity if missing
@@ -212,6 +212,17 @@ bootnet <- function(
     
   }
   
+  # Extract arguments:
+  default <- sampleResult$input$default
+  prepFun <- sampleResult$input$prepFun
+  prepArgs <- sampleResult$input$prepArgs
+  estFun <- sampleResult$input$estFun
+  estArgs <- sampleResult$input$estArgs
+  graphFun <- sampleResult$input$graphFun
+  graphArgs <- sampleResult$input$graphArgs
+  intFun <- sampleResult$input$intFun
+  intArgs <- sampleResult$input$intArgs
+
   
   if (!isSymmetric(as.matrix(sampleResult[['graph']]))){
     stop("bootnet does not support directed graphs")
@@ -286,7 +297,7 @@ bootnet <- function(
                           graphArgs = graphArgs, # Set to null if missing
                           intFun = intFun, # Set to null if missing
                           intArgs = intArgs, # Set to null if missing
-                          labels = labels)
+                          labels = labels[inSample])
         }))
         if (is(res, "try-error")){
           if (tryCount == tryLimit) {
@@ -454,7 +465,7 @@ bootnet <- function(
   # Ordereing by node name to make nice paths:
   Result <- list(
     sampleTable = ungroup(statTableOrig),
-    bootTable =  ungroup(dplyr::rbind_all(statTableBoots)),
+    bootTable =  ungroup(dplyr::bind_rows(statTableBoots)),
     sample = sampleResult,
     boots = bootResults,
     type = type,

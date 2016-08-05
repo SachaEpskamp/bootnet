@@ -24,7 +24,7 @@ print.bootnetResult <- function(x, ...){
   cat("=== Estimated network ===")
   cat("\nNumber of nodes:",nrow(x[['graph']]),
       "\nNumber of non-zero edges:",sum(x[['graph']][upper.tri(x[['graph']],diag=FALSE)]==0) ,
-      "\nSparsity:",mean(x[['graph']][upper.tri(x[['graph']],diag=FALSE)]) ,
+      "\nSparsity:",mean(x[['graph']][upper.tri(x[['graph']],diag=FALSE)]==0) ,
       paste0("\nNetwork stored in ",name,"$graph"),
       "\n",
       paste0("\nDefault set used: ",x$input$default),     

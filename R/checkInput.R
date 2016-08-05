@@ -3,7 +3,7 @@
 checkInput <- function(
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL", "huge","adalasso"),
   prepFun, # Fun to produce the correlation or covariance matrix
-  prepArgs = list(), # list with arguments for the correlation function
+  prepArgs, # list with arguments for the correlation function
   estFun, # function that results in a network
   estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
   graphFun, # set to identity if missing
@@ -50,7 +50,6 @@ checkInput <- function(
     #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
     #       qgraphVersion[[1]] > 1
     
-    
     if (missing(prepArgs)){
       prepArgs <- switch(default,
                          EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
@@ -62,9 +61,10 @@ checkInput <- function(
                          huge = list(),
                          adalasso = list()
       )
-      
-      
+
+
     }
+
     
     # estFun:
     if (missing(estFun)){
