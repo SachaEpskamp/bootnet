@@ -402,7 +402,7 @@ bootnet <- function(
                           graphArgs = graphArgs, # Set to null if missing
                           intFun = intFun, # Set to null if missing
                           intArgs = intArgs, # Set to null if missing
-                          labels = labels)
+                          labels = labels[inSample])
         }))
         if (is(res, "try-error")){
           if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")
