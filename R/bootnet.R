@@ -25,7 +25,7 @@ bootnet <- function(
   data, # Dataset
   nBoots = 1000, # Number of bootstrap samples.
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
-  type = c("nonparametric","parametric","node","person","jackknife"), # Bootstrap method to use
+  type = c("nonparametric","parametric","node","person","jackknife","case"), # Bootstrap method to use
   nCores = 1,
   model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   prepFun, # Fun to produce the correlation or covariance matrix
@@ -54,6 +54,7 @@ bootnet <- function(
   if (default[[1]]=="glasso") default <- "EBICglasso"
   default <- match.arg(default)
   type <- match.arg(type)
+  if (type == "case") type <- "person"
   model <- match.arg(model)
   
   # If data is bootnetResult, extract:

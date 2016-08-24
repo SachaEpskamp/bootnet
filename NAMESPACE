@@ -9,7 +9,7 @@ export(null)
 export(binarize)
 export(estimateNetwork)
 export(differenceTest)
-export(Smetric)
+export(corStability)
 
 
 # Methods:
