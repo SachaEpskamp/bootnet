@@ -183,7 +183,8 @@ bootnet <- function(
                                     graphArgs = graphArgs, # Set to null if missing
                                     intFun = intFun, # Set to null if missing
                                     intArgs = intArgs, # Set to null if missing
-                                    labels = labels)
+                                    labels = labels,
+                                    verbose = verbose)
     
     
   } else {
@@ -286,6 +287,14 @@ bootnet <- function(
           bootData <- data[persSample,,drop=FALSE]
           
         }
+
+        # Some checks to remove progress bars:
+        if (!missing(prepFun)){
+          # EBICglasso:
+          if (!missing(prepArgs) & is.list(prepArgs) & identical(prepFun,qgraph::cor_auto)){
+            prepArgs$verbose <- FALSE
+          }
+        }
         
         res <- suppressWarnings(try({
           estimateNetwork(bootData, 
@@ -298,7 +307,8 @@ bootnet <- function(
                           graphArgs = graphArgs, # Set to null if missing
                           intFun = intFun, # Set to null if missing
                           intArgs = intArgs, # Set to null if missing
-                          labels = labels[inSample])
+                          labels = labels[inSample],
+                          verbose = FALSE)
         }))
         if (is(res, "try-error")){
           if (tryCount == tryLimit) {
@@ -403,7 +413,8 @@ bootnet <- function(
                           graphArgs = graphArgs, # Set to null if missing
                           intFun = intFun, # Set to null if missing
                           intArgs = intArgs, # Set to null if missing
-                          labels = labels[inSample])
+                          labels = labels[inSample],
+                          verbose = FALSE)
         }))
         if (is(res, "try-error")){
           if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")

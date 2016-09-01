@@ -1,0 +1,13 @@
+citHeader("To cite bootnet in publications, please use:")
+
+citEntry(entry = "Article",
+  title        = "Estimating Psychological Networks and their Accuracy: A Tutorial Paper",
+  author       = personList(as.person("Sacha Epskamp"),
+                   as.person("Denny Borsboom"),
+                   as.person("Eiko I. Fried")),
+  journal      = "arXiv preprint",
+  url          = "https://arxiv.org/abs/1604.08462",
+
+  textVersion  = "Epskamp, S., Borsboom, D., & Fried, E. I. (2016). Estimating psychological networks and their accuracy: a tutorial paper. arXiv preprint, arXiv:1604.08462.",
+  year = "2016")
+

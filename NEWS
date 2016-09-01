@@ -1,0 +1,19 @@
+Changes in version 0.3:
+	- Eiko Fried joined the author list
+	- Added 'estimateNetwork' function, allowing one to estimate the network structure from within bootnet
+		- The plot method will run qgraph on the estimated network structure
+		- The qgraph function getWmat can now be applied to networks estimated in bootnet. Allowing one to use, e.g., centralityPlot on a network estimated with estimateNetwork
+	- Added 'differenceTest' function to test for significant differences between edge weights and centrality indices
+	- Added 'corStability' to compute the CS-coefficient as described in our paper:
+			- Epskamp, S., Borsboom, D., & Fried, E. I. (2016). Estimating psychological networks and their accuracy: a tutorial paper. arXiv preprint, arXiv:1604.08462.
+	- The plot method now supports 'plot = "difference"', to make plots of significant differences between edge-weights and centralities
+	- New default sets:
+			- "huge"
+			- "adalasso"
+	- 'nCores' argument added to bootnet to use parallel computing
+	- bootnet print methods now print a list of relevant references on the network estimation procedure used
+	- When EBICglasso is used as default set, variables that are made ordinal are now printed only when estimating the first network
+	- Updated CITATION such that citation("bootnet") now references the pre-print
+	- Bootnet now gives a message on loading that it is BETA software
+	- Several minor bugfixes
+	

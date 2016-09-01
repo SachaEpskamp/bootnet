@@ -1,6 +1,24 @@
-differenceTest <- function(bootobject,x,y,measure = c("strength","closeness","betweenness"),x2,y2){
+expAlpha <- function(alpha, nBoots, reps = 1000) {
+  c(sapply(alpha,function(a){
+    sapply(nBoots,function(nb){
+      mean(replicate(reps,quantile(runif(nb),a/2))) + 
+        (1 - mean(replicate(reps,quantile(runif(nb),1-a/2))))
+    })
+  }))
+}
+
+differenceTest <- function(bootobject,x,y,measure = c("strength","closeness","betweenness"),alpha = 0.05,x2,y2, verbose=TRUE){
+  
+  if (!bootobject$type %in% c("nonparametric","parametric")){
+    stop("Difference test requires type = 'nonparametric' or type = 'parametric'.")
+  }
   
   stopifnot(class(bootobject) == "bootnet")
+  
+  if (verbose){
+    exp <- expAlpha(alpha,length(bootobject$boots))
+    message(paste0("Expected significance level given number of bootstrap samples is approximately: ",format(signif(exp,2),scientific = FALSE)))
+  }
   
   if (any(measure %in% c("strength","betweenness","closeness")) & any(measure %in% c("edge","distance"))){
     stop("Difference test can not be made for centrality index and edge weights/distances at the same time.")
@@ -54,12 +72,15 @@ differenceTest <- function(bootobject,x,y,measure = c("strength","closeness","be
   
 
   Quantiles <- fullTable %>% 
-    left_join(dplyr::select(cent,name,id1=id1,value1=value,type),by=c("name","id1","type")) %>% 
-    left_join(dplyr::select(cent,name,id2=id1,value2=value,type),by=c("name","id2","type"))  %>%
-    group_by(id1,id2,type) %>%
-    summarize(lower = quantile(value2-value1,0.025),upper = quantile(value2-value1,0.975)) %>%
-    mutate(contain0 = 0 >= lower & 0 <= upper) %>% 
-    rename(measure = type) %>% 
+    dplyr::left_join(dplyr::select(cent,name,id1=id1,value1=value,type),by=c("name","id1","type")) %>% 
+    dplyr::left_join(dplyr::select(cent,name,id2=id1,value2=value,type),by=c("name","id2","type"))  %>%
+    dplyr::group_by(id1,id2,type) %>%
+    dplyr::summarize(lower = quantile(value2-value1,alpha/2),
+              upper = quantile(value2-value1,1-alpha/2)) %>%
+    dplyr::mutate(contain0 = 0 >= lower & 0 <= upper) %>% 
+    dplyr::mutate(significant = !contain0) %>%
+    dplyr::select_("id1","id2","type","lower","upper","significant") %>%
+    dplyr::rename(measure = type) %>% 
     as.data.frame
   
   #   Results <- list(
@@ -70,6 +91,7 @@ differenceTest <- function(bootobject,x,y,measure = c("strength","closeness","be
   #     CIupper = Quantiles$upper
   #   )
   rownames(Quantiles) <- NULL
+  
   
   return(Quantiles)
 }

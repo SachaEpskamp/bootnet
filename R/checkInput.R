@@ -10,7 +10,8 @@ checkInput <- function(
   graphArgs, # Set to null if missing
   intFun, # Set to null if missing
   intArgs, # Set to null if missing
-  sampleSize
+  sampleSize,
+  verbose=TRUE
 ){
   if (default[[1]]=="glasso") default <- "EBICglasso"
   default <- match.arg(default)
@@ -52,10 +53,10 @@ checkInput <- function(
     
     if (missing(prepArgs)){
       prepArgs <- switch(default,
-                         EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
+                         EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=verbose),
                                              ifElse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
                          IsingFit = list(),
-                         pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=FALSE),
+                         pcor =  ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=verbose),
                                         ifElse(identical(prepFun,cor),list(use = "pairwise.complete.obs"),list())),
                          IsingLL = list(),
                          huge = list(),

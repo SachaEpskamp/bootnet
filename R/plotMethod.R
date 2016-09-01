@@ -22,6 +22,12 @@ plot.bootnet <- function(
   legend = TRUE,
   subsetRange = c(100,0),
   area = !perNode,
+  alpha = 0.05, # Only used if plot = "difference"
+  bonferroni = FALSE,
+  onlyNonZero = FALSE, # Set to TRUE to only show edges that are non-zero in the sample network
+  differenceShowValue, # Show values in difference plots?
+  differenceEdgeColor = TRUE, # Show blocks of edges as colors according to standard plot.
+  verbose = TRUE,
   ...
 ){
   if (missing(statistics)){
@@ -49,6 +55,19 @@ plot.bootnet <- function(
   if (plot == "difference" & x$type %in% c("person","node")){
     stop("plot = 'difference' is not supported for subset bootstrap.")
   }
+  
+  if (plot != "difference" & onlyNonZero){
+    stop("'onlyNonZero' only supported for plot = 'difference'")
+  }
+  
+  if (alpha != 0.05 & plot != "difference"){
+    stop("'alpha' argument only used when plot = 'difference'")
+  }
+  if (isTRUE(bonferroni) & plot != "difference"){
+    stop("'bonferroni' argument only used when plot = 'difference'")
+  }
+  
+  
   
   # plot <- match.arg(plot)
   order <- match.arg(order)
@@ -294,8 +313,36 @@ plot.bootnet <- function(
       stop("'difference' plot can not be made for centrality index and edge weights/distances at the same time.")
     }
     
+    if (missing(differenceShowValue)){
+      differenceShowValue <- any(statistics %in% c("strength","betweenness","closeness"))
+    }
     
     cent <- x$bootTable %>% filter(type %in% statistics) %>% dplyr::select(name,id,value,type)
+    
+    # Only non-zero in sample edges:
+    if (onlyNonZero){
+      if (!all(statistics == "edge")){
+        stop("'onlyNonZero' only supported for statistics = 'edge'")
+      }
+      include <-     unique(x$sampleTable$id[x$sampleTable$type %in% statistics & x$sampleTable$value != 0])
+      cent <- cent %>% filter(id %in% include)
+    } else {
+      include <-     unique(x$sampleTable$id[x$sampleTable$type %in% statistics])
+      cent <- cent %>% filter(id %in% include)
+    }
+    
+    # Set alpha level:
+    if (bonferroni){
+      nInclude <- length(include)
+      alpha <- alpha / (nInclude*(nInclude-1)/2)
+      if (verbose) message(paste0("Significance level (alpha) set to: ",format(signif(alpha,2),scientific = FALSE)))
+    }
+    
+    if (verbose){
+      exp <- expAlpha(alpha,length(x$boots))
+      if (verbose) message(paste0("Expected significance level given number of bootstrap samples is approximately: ",format(signif(exp,2),scientific = FALSE)))
+    }
+    
     fullTable <- expand.grid(name = unique(cent$name),id1=unique(cent$id),id2=unique(cent$id),type = unique(cent$type),
                              stringsAsFactors = FALSE) 
     
@@ -303,7 +350,7 @@ plot.bootnet <- function(
       left_join(dplyr::select(cent,name,id1=id,value1=value,type),by=c("name","id1","type")) %>% 
       left_join(dplyr::select(cent,name,id2=id,value2=value,type),by=c("name","id2","type"))  %>%
       group_by(id1,id2,type) %>%
-      summarize(lower = quantile(value2-value1,0.025),upper = quantile(value2-value1,0.975)) %>%
+      summarize(lower = quantile(value2-value1,alpha/2),upper = quantile(value2-value1,1-alpha/2)) %>%
       mutate(contain0 = 0 >= lower & 0 <= upper)
     
     #bootmean:
@@ -319,10 +366,19 @@ plot.bootnet <- function(
     
     DF2 <- DF %>% filter(type == statistics[[1]])
     
+    if (onlyNonZero){
+      if (!all(statistics == "edge")){
+        stop("'onlyNonZero' only supported for statistics = 'edge'")
+      }
+      include <-     x$sampleTable$id[x$sampleTable$type %in% statistics & x$sampleTable$value != 0]
+      DF2 <- DF2 %>% filter(id1 %in% include)
+      DF <- DF %>% filter(id1 %in% include)
+    }
+    
     if (order == "sample"){
-      levels <- DF2$id1[order(DF2$value,decreasing = decreasing)]  
+      levels <- DF2$id1[order(DF2$value,decreasing = !decreasing)]  
     } else if (order == "mean"){
-      levels <- DF2$id1[order(DF2$rank, decreasing=decreasing)]  
+      levels <- DF2$id1[order(DF2$rank, decreasing = !decreasing)]  
     } else  if (order == "id"){
       levels <- gtools::mixedsort(unique(sample$id1))
     }
@@ -334,19 +390,53 @@ plot.bootnet <- function(
     DF$id2 <- DF$id1
     DF$id1 <- factor(DF$id1,levels=levels)
     DF$id2 <- factor(DF$id2,levels=levels)
-    DF$label <- as.character(round(DF$value,2))
+    DF$label <- format(signif(DF$value,2),scientific = FALSE)
     DF$fill <- "same"
     
     lab <- statistics
     Quantiles$type <- factor(Quantiles$type, levels = statistics)
     DF$type <- factor(DF$type, levels = statistics)
     substr(lab,1,1) <- toupper(substr(lab,1,1))
-
+    
+    # If blocks are to be colored, change "same" to ID:
+    if (differenceEdgeColor){
+      Quantiles$fill <- ifelse(Quantiles$fill == "same",
+                               as.character(Quantiles$id1),
+                               Quantiles$fill)
+      
+      # Run qgraph to obtain colors:
+      graph <- plot(x$sample,DoNotPlot=TRUE)
+      Edgelist <- data.frame(
+        from =  x$sample$labels[graph$Edgelist$from],
+        to =  x$sample$labels[graph$Edgelist$to],
+        col = graph$graphAttributes$Edges$color,
+        stringsAsFactors=FALSE
+      )
+      Edgelist$id <- paste0(Edgelist$from,"--",Edgelist$to)
+      fullEdgelist <- data.frame(id=include,stringsAsFactors=FALSE) %>% 
+        dplyr::left_join(dplyr::select_(Edgelist,"id","col"),by = "id")
+      fullEdgelist$col[is.na(fullEdgelist$col)] <- "white"
+      
+      colorValues <- fullEdgelist$col
+      names(colorValues) <- fullEdgelist$id
+      colorValues <- c(colorValues,"same" = "white","nonsig" = "lightgray","sig" = "black") 
+      
+    } else {
+      # Color values:
+      colorValues <- c("same" = "white","nonsig" = "lightgray","sig" = "black") 
+    }
+    
     g <- ggplot(Quantiles,aes(x=id1,y=id2,fill=fill)) + 
       geom_tile(colour = 'white') + xlab("") + ylab("") + 
-      scale_fill_manual(values = c("same" = "white","nonsig" = "lightgray","sig" = "black")) + 
-      geom_text(data=DF,aes(label = label))+ theme(legend.position="none") + 
+      scale_fill_manual(values = colorValues) + 
+      theme(legend.position="none") + 
       facet_grid(~ type)
+    
+ 
+    
+    if (differenceShowValue){
+      g <- g +  geom_text(data=DF,aes(label = label))
+    }
     
     
     base_size <- 9
@@ -355,79 +445,78 @@ plot.bootnet <- function(
       scale_y_discrete(expand = c(0, 0)) + theme(legend.position = "none",
                                                  axis.ticks = element_blank(), axis.text.x = element_text(size = base_size *
                                                                                                             0.8, angle = 270, hjust = 0, colour = "grey50"))
-    
     return(g)
     
-#     
-#     cent <- x$bootTable %>% filter(type %in% statistics) %>% dplyr::select(name,node1,value,type)
-#     fullTable <- expand.grid(name = unique(cent$name),node1=unique(cent$node1),node2=unique(cent$node1),type = unique(cent$type),
-#                              stringsAsFactors = FALSE) 
-#  
-#     Quantiles <- fullTable %>% 
-#       left_join(dplyr::select(cent,name,node1,value1=value,type),by=c("name","node1","type")) %>% 
-#       left_join(dplyr::select(cent,name,node2=node1,value2=value,type),by=c("name","node2","type"))  %>%
-#       group_by(node1,node2,type) %>%
-#       summarize(lower = quantile(value2-value1,0.025),upper = quantile(value2-value1,0.975)) %>%
-#       mutate(contain0 = 0 >= lower & 0 <= upper)
-#     
-#     #bootmean:
-#     bootMeans <- x$bootTable %>% filter(type %in% statistics) %>%
-#       group_by(node1,type) %>% summarize(mean = mean(value,na.rm=TRUE))
-#     
-#     sample <- x$sampleTable %>% filter(type %in% statistics) %>% dplyr::select(node1,value,type) %>% 
-#       left_join(bootMeans,by=c("node1","type"))
-#     
-#     # Now for every node: minimal node equal to....
-#     DF <- Quantiles %>% left_join(dplyr::select(sample,node2=node1,value,type), by = c("node2","type")) %>%
-#       group_by(node1,type) %>% 
-#       summarize(
-#         minNode = node2[contain0][which.min(value[contain0])],
-#         maxNode = node2[contain0][which.max(value[contain0])]
-#       ) %>% left_join(sample,by=c("node1","type")) %>% ungroup %>%
-#       mutate(valueMin = value[match(minNode,node1)], 
-#              valueMax = value[match(maxNode,node1)],
-#              rank = order(order(value,mean))) %>% arrange(rank)
-#     
-#     DF2 <- DF %>% filter(type == statistics[[1]])
-#     
-#     if (order == "sample"){
-#       levels <- DF2$node1[order(DF2$value,decreasing = decreasing)]  
-#     } else if (order == "mean"){
-#       levels <- DF2$node1[order(DF2$rank, decreasing=decreasing)]  
-#     } else  if (order == "id"){
-#       levels <- x$sample$labels
-#     }
-#     
-#     Quantiles$node1 <- factor(Quantiles$node1,levels=levels)
-#     Quantiles$node2 <- factor(Quantiles$node2,levels=levels)
-#     Quantiles$fill <- ifelse(Quantiles$node1 == Quantiles$node2, "same",
-#                              ifelse(Quantiles$contain0,"nonsig","sig"))
-#     DF$node2 <- DF$node1
-#     DF$node1 <- factor(DF$node1,levels=levels)
-#     DF$node2 <- factor(DF$node2,levels=levels)
-#     DF$label <- as.character(round(DF$value,2))
-#     DF$fill <- "same"
-#     
-#     lab <- statistics
-#     Quantiles$type <- factor(Quantiles$type, levels = statistics)
-#     DF$type <- factor(DF$type, levels = statistics)
-#     substr(lab,1,1) <- toupper(substr(lab,1,1))
-# 
-#     g <- ggplot(Quantiles,aes(x=node1,y=node2,fill=fill)) + 
-#       geom_tile(colour = 'white') + xlab("") + ylab("") + 
-#       scale_fill_manual(values = c("same" = "white","nonsig" = "lightgray","sig" = "black")) + 
-#       geom_text(data=DF,aes(label = label))+ theme(legend.position="none") + 
-#       facet_grid(~ type)
-#     
-#     
-#     base_size <- 9
-#     g <- g + theme_grey(base_size = base_size) + labs(x = "",
-#                                                       y = "") + scale_x_discrete(expand = c(0, 0)) +
-#       scale_y_discrete(expand = c(0, 0)) + theme(legend.position = "none",
-#                                                  axis.ticks = element_blank(), axis.text.x = element_text(size = base_size *
-#                                                                                                             0.8, angle = 270, hjust = 0, colour = "grey50"))
-#     
-#     return(g)
+    #     
+    #     cent <- x$bootTable %>% filter(type %in% statistics) %>% dplyr::select(name,node1,value,type)
+    #     fullTable <- expand.grid(name = unique(cent$name),node1=unique(cent$node1),node2=unique(cent$node1),type = unique(cent$type),
+    #                              stringsAsFactors = FALSE) 
+    #  
+    #     Quantiles <- fullTable %>% 
+    #       left_join(dplyr::select(cent,name,node1,value1=value,type),by=c("name","node1","type")) %>% 
+    #       left_join(dplyr::select(cent,name,node2=node1,value2=value,type),by=c("name","node2","type"))  %>%
+    #       group_by(node1,node2,type) %>%
+    #       summarize(lower = quantile(value2-value1,0.025),upper = quantile(value2-value1,0.975)) %>%
+    #       mutate(contain0 = 0 >= lower & 0 <= upper)
+    #     
+    #     #bootmean:
+    #     bootMeans <- x$bootTable %>% filter(type %in% statistics) %>%
+    #       group_by(node1,type) %>% summarize(mean = mean(value,na.rm=TRUE))
+    #     
+    #     sample <- x$sampleTable %>% filter(type %in% statistics) %>% dplyr::select(node1,value,type) %>% 
+    #       left_join(bootMeans,by=c("node1","type"))
+    #     
+    #     # Now for every node: minimal node equal to....
+    #     DF <- Quantiles %>% left_join(dplyr::select(sample,node2=node1,value,type), by = c("node2","type")) %>%
+    #       group_by(node1,type) %>% 
+    #       summarize(
+    #         minNode = node2[contain0][which.min(value[contain0])],
+    #         maxNode = node2[contain0][which.max(value[contain0])]
+    #       ) %>% left_join(sample,by=c("node1","type")) %>% ungroup %>%
+    #       mutate(valueMin = value[match(minNode,node1)], 
+    #              valueMax = value[match(maxNode,node1)],
+    #              rank = order(order(value,mean))) %>% arrange(rank)
+    #     
+    #     DF2 <- DF %>% filter(type == statistics[[1]])
+    #     
+    #     if (order == "sample"){
+    #       levels <- DF2$node1[order(DF2$value,decreasing = decreasing)]  
+    #     } else if (order == "mean"){
+    #       levels <- DF2$node1[order(DF2$rank, decreasing=decreasing)]  
+    #     } else  if (order == "id"){
+    #       levels <- x$sample$labels
+    #     }
+    #     
+    #     Quantiles$node1 <- factor(Quantiles$node1,levels=levels)
+    #     Quantiles$node2 <- factor(Quantiles$node2,levels=levels)
+    #     Quantiles$fill <- ifelse(Quantiles$node1 == Quantiles$node2, "same",
+    #                              ifelse(Quantiles$contain0,"nonsig","sig"))
+    #     DF$node2 <- DF$node1
+    #     DF$node1 <- factor(DF$node1,levels=levels)
+    #     DF$node2 <- factor(DF$node2,levels=levels)
+    #     DF$label <- as.character(round(DF$value,2))
+    #     DF$fill <- "same"
+    #     
+    #     lab <- statistics
+    #     Quantiles$type <- factor(Quantiles$type, levels = statistics)
+    #     DF$type <- factor(DF$type, levels = statistics)
+    #     substr(lab,1,1) <- toupper(substr(lab,1,1))
+    # 
+    #     g <- ggplot(Quantiles,aes(x=node1,y=node2,fill=fill)) + 
+    #       geom_tile(colour = 'white') + xlab("") + ylab("") + 
+    #       scale_fill_manual(values = c("same" = "white","nonsig" = "lightgray","sig" = "black")) + 
+    #       geom_text(data=DF,aes(label = label))+ theme(legend.position="none") + 
+    #       facet_grid(~ type)
+    #     
+    #     
+    #     base_size <- 9
+    #     g <- g + theme_grey(base_size = base_size) + labs(x = "",
+    #                                                       y = "") + scale_x_discrete(expand = c(0, 0)) +
+    #       scale_y_discrete(expand = c(0, 0)) + theme(legend.position = "none",
+    #                                                  axis.ticks = element_blank(), axis.text.x = element_text(size = base_size *
+    #                                                                                                             0.8, angle = 270, hjust = 0, colour = "grey50"))
+    #     
+    #     return(g)
     
   } else {
     if (any(statistics %in% c("strength","closeness","betweenness"))){
@@ -541,7 +630,7 @@ plot.bootnet <- function(
       )
       
       
-      sumTable2 <- dplyr::rbind_list(
+      sumTable2 <- dplyr::bind_rows(
         sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~lbound),
         revTable(sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~ubound))
       )
