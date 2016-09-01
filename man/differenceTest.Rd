@@ -8,7 +8,8 @@ Bootstrapped difference test
 This function computes the bootstrapped difference test for edge-weights and centrality indices. A confidence interval is constructured on the difference of two values, and the test is deemed significant if zero is not in this confidence interval. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-differenceTest(bootobject, x, y, measure = c("strength", "closeness", "betweenness"), alpha = 0.05, x2, y2, verbose = TRUE)
+differenceTest(bootobject, x, y, measure = c("strength", "closeness", "betweenness"),
+                alpha = 0.05, x2, y2, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,7 +19,7 @@ Output of \code{\link{bootnet}}. Must be nonparametric or parametric bootstrap.
   \item{x}{
 A character string indicating the ID of a node or an edge, or a number indiacting the node or edge. For an edge, can be e.g., \code{"1--2"} or \code{"x = 1, x2 = 2"}.
 }
-  \item{x}{
+  \item{y}{
 A character string indicating the ID of a node or an edge, or a number indiacting the node or edge. For an edge, can be e.g., \code{"1--2"} or \code{"y = 1, y2 = 2"}.
 }
   \item{measure}{

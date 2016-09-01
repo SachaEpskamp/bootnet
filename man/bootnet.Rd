@@ -8,14 +8,16 @@ Bootstrapped network estimation
 This function can be used to bootstrap network estimation methods so that the spread of parameter and centrality estimates can be assessed. Most important methods are \code{type = 'nonparametric'} for the non-parametric bootstrap and \code{type = 'case'} for the case-dropping bootstrap. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-bootnet(data, nBoots = 1000, 
-    default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"), 
-    type = c("nonparametric","parametric","node","person","jackknife"),
-    model = c("detect","GGM","Ising"), prepFun, prepArgs = list(), estFun, estArgs, 
-    graphFun, graphArgs, intFun, intArgs, verbose = TRUE, labels, alpha = 1, 
-    subNodes = 2:(ncol(data)-1), subPersons = round(seq(0.25,0.95,length=10)*nrow(data)), 
-    computeCentrality = TRUE, propBoot = 1, 
-    replacement = TRUE, edgeResample = FALSE)
+bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
+                 "pcor", "IsingFit", "IsingLL"), type =
+                 c("nonparametric", "parametric", "node", "person",
+                 "jackknife", "case"), nCores = 1, model = c("detect",
+                 "GGM", "Ising"), prepFun, prepArgs, estFun, estArgs,
+                 graphFun, graphArgs, intFun, intArgs, verbose = TRUE,
+                 labels, alpha = 1, subNodes = 2:(ncol(data) - 1),
+                 subPersons = round(seq(0.25, 0.95, length = 10) *
+                 nrow(data)), computeCentrality = TRUE, propBoot = 1,
+                 replacement = TRUE, graph, sampleSize, intercepts)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -30,6 +32,9 @@ A string indicating the method to use. See documentation at \code{\link[bootnet]
 }
 \item{type}{
  The kind of bootstrap method to use.
+}
+\item{nCores}{
+Number of cores to use in computing results. Set to 1 to not use parallel computing.
 }
 \item{model}{
  The modeling framework to use. Automatically detects if data is binary or not.
@@ -82,9 +87,9 @@ A character vector containing the node labels. If omitted the column names of th
     \item{replacement}{
       Logical, should replacement be used in bootstrap sampling?
   }
-  \item{edgeResample}{
-      Logical, if \code{TRUE} only the order of edges based on bootstraps is retained and parameter values of the original network are mapped to this new order.
-  }
+  \item{graph}{A given network structure to use in parametric bootstrap.}
+  \item{sampleSize}{The samplesize to use in parametric bootstrap.}
+  \item{intercepts}{Intercepts to use in parametric bootstrap.}
 }
 
 \value{

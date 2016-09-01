@@ -9,12 +9,13 @@ This function can be used to plot bootnet results by plotting all bootstrapped s
 }
 \usage{
 \method{plot}{bootnet}(x, statistics, 
-        plot = c("area","interval","line"),  CIstyle = c("default","SE","quantiles"), 
+        plot,  CIstyle = c("default","SE","quantiles"), 
         rank = FALSE, sampleColor = "darkred", samplelwd = 1, bootColor = "black", 
         bootAlpha = 0.01, bootlwd = 0.9, areaAlpha = 0.1, 
         order = c("id", "sample", "mean"), decreasing = TRUE, perNode = FALSE, 
         legendNcol = 2, labels=TRUE, legend = TRUE,subsetRange = c(100,0), 
-        area = !perNode, ...)
+        area = !perNode, alpha = 0.05, onlyNonZero = FALSE, differenceShowValue, 
+        differenceEdgeColor = TRUE, verbose = TRUE,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,7 +25,7 @@ A \code{bootnet} object
 \item{statistics}{
 The types of statistics to plot. \code{c("intercept", "strength", "closeness", "betweenness") } plots all nodewise statistics whereas \code{c("edge","distance")} plots all pairwise statistics. Defaults to \code{"edge"} for regular bootstrap and \code{c("strength", "closeness", "betweenness")} for node and person drop bootstrap.}
 \item{plot}{
-Character string indicating what to plot. \code{"line"} will produce a graph with the area indicating the confidence region, \code{"line"} will produce a line graph and \code{"interval"} a 95\% confidence interval graph
+Character string indicating what to plot. Can be \code{"area"} to produce a graph with the area indicating the confidence region, or \code{"difference"} producing a plot showing significant differences. Other options are \code{"line"} and \code{"interval"}, which are currently unstable and not recommended to use.
 }
 \item{CIstyle}{
  Style of CIs to construct. \code{"SE"} shows the sample statistic plus and minus two times the standard deviation of bootstraps, and \code{"quantiles"} the area between the 2.5th and 97.5th quantile. Defaults to  \code{"SE"} for strength and betweenness and \code{"quantiles"} otherwise
@@ -74,6 +75,15 @@ Alpha of the area
   \item{area}{
    Logical, should the confidence area be plotted?
   }
+    \item{alpha}{
+   Signifiance level used in \code{plot = "difference"}.
+  }
+  \item{onlyNonZero}{Logical used when \code{plot = "difference", statistics = "edge"}, should only edges be included that were nonzero in the estimated network structure?}
+  \item{differenceShowValue}{Logical used when \code{plot = "difference"}. Should values be shown in the diagonal of the difference plot?
+  }
+   \item{differenceEdgeColor}{Logical used when \code{plot = "difference", statistics = "edge"}. Should diagonal blocks be colored according to default edge colors?
+  }
+  \item{verbose}{Should expected alpha be printed?}
   \item{\dots}{Not used.}
 }
 

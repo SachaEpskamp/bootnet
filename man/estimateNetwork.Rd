@@ -8,7 +8,9 @@ Estimate a network structure
 This function allows for flexible estimation of a network structure using various R packages and model frameworks. This is typically done by using one of the default sets. See details for manual specification. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit", "IsingLL", "huge", "adalasso"), prepFun, prepArgs = list(), estFun, estArgs, graphFun, graphArgs, intFun, intArgs, labels, verbose = TRUE)
+estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit", "IsingLL", 
+                "huge", "adalasso"), prepFun, prepArgs, estFun, estArgs, 
+                graphFun, graphArgs, intFun, intArgs, labels, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -137,6 +139,15 @@ The user can manually set the estimation method of the PMRF in bootnet using a s
 }
 }
 \value{
+A \code{bootnetResult} object with the following elements:
+\item{graph}{The weights matrix of the network}
+\item{intercepts}{The intercepts}
+\item{results}{The results of the estimation procedure}
+\item{labels}{A vector with node labels}
+\item{nNodes}{Number of nodes in the network}
+\item{nPerson}{Number of persons in the network}
+\item{input}{Input used, including the result of the default set used}
+
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}

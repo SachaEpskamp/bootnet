@@ -23,13 +23,15 @@ plot.bootnet <- function(
   subsetRange = c(100,0),
   area = !perNode,
   alpha = 0.05, # Only used if plot = "difference"
-  bonferroni = FALSE,
+  # bonferroni = FALSE,
   onlyNonZero = FALSE, # Set to TRUE to only show edges that are non-zero in the sample network
   differenceShowValue, # Show values in difference plots?
   differenceEdgeColor = TRUE, # Show blocks of edges as colors according to standard plot.
   verbose = TRUE,
   ...
 ){
+  bonferroni <- FALSE
+  
   if (missing(statistics)){
     if (! x$type %in% c("person","node")){
       statistics <- "edge"
