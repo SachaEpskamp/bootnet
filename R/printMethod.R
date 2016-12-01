@@ -13,10 +13,11 @@ getRefs <- function(x){
                  "Epskamp, S., Cramer, A., Waldorp, L., Schmittmann, V. D., & Borsboom, D. (2012). qgraph: Network visualizations of relationships in psychometric data. Journal of Statistical Software, 48 (1), 1-18."
     ),
     "IsingFit" = "van Borkulo, C. D., Borsboom, D., Epskamp, S., Blanken, T. F., Boschloo, L., Schoevers, R. A., & Waldorp, L. J. (2014). A new method for constructing networks from binary data. Scientific reports, 4 (5918), 1-10.",
-    "IsingLL" = c("Epskamp, S., Maris, G., Waldorp, L., & Borsboom, D. (in press). Network psychometrics. In P. Irwing, D. Hughes, & T. Booth (Eds.), Handbook of psychometrics. New York, NY, USA: Wiley.",
+    "IsingSampler" = c("Epskamp, S., Maris, G., Waldorp, L., & Borsboom, D. (in press). Network psychometrics. In P. Irwing, D. Hughes, & T. Booth (Eds.), Handbook of psychometrics. New York, NY, USA: Wiley.",
                   "Epskamp, S. (2014). IsingSampler: Sampling methods and distribution functions for the Ising model. Retrieved from github.com/SachaEpskamp/IsingSampler"),
     "huge" = "Zhao, T., Li, X., Liu, H., Roeder, K., Lafferty, J., & Wasserman, L. (2015). huge: High-dimensional undirected graph estimation. Retrieved from https://CRAN.R-project.org/package=huge",
-    "adalasso" = "Kraeamer, N., Schaeafer, J., & Boulesteix, A.-L. (2009). Regularized estimation of large-scale gene association networks using graphical gaussian models. BMC Bioinformatics, 10 (1), 1-24."
+    "adalasso" = "Kraeamer, N., Schaeafer, J., & Boulesteix, A.-L. (2009). Regularized estimation of large-scale gene association networks using graphical gaussian models. BMC Bioinformatics, 10 (1), 1-24.",
+    "mgm" = "Jonas M. B. Haslbeck, Lourens J. Waldorp (2016). mgm: Structure Estimation for Time-Varying Mixed Graphical Models in high-dimensional Data arXiv preprint:1510.06871v2 URL http://arxiv.org/abs/1510.06871v2."
   )
   
   citation <- c(citation,
@@ -43,7 +44,7 @@ print.bootnet <- function(x, ...){
       paste0("\nUse plot(",name,"$sample, layout = 'spring') to plot estimated network of original sample"),
       paste0("\nUse summary(",name,") to inspect summarized statistics (see ?summary.bootnet for details)"),
       paste0("\nUse plot(",name,") to plot summarized statistics (see ?plot.bootnet for details)"),
-      "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$sample$input$default),collapse="\n")
+      "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$sample$default),collapse="\n")
       )
 }
 
@@ -56,10 +57,10 @@ print.bootnetResult <- function(x, ...){
       "\nSparsity:",mean(x[['graph']][upper.tri(x[['graph']],diag=FALSE)]==0) ,
       paste0("\nNetwork stored in ",name,"$graph"),
       "\n",
-      paste0("\nDefault set used: ",x$input$default),     
+      paste0("\nDefault set used: ",x$default),     
       "\n",
       paste0("\nUse plot(",name,", layout = 'spring') to plot estimated network"),
       paste0("\nUse bootnet(",name,") to bootstrap edge weights and centrality indices"),
-      "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$input$default),collapse="\n")
+      "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$default),collapse="\n")
   )
 }

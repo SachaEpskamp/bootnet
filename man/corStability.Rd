@@ -8,7 +8,8 @@ Correlation stability coefficient
 This coefficient denotes the estimated maximum number of cases that can be dropped from the data to retain, with 95\% probability, a correlation of at least 0.7 (default) between statistics based on the original network and statistics computed with less cases. This coefficient should not be below 0.25 and is preferably above 0.5. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-corStability(x, cor = 0.7, statistics = c("strength", "closeness", "betweenness"))
+corStability(x, cor = 0.7, statistics = c("strength", "closeness", "betweenness"), 
+verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,6 +22,7 @@ The correlation level tot est at.
   \item{statistics}{
 The statistic(s) to test for.
 }
+\item{verbose}{Logical, should information on the progress be printed to the console?}
 }
 \references{
 Epskamp, S., Borsboom, D., & Fried, E. I. (2016). Estimating psychological networks and their accuracy: a tutorial paper. arXiv preprint, arXiv:1604.08462.

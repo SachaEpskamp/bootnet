@@ -27,7 +27,9 @@ bootnet <- function(
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
   type = c("nonparametric","parametric","node","person","jackknife","case"), # Bootstrap method to use
   nCores = 1,
+  statistics = c("edge","strength","closeness","betweenness"),
   model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
+  fun,
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
   estFun, # function that results in a network
@@ -37,17 +39,22 @@ bootnet <- function(
   intFun, # Set to null if missing
   intArgs, # Set to null if missing
   verbose = TRUE, # messages on what is being done?
+  construct = c("default","function","arguments"),
   labels, # if missing taken from colnames
   alpha = 1, # centrality alpha
+  caseMin = 0.05, # minimum proportion to DROP
+  caseMax = 0.75, # Maximum proportion to DROP
+  caseN = 10,
   subNodes = 2:(ncol(data)-1), # if type = "node", defaults to 2:(p-1)
-  subPersons = round(seq(0.25,0.95,length=10) * nrow(data)),
+  subCases = round((1-seq(caseMin,caseMax,length=caseN)) * nrow(data)),
   computeCentrality = TRUE,
   propBoot = 1, # M out of N
   # subsampleSize,
   replacement = TRUE,
   graph, # for parametric bootstrap
   sampleSize, # for parametric bootstrap
-  intercepts # for parametric bootstrap,
+  intercepts, # for parametric bootstrap,
+  ... # Other arguments
   # edgeResample = FALSE # If true, only resample edges from original estimate
   # scaleAdjust = FALSE
 ){
@@ -82,21 +89,24 @@ bootnet <- function(
     }
     
     manual <- TRUE
+    dots <- list(...)
   } else {
     if (is(data,"bootnetResult")){
-      default <- data$input$default
-      prepFun <- data$input$prepFun
-      prepArgs <- data$input$prepArgs
-      estFun <- data$input$estFun
-      estArgs <- data$input$estArgs
-      graphFun <- data$input$graphFun
-      graphArgs <- data$input$graphArgs
-      intFun <- data$input$intFun
-      intArgs <- data$input$intArgs
-      data <- data$input$data
+
+        default <- data$default
+      # prepFun <- data$input$prepFun
+      # prepArgs <- data$input$prepArgs
+      # estFun <- data$input$estFun
+      # estArgs <- data$input$estArgs
+      # graphFun <- data$input$graphFun
+      # graphArgs <- data$input$graphArgs
+      # intFun <- data$input$intFun
+      # intArgs <- data$input$intArgs
+      fun <- data$estimator
+      dots <- data$arguments
+      data <- data$data
     }
-    
-    
+ 
     N <- ncol(data)
     Np <- nrow(data)
     
@@ -168,38 +178,40 @@ bootnet <- function(
   }
   
   # Estimate sample result:
+  # Check the input:
+ 
+  inputCheck <- checkInput(
+    default = default,
+    fun = fun,
+    prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+    prepArgs = prepArgs, # list with arguments for the correlation function
+    estFun=estFun, # function that results in a network
+    estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+    graphFun=graphFun, # set to identity if missing
+    graphArgs=graphArgs, # Set to null if missing
+    intFun=intFun, # Set to null if missing
+    intArgs=intArgs, # Set to null if missing
+    sampleSize = Np,
+    construct = construct,
+    .dots = dots
+  )
+  
   if (!manual)
   {
     if (verbose){
       message("Estimating sample network...")
     }
+    
     sampleResult <- estimateNetwork(data, 
-                                    default = default,
-                                    prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-                                    prepArgs = prepArgs, # list with arguments for the correlation function
-                                    estFun = estFun, # function that results in a network
-                                    estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-                                    graphFun = graphFun, # set to identity if missing
-                                    graphArgs = graphArgs, # Set to null if missing
-                                    intFun = intFun, # Set to null if missing
-                                    intArgs = intArgs, # Set to null if missing
-                                    labels = labels,
-                                    verbose = verbose)
+                        default = default,
+                        fun = inputCheck$estimator,
+                        .dots = inputCheck$arguments,
+                        labels = labels,
+                        verbose = verbose)
     
     
   } else {
-    args <- checkInput(
-      default = default,
-      prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-      prepArgs = prepArgs, # list with arguments for the correlation function
-      estFun=estFun, # function that results in a network
-      estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-      graphFun=graphFun, # set to identity if missing
-      graphArgs=graphArgs, # Set to null if missing
-      intFun=intFun, # Set to null if missing
-      intArgs=intArgs, # Set to null if missing
-      sampleSize = Np
-    )
+   
     
     sampleResult <- list(
       graph = graph,
@@ -207,23 +219,24 @@ bootnet <- function(
       labels = labels,
       nNodes = N,
       nPerson = Np,
-      input = args
+      estimator = inputCheck$estimator,
+      arguments = inputCheck$arguments,
+      default = default
     )
     class(sampleResult) <- c("bootnetResult", "list")
-    
     
   }
   
   # Extract arguments:
-  default <- sampleResult$input$default
-  prepFun <- sampleResult$input$prepFun
-  prepArgs <- sampleResult$input$prepArgs
-  estFun <- sampleResult$input$estFun
-  estArgs <- sampleResult$input$estArgs
-  graphFun <- sampleResult$input$graphFun
-  graphArgs <- sampleResult$input$graphArgs
-  intFun <- sampleResult$input$intFun
-  intArgs <- sampleResult$input$intArgs
+  # default <- sampleResult$input$default
+  # prepFun <- sampleResult$input$prepFun
+  # prepArgs <- sampleResult$input$prepArgs
+  # estFun <- sampleResult$input$estFun
+  # estArgs <- sampleResult$input$estArgs
+  # graphFun <- sampleResult$input$graphFun
+  # graphArgs <- sampleResult$input$graphArgs
+  # intFun <- sampleResult$input$intFun
+  # intArgs <- sampleResult$input$intArgs
 
   
   if (!isSymmetric(as.matrix(sampleResult[['graph']]))){
@@ -281,7 +294,7 @@ bootnet <- function(
         } else {
           # Personwise:
           nNode <- ncol(data)
-          nPerson <- sample(subPersons,1)
+          nPerson <- sample(subCases,1)
           inSample <- 1:N
           persSample <- sort(sample(seq_len(Np),nPerson))
           bootData <- data[persSample,,drop=FALSE]
@@ -297,18 +310,28 @@ bootnet <- function(
         }
         
         res <- suppressWarnings(try({
+          # estimateNetwork(bootData, 
+          #                 default = default,
+          #                 fun = fun,
+          #                 prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+          #                 prepArgs = prepArgs, # list with arguments for the correlation function
+          #                 estFun = estFun, # function that results in a network
+          #                 estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+          #                 graphFun = graphFun, # set to identity if missing
+          #                 graphArgs = graphArgs, # Set to null if missing
+          #                 intFun = intFun, # Set to null if missing
+          #                 intArgs = intArgs, # Set to null if missing
+          #                 labels = labels[inSample],
+          #                 verbose = FALSE,
+          #                 construct = construct)
+          # 
           estimateNetwork(bootData, 
                           default = default,
-                          prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-                          prepArgs = prepArgs, # list with arguments for the correlation function
-                          estFun = estFun, # function that results in a network
-                          estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-                          graphFun = graphFun, # set to identity if missing
-                          graphArgs = graphArgs, # Set to null if missing
-                          intFun = intFun, # Set to null if missing
-                          intArgs = intArgs, # Set to null if missing
+                          fun = inputCheck$estimator,
+                          .dots = inputCheck$arguments,
                           labels = labels[inSample],
                           verbose = FALSE)
+          
         }))
         if (is(res, "try-error")){
           if (tryCount == tryLimit) {
@@ -353,8 +376,14 @@ bootnet <- function(
       sampleSize <- Np
     }
     
-    clusterExport(cl, ls()[ls()!="cl"], envir = environment())
-  
+    # Needed arguments to be excluded:
+   excl <- c("prepFun", "prepArgs", "estFun", "estArgs", "graphFun", 
+             "graphArgs", "intFun", "intArgs")
+    
+    clusterExport(cl, ls()[!ls()%in%c(excl,"cl")], envir = environment())
+    # clusterExport(cl, export, envir = environment())
+    
+    
     # Run loop:
     bootResults <- parLapply(cl, seq_len(nBoots), function(b){
       
@@ -395,7 +424,7 @@ bootnet <- function(
         } else {
           # Personwise:
           nNode <- ncol(data)
-          nPerson <- sample(subPersons,1)
+          nPerson <- sample(subCases,1)
           inSample <- 1:N
           persSample <- sort(sample(seq_len(Np),nPerson))
           bootData <- data[persSample,,drop=FALSE]
@@ -405,14 +434,8 @@ bootnet <- function(
         res <- suppressWarnings(try({
           estimateNetwork(bootData, 
                           default = default,
-                          prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-                          prepArgs = prepArgs, # list with arguments for the correlation function
-                          estFun = estFun, # function that results in a network
-                          estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-                          graphFun = graphFun, # set to identity if missing
-                          graphArgs = graphArgs, # Set to null if missing
-                          intFun = intFun, # Set to null if missing
-                          intArgs = intArgs, # Set to null if missing
+                          fun = inputCheck$estimator,
+                          .dots = inputCheck$arguments,
                           labels = labels[inSample],
                           verbose = FALSE)
         }))
@@ -449,7 +472,7 @@ bootnet <- function(
   if (verbose){
     message("Computing statistics...")
   }
-  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality)
+  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality,statistics=statistics)
   
   if (nCores == 1){
     if (verbose){
@@ -457,7 +480,7 @@ bootnet <- function(
     }
     statTableBoots <- vector("list", nBoots)
     for (b in seq_len(nBoots)){
-      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)
+      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics)
       if (verbose){
         setTxtProgressBar(pb, b)
       }
@@ -467,7 +490,7 @@ bootnet <- function(
     }
   }  else {
     statTableBoots <- parLapply(cl,seq_len(nBoots),function(b){
-      statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality)
+      statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics)
     })
     # Stop the cluster:
     stopCluster(cl)

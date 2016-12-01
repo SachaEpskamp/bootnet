@@ -8,7 +8,7 @@ Binarizes a dataset
 This function will transform data into binary data (0,1). If the data is already binary, this function does nothing.
 }
 \usage{
-binarize(x, split = "median", na.rm = TRUE, removeNArows = TRUE)
+binarize(x, split = "median", na.rm = TRUE, removeNArows = TRUE, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -24,6 +24,7 @@ The \code{na.rm} argument used in the split function.
   \item{removeNArows}{
 Logical, should rows with \code{NA} be removed?
 }
+\item{verbose}{Output progress to the console?}
 }
 
 \value{

@@ -1,6 +1,16 @@
+# Default functions:
+export(bootnet_IsingFit)
+export(bootnet_EBICglasso)
+export(bootnet_pcor)
+export(bootnet_IsingSampler)
+export(bootnet_adalasso)
+export(bootnet_huge)
+export(bootnet_mgm)
+
 # Defaults:
 importFrom(huge,"huge","huge.npn","huge.select")
 importFrom(parcor,"adalasso.net")
+importFrom(mgm,"mgmfit")
 
 # exportPattern("^[[:alpha:]]+")
 # Exports:
@@ -42,3 +52,4 @@ importFrom(Matrix,"forceSymmetric")
   importFrom("utils", "setTxtProgressBar", "txtProgressBar")
     importFrom("stats", "na.omit", "quantile", "runif", "sd")
   importFrom("utils", "data")
+    importFrom("utils", "capture.output")
