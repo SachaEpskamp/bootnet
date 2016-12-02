@@ -434,11 +434,12 @@ plot.bootnet <- function(
       theme(legend.position="none") + 
       facet_grid(~ type)
     
- 
+    
     
     if (differenceShowValue){
       g <- g +  geom_text(data=DF,aes(label = label))
     }
+    
     
     
     base_size <- 9
@@ -447,6 +448,16 @@ plot.bootnet <- function(
       scale_y_discrete(expand = c(0, 0)) + theme(legend.position = "none",
                                                  axis.ticks = element_blank(), axis.text.x = element_text(size = base_size *
                                                                                                             0.8, angle = 270, hjust = 0, colour = "grey50"))
+    
+    if (!labels){
+
+      g <- g +   theme(axis.title.x=element_blank(),
+                       axis.text.x=element_blank(),
+                       axis.ticks.x=element_blank(),
+                       axis.title.y=element_blank(),
+                       axis.text.y=element_blank(),
+                       axis.ticks.y=element_blank())
+    }
     return(g)
     
     #     

@@ -8,6 +8,8 @@ Changes in version 0.4:
   - The corStability function now has a greatly improved output
   - Default set "IsingLL" has been renamed to "IsingSampler"
   - Default set "mgm" is now supported
+  - labels argument is now supported in difference plots
+  
   
 Changes in version 0.3:
 	- Eiko Fried joined the author list
