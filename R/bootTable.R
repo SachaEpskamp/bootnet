@@ -26,13 +26,16 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
   # edges:
   ind <- which(upper.tri(x[['graph']], diag=FALSE), arr.ind=TRUE)
   
+  # Weights matrix:
+  Wmat <- qgraph::getWmat(x)
+  
   if ("edge" %in% statistics){
     tables$edges <- dplyr::tbl_df(data.frame(
       name = name,
       type = "edge",
       node1 = x[['labels']][ind[,1]],
       node2 = x[['labels']][ind[,2]],
-      value = x[['graph']][upper.tri(x[['graph']], diag=FALSE)],
+      value = Wmat[upper.tri(Wmat, diag=FALSE)],
       stringsAsFactors = FALSE
     ))
   }
@@ -44,7 +47,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       type = "length",
       node1 = x[['labels']][ind[,1]],
       node2 = x[['labels']][ind[,2]],
-      value = abs(1/abs(x[['graph']][upper.tri(x[['graph']], diag=FALSE)])),
+      value = abs(1/abs(Wmat[upper.tri(Wmat, diag=FALSE)])),
       stringsAsFactors = FALSE
     ))
   }
@@ -72,7 +75,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
         ShortestPathLengths = matrix(Inf,ncol(x[['graph']]),ncol(x[['graph']]))
       )
     } else {
-      cent <- qgraph::centrality(x[['graph']], alpha = alpha, all.shortest.paths = FALSE)
+      cent <- qgraph::centrality(Wmat, alpha = alpha, all.shortest.paths = FALSE)
       
     }
     

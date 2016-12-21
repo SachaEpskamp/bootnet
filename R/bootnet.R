@@ -53,7 +53,9 @@ bootnet <- function(
   replacement = TRUE,
   graph, # for parametric bootstrap
   sampleSize, # for parametric bootstrap
-  intercepts, # for parametric bootstrap,
+  intercepts, # for parametric bootstrap
+  weighted,
+  signed,
   ... # Other arguments
   # edgeResample = FALSE # If true, only resample edges from original estimate
   # scaleAdjust = FALSE
@@ -104,7 +106,21 @@ bootnet <- function(
       # intArgs <- data$input$intArgs
       fun <- data$estimator
       dots <- data$arguments
+      if (missing(weighted)){
+        weighted <- data$weighted
+      }
+      if (missing(signed)){
+        signed <- data$signed
+      }
       data <- data$data
+    }
+    
+    # Weighted and signed defaults
+    if (missing(weighted)){
+      weighted <- TRUE
+    }
+    if (missing(signed)){
+      signed <- TRUE
     }
  
     N <- ncol(data)
@@ -207,7 +223,9 @@ bootnet <- function(
                         fun = inputCheck$estimator,
                         .dots = inputCheck$arguments,
                         labels = labels,
-                        verbose = verbose)
+                        verbose = verbose,
+                        weighted = weighted,
+                        signed = signed)
     
     
   } else {
@@ -330,7 +348,9 @@ bootnet <- function(
                           fun = inputCheck$estimator,
                           .dots = inputCheck$arguments,
                           labels = labels[inSample],
-                          verbose = FALSE)
+                          verbose = FALSE,
+                          weighted = weighted,
+                          signed = signed)
           
         }))
         if (is(res, "try-error")){
@@ -437,7 +457,9 @@ bootnet <- function(
                           fun = inputCheck$estimator,
                           .dots = inputCheck$arguments,
                           labels = labels[inSample],
-                          verbose = FALSE)
+                          verbose = FALSE,
+                          weighted = weighted,
+                          signed = signed)
         }))
         if (is(res, "try-error")){
           if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")

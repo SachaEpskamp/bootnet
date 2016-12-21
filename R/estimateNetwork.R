@@ -15,6 +15,8 @@ estimateNetwork <- function(
   verbose = TRUE, # Dummy used in cor_auto and in the future in other functions. Set to FALSE in bootnet
   construct = c("default","function","arguments"),
   .dots = list(),
+  weighted = TRUE,
+  signed = TRUE,
   # plot = TRUE, # Plot the network?
   ... # Arguments to the 'fun' function
 ){
@@ -108,7 +110,9 @@ estimateNetwork <- function(
     estimator = input$estimator,
     arguments = input$arguments,
     data = data,
-    default = default
+    default = default,
+    weighted = weighted,
+    signed = signed
   )
   class(sampleResult) <- c("bootnetResult", "list")
   

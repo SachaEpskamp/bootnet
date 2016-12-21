@@ -11,6 +11,22 @@ summary.bootnetResult <- function(object, ...){
       )
 }
 
-plot.bootnetResult <- function(x,...){
-  qgraph::qgraph(x[['graph']],labels=x[['labels']],...)
+plot.bootnetResult <- function(x,weighted, signed,...){
+
+  if (missing(weighted)){
+    weighted <- x$weighted
+  }
+  if (missing(signed)){
+    signed <- x$signed
+  }
+  
+  wMat <- x[['graph']]
+  if (!isTRUE(weighted)){
+    wMat <- sign(wMat)
+  }
+  if (!isTRUE(signed)){
+    wMat <- abs(wMat)
+  }
+  
+  qgraph::qgraph(wMat,labels=x[['labels']],...)
 }
