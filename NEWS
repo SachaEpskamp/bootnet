@@ -9,6 +9,7 @@ Changes in version 0.4:
   - Default set "IsingLL" has been renamed to "IsingSampler"
   - Default set "mgm" is now supported
   - labels argument is now supported in difference plots
+  - Quantile now uses type = 6, this makes CIs slightly wider and therefore the difference test slightly more conservative
   
   
 Changes in version 0.3:

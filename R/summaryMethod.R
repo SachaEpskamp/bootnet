@@ -77,13 +77,13 @@ summary.bootnet <- function(
           sd = ~sd(value,na.rm=TRUE),
           prop0 = ~mean(value == 0),
           # q1 = ~quantile(value,1/100, na.rm = TRUE),
-          q2.5 = ~quantile(value_min, 2.5/100, na.rm = TRUE),
+          q2.5 = ~quantile(value_min, 2.5/100, na.rm = TRUE, type = 6),
           #                 q5 = ~quantile(value, 5/100, na.rm = TRUE),
           #                 q25 = ~quantile(value, 25/100, na.rm = TRUE),
           #                 q50 = ~quantile(value, 50/100, na.rm = TRUE),
           #                 q75 = ~quantile(value, 75/100, na.rm = TRUE),
           #                 q95 = ~quantile(value, 95/100, na.rm = TRUE),
-          q97.5 = ~quantile(value_max, 97.5/100, na.rm = TRUE)
+          q97.5 = ~quantile(value_max, 97.5/100, na.rm = TRUE, type = 6)
           # q99 = ~quantile(value, 99/100, na.rm = TRUE)
         ) %>%
         dplyr::left_join(object$sampleTable %>% dplyr::select_(~type,~id,~node1,~node2,sample = ~value), by=c("id","type","node1","node2"))   %>%
@@ -107,15 +107,15 @@ summary.bootnet <- function(
           mean = ~mean(value,na.rm=TRUE),
           var = ~var(value,na.rm=TRUE),
           sd = ~sd(value,na.rm=TRUE),
-          q1 = ~quantile(value,1/100, na.rm = TRUE),
-          q2.5 = ~quantile(value, 2.5/100, na.rm = TRUE),
-          q5 = ~quantile(value, 5/100, na.rm = TRUE),
-          q25 = ~quantile(value, 25/100, na.rm = TRUE),
-          q50 = ~quantile(value, 50/100, na.rm = TRUE),
-          q75 = ~quantile(value, 75/100, na.rm = TRUE),
-          q95 = ~quantile(value, 95/100, na.rm = TRUE),
-          q97.5 = ~quantile(value, 97.5/100, na.rm = TRUE),
-          q99 = ~quantile(value, 99/100, na.rm = TRUE)
+          q1 = ~quantile(value,1/100, na.rm = TRUE, type = 6),
+          q2.5 = ~quantile(value, 2.5/100, na.rm = TRUE, type = 6),
+          q5 = ~quantile(value, 5/100, na.rm = TRUE, type = 6),
+          q25 = ~quantile(value, 25/100, na.rm = TRUE, type = 6),
+          q50 = ~quantile(value, 50/100, na.rm = TRUE, type = 6),
+          q75 = ~quantile(value, 75/100, na.rm = TRUE, type = 6),
+          q95 = ~quantile(value, 95/100, na.rm = TRUE, type = 6),
+          q97.5 = ~quantile(value, 97.5/100, na.rm = TRUE, type = 6),
+          q99 = ~quantile(value, 99/100, na.rm = TRUE, type = 6)
         ) %>% mutate_(CIlower = ~mean - 2*sd, CIupper = ~mean + 2*sd) %>% arrange_(~nNode,~nPerson)
       
     } else {
@@ -126,15 +126,15 @@ summary.bootnet <- function(
           mean = ~mean(cor,na.rm=TRUE),
           var = ~var(cor,na.rm=TRUE),
           sd = ~sd(cor,na.rm=TRUE),
-          q1 = ~quantile(cor,1/100, na.rm = TRUE),
-          q2.5 = ~quantile(cor, 2.5/100, na.rm = TRUE),
-          q5 = ~quantile(cor, 5/100, na.rm = TRUE),
-          q25 = ~quantile(cor, 25/100, na.rm = TRUE),
-          q50 = ~quantile(cor, 50/100, na.rm = TRUE),
-          q75 = ~quantile(cor, 75/100, na.rm = TRUE),
-          q95 = ~quantile(cor, 95/100, na.rm = TRUE),
-          q97.5 = ~quantile(cor, 97.5/100, na.rm = TRUE),
-          q99 = ~quantile(cor, 99/100, na.rm = TRUE)
+          q1 = ~quantile(cor,1/100, na.rm = TRUE, type = 6),
+          q2.5 = ~quantile(cor, 2.5/100, na.rm = TRUE, type = 6),
+          q5 = ~quantile(cor, 5/100, na.rm = TRUE, type = 6),
+          q25 = ~quantile(cor, 25/100, na.rm = TRUE, type = 6),
+          q50 = ~quantile(cor, 50/100, na.rm = TRUE, type = 6),
+          q75 = ~quantile(cor, 75/100, na.rm = TRUE, type = 6),
+          q95 = ~quantile(cor, 95/100, na.rm = TRUE, type = 6),
+          q97.5 = ~quantile(cor, 97.5/100, na.rm = TRUE, type = 6),
+          q99 = ~quantile(cor, 99/100, na.rm = TRUE, type = 6)
         ) %>% arrange_(~nNode, ~nPerson)
       
     }

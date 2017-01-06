@@ -1,8 +1,8 @@
 expAlpha <- function(alpha, nBoots, reps = 1000) {
   c(sapply(alpha,function(a){
     sapply(nBoots,function(nb){
-      mean(replicate(reps,quantile(runif(nb),a/2))) + 
-        (1 - mean(replicate(reps,quantile(runif(nb),1-a/2))))
+      mean(replicate(reps,quantile(runif(nb),a/2, type = 6))) + 
+        (1 - mean(replicate(reps,quantile(runif(nb),1-a/2, type = 6))))
     })
   }))
 }
@@ -75,8 +75,8 @@ differenceTest <- function(bootobject,x,y,measure = c("strength","closeness","be
     dplyr::left_join(dplyr::select(cent,name,id1=id1,value1=value,type),by=c("name","id1","type")) %>% 
     dplyr::left_join(dplyr::select(cent,name,id2=id1,value2=value,type),by=c("name","id2","type"))  %>%
     dplyr::group_by(id1,id2,type) %>%
-    dplyr::summarize(lower = quantile(value2-value1,alpha/2),
-              upper = quantile(value2-value1,1-alpha/2)) %>%
+    dplyr::summarize(lower = quantile(value2-value1,alpha/2, type = 6),
+              upper = quantile(value2-value1,1-alpha/2, type = 6)) %>%
     dplyr::mutate(contain0 = 0 >= lower & 0 <= upper) %>% 
     dplyr::mutate(significant = !contain0) %>%
     dplyr::select_("id1","id2","type","lower","upper","significant") %>%
