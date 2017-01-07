@@ -2,7 +2,7 @@
 # Function that checks input and returns the functions:
 checkInput <- function(
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm"),
-  fun = fun, # Estimator function
+  fun, # Estimator function
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
   estFun, # function that results in a network
@@ -23,7 +23,9 @@ checkInput <- function(
   construct <- match.arg(construct)
   
   ### DEFAULT OPTIONS ###
- 
+ if (missing(fun)){
+   fun <- NULL
+ }
   
 
   
@@ -88,12 +90,12 @@ checkInput <- function(
   if (construct == "default"){
     construct <- "function"
     
-    if (default == "none" && missing(fun)){
+    if (default == "none" && is.null(fun)){
       construct <- "arguments"
     }
     
     # If fun is missing, default is not none and one argument is not missing, use arguments (backward competability):
-    if (default != "none" && missing(fun) && (!missing(prepFun) | !missing(prepArgs) | !missing(estFun) | !missing(estArgs))){
+    if (default != "none" && is.null(fun) && (!missing(prepFun) | !missing(prepArgs) | !missing(estFun) | !missing(estArgs))){
       construct <- "arguments"
     }
   }

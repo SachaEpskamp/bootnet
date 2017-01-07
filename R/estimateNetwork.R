@@ -18,7 +18,8 @@ estimateNetwork <- function(
   weighted = TRUE,
   signed = TRUE,
   # plot = TRUE, # Plot the network?
-  ... # Arguments to the 'fun' function
+  ..., # Arguments to the 'fun' function
+  .input # Skips most of first steps if supplied
 ){
 #   if (default[[1]]=="glasso") default <- "EBICglasso"
 #   default <- match.arg(default)
@@ -61,32 +62,35 @@ estimateNetwork <- function(
   
   
   # Compute estimator:
-  input <- checkInput(
-    default = default,
-    fun = fun,
-    prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-    prepArgs = prepArgs, # list with arguments for the correlation function
-    estFun=estFun, # function that results in a network
-    estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-    graphFun=graphFun, # set to identity if missing
-    graphArgs=graphArgs, # Set to null if missing
-    intFun=intFun, # Set to null if missing
-    intArgs=intArgs, # Set to null if missing
-    sampleSize = Np,
-    construct=construct,
-    verbose=verbose,
-    .dots=.dots,
-    ...
-  )
+  if (missing(.input)){
+    .input <- checkInput(
+      default = default,
+      fun = fun,
+      prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+      prepArgs = prepArgs, # list with arguments for the correlation function
+      estFun=estFun, # function that results in a network
+      estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+      graphFun=graphFun, # set to identity if missing
+      graphArgs=graphArgs, # Set to null if missing
+      intFun=intFun, # Set to null if missing
+      intArgs=intArgs, # Set to null if missing
+      sampleSize = Np,
+      construct=construct,
+      verbose=verbose,
+      .dots=.dots,
+      ...
+    )
+  }
+
   
   # Add verbose:
   # Every estimator must have argument verbose:
-  if ("verbose" %in% names(formals(input$estimator))){
-    input$arguments$verbose <- verbose
+  if ("verbose" %in% names(formals(.input$estimator))){
+    .input$arguments$verbose <- verbose
   }
   
   # Compute network:
-  Result <- do.call(input$estimator, c(list(data),input$arguments))
+  Result <- do.call(.input$estimator, c(list(data),.input$arguments))
   
   if (is.list(Result)){
     sampleGraph <- Result$graph
@@ -107,12 +111,13 @@ estimateNetwork <- function(
     labels = labels,
     nNodes = ncol(data),
     nPerson = Np,
-    estimator = input$estimator,
-    arguments = input$arguments,
+    estimator = .input$estimator,
+    arguments = .input$arguments,
     data = data,
     default = default,
     weighted = weighted,
-    signed = signed
+    signed = signed,
+    .input = .input
   )
   class(sampleResult) <- c("bootnetResult", "list")
   

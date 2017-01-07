@@ -40,7 +40,10 @@ binarize <- function(x, split = "median", na.rm=TRUE, removeNArows = TRUE, verbo
 ### ARGUMENT ESTIMATOR ###
 # Construct the estimator:
 bootnet_argEstimator <- function(data, prepFun, prepArgs, estFun, estArgs, graphFun, graphArgs, intFun, intArgs, verbose = TRUE){
-  prepArgs$verbose <- verbose
+  # prepArgs$verbose <- verbose
+  if ("verbose" %in% names(formals(prepFun))){
+    prepArgs$verbose <- verbose
+  }
   
   # Compute input:
   input <- do.call(prepFun, c(list(data), prepArgs))

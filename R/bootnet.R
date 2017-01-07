@@ -90,12 +90,16 @@ bootnet <- function(
       intercepts <- rep(0, Np)
     }
     
+
     manual <- TRUE
     dots <- list(...)
   } else {
-    if (is(data,"bootnetResult")){
 
+    manual <- FALSE
+    
+    if (is(data,"bootnetResult")){
         default <- data$default
+        inputCheck <- data$.input
       # prepFun <- data$input$prepFun
       # prepArgs <- data$input$prepArgs
       # estFun <- data$input$estFun
@@ -113,6 +117,44 @@ bootnet <- function(
         signed <- data$signed
       }
       data <- data$data
+      N <- ncol(data)
+      Np <- nrow(data)
+    } else {
+      dots <- list(...)
+      N <- ncol(data)
+      Np <- nrow(data)
+      fun <- NULL
+      
+      # Check and remove any variable that is not ordered, integer or numeric:
+      if (!manual){
+        goodColumns <- sapply(data, function(x) is.numeric(x) | is.ordered(x) | is.integer(x))
+        
+        if (!all(goodColumns)){
+          if (verbose){
+            warning(paste0("Removing non-numeric columns: ",paste(which(!goodColumns),collapse="; ")))
+          }
+          data <- data[,goodColumns,drop=FALSE]
+        }
+      }
+      
+      
+      inputCheck <- checkInput(
+        default = default,
+        fun = fun,
+        prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+        prepArgs = prepArgs, # list with arguments for the correlation function
+        estFun=estFun, # function that results in a network
+        estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+        graphFun=graphFun, # set to identity if missing
+        graphArgs=graphArgs, # Set to null if missing
+        intFun=intFun, # Set to null if missing
+        intArgs=intArgs, # Set to null if missing
+        sampleSize = Np,
+        construct = construct,
+        .dots = dots
+      )
+      
+      
     }
     
     # Weighted and signed defaults
@@ -123,10 +165,7 @@ bootnet <- function(
       signed <- TRUE
     }
  
-    N <- ncol(data)
-    Np <- nrow(data)
-    
-    manual <- FALSE
+
   }
   
   
@@ -135,7 +174,7 @@ bootnet <- function(
     message("Jacknife overwrites nBoot to sample size")
     nBoots <- Np
   }
-  
+
   
   if (type == "node" & N < 3){
     stop("Node-wise bootstrapping requires at least three nodes.")
@@ -167,17 +206,7 @@ bootnet <- function(
 
   }
   
-  # Check and remove any variable that is not ordered, integer or numeric:
-  if (!manual){
-    goodColumns <- sapply(data, function(x) is.numeric(x) | is.ordered(x) | is.integer(x))
-    
-    if (!all(goodColumns)){
-      if (verbose){
-        warning(paste0("Removing non-numeric columns: ",paste(which(!goodColumns),collapse="; ")))
-      }
-      data <- data[,goodColumns,drop=FALSE]
-    }
-  }
+
   
   ## For parametric bootstrap, detect model
   if (type == "parametric" & model == "detect"){
@@ -196,28 +225,13 @@ bootnet <- function(
   # Estimate sample result:
   # Check the input:
  
-  inputCheck <- checkInput(
-    default = default,
-    fun = fun,
-    prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-    prepArgs = prepArgs, # list with arguments for the correlation function
-    estFun=estFun, # function that results in a network
-    estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-    graphFun=graphFun, # set to identity if missing
-    graphArgs=graphArgs, # Set to null if missing
-    intFun=intFun, # Set to null if missing
-    intArgs=intArgs, # Set to null if missing
-    sampleSize = Np,
-    construct = construct,
-    .dots = dots
-  )
   
   if (!manual)
   {
     if (verbose){
       message("Estimating sample network...")
     }
-    
+
     sampleResult <- estimateNetwork(data, 
                         default = default,
                         fun = inputCheck$estimator,
@@ -225,7 +239,8 @@ bootnet <- function(
                         labels = labels,
                         verbose = verbose,
                         weighted = weighted,
-                        signed = signed)
+                        signed = signed,
+                        .input = inputCheck)
     
     
   } else {
@@ -343,6 +358,7 @@ bootnet <- function(
           #                 verbose = FALSE,
           #                 construct = construct)
           # 
+          
           estimateNetwork(bootData, 
                           default = default,
                           fun = inputCheck$estimator,
@@ -350,10 +366,12 @@ bootnet <- function(
                           labels = labels[inSample],
                           verbose = FALSE,
                           weighted = weighted,
-                          signed = signed)
+                          signed = signed,
+                          .input = inputCheck)
           
         }))
         if (is(res, "try-error")){
+
           if (tryCount == tryLimit) {
             stop("Maximum number of errors in bootstraps reached")
           }
