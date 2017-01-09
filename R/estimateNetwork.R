@@ -95,9 +95,11 @@ estimateNetwork <- function(
   if (is.list(Result)){
     sampleGraph <- Result$graph
     intercepts <- Result$intercepts
+    output <- Result$results
   } else {
     sampleGraph <- Result
     intercepts <- NULL
+    output <- NULL
   }
   
   if (!is.matrix(sampleGraph)){
@@ -107,7 +109,7 @@ estimateNetwork <- function(
   sampleResult <- list(
     graph = sampleGraph,
     intercepts = intercepts,
-    results = Result$results,
+    results = ,
     labels = labels,
     nNodes = ncol(data),
     nPerson = Np,
