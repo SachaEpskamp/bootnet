@@ -109,7 +109,7 @@ estimateNetwork <- function(
   sampleResult <- list(
     graph = sampleGraph,
     intercepts = intercepts,
-    results = ,
+    results = output,
     labels = labels,
     nNodes = ncol(data),
     nPerson = Np,
