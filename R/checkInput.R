@@ -17,11 +17,11 @@ checkInput <- function(
   .dots = list(),
   ... # Arguments to the estimator function
 ){
+  default <- match.arg(default)
   if (default[[1]]=="glasso") default <- "EBICglasso"
   if (default[[1]]=="IsingSampler") default <- "IsingSampler"
-  default <- match.arg(default)
   construct <- match.arg(construct)
-  
+
   ### DEFAULT OPTIONS ###
  if (missing(fun)){
    fun <- NULL

@@ -1,7 +1,7 @@
 # This function takes data as input and produced a network. It is used inside bootnet:
 estimateNetwork <- function(
   data,
-  default = c("none", "EBICglasso", "pcor","IsingFit","IsingLL", "huge","adalasso"),
+  default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm"),
   fun, # A function that takes data and returns a network or list entitled "graph" and "thresholds". optional.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
@@ -28,7 +28,7 @@ estimateNetwork <- function(
   # if (any(is.na(data)) && default %in% c("huge","adalasso")){
   #   stop(paste0("Missing data not supported for default set '",default,"'. Try using na.omit(data)."))
   # }
-  
+
   # First test if data is a data frame:
   if (!(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
@@ -88,7 +88,7 @@ estimateNetwork <- function(
   if ("verbose" %in% names(formals(.input$estimator))){
     .input$arguments$verbose <- verbose
   }
-  
+
   # Compute network:
   Result <- do.call(.input$estimator, c(list(data),.input$arguments))
   
