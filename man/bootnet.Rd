@@ -8,8 +8,8 @@ Bootstrapped network estimation
 This function can be used to bootstrap network estimation methods so that the spread of parameter and centrality estimates can be assessed. Most important methods are \code{type = 'nonparametric'} for the non-parametric bootstrap and \code{type = 'case'} for the case-dropping bootstrap. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
-                 "pcor", "IsingFit", "IsingLL"), type =
+bootnet(data, nBoots = 1000, default = c("none", "EBICglasso", "pcor","IsingFit",
+                  "IsingSampler", "huge","adalasso","mgm"), type =
                  c("nonparametric", "parametric", "node", "person",
                  "jackknife", "case"), nCores = 1, statistics = c("edge"
                  ,"strength","closeness","betweenness"), model = c("detect",
@@ -20,7 +20,7 @@ bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
                  subNodes = 2:(ncol(data) - 1), subCases = round((1 -
                  seq(caseMin, caseMax, length = caseN)) * nrow(data)),
                  computeCentrality = TRUE, propBoot = 1, replacement =
-                 TRUE, graph, sampleSize, intercepts, ...)
+                 TRUE, graph, sampleSize, intercepts, weighted, signed,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -103,6 +103,8 @@ A character vector containing the node labels. If omitted the column names of th
   \item{sampleSize}{The samplesize to use in parametric bootstrap.}
   \item{intercepts}{Intercepts to use in parametric bootstrap.}
   \item{construct}{How to construct the estimator? Set to \code{"arguments"} to use old functionality (not recommended).}
+\item{weighted}{Logical, should the analyzed network be weighted?}
+\item{signed}{Logical, should the analyzed network be signed?}
   \item{\dots}{
   Additional arguments used in the estimator function.
   }

@@ -15,10 +15,11 @@ Estimate a network structure
 This function allows for flexible estimation of a network structure using various R packages and model frameworks. This is typically done by using one of the default sets. See details for manual specification. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit", "IsingLL", 
-  "huge", "adalasso"), fun, prepFun, prepArgs, estFun, estArgs, 
-  graphFun, graphArgs, intFun, intArgs, labels, verbose = TRUE,
-  construct = c("default","function","arguments"), .dots = list(), \dots)
+estimateNetwork(data, default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", 
+  "huge","adalasso","mgm"), fun, prepFun, prepArgs, estFun, estArgs, 
+  graphFun, graphArgs, intFun, intArgs, labels, verbose = TRUE,  construct = 
+  c("default","function","arguments"), .dots = list(), weighted = TRUE, signed = TRUE,
+  \dots, .input)
                 
 bootnet_EBICglasso(data, tuning = 0.5,corMethod = c("cor_auto","cov","cor","npn"), 
   missing = c("pairwise","listwise","stop"), sampleSize = c("maximum","minimim"),
@@ -52,6 +53,7 @@ A string indicating the method to use. Specifying a \code{default} sets default 
 \describe{
 \item{\code{"EBICglasso"}}{Gaussian Markov random field estimation using graphical LASSO and extended Bayesian information criterion to select optimal regularization parameter. Using \code{\link[qgraph]{EBICglasso}} from the qgraph package. Calls \code{bootnet_EBICglasso}.}
 \item{\code{"IsingFit"}}{Ising model estimation using LASSO regularized nodewise logistic regression and extended Bayesian information criterion to select optimal regularization parameter. Using \code{\link[IsingFit]{IsingFit}} from the IsingFit package.  Calls \code{bootnet_IsingFit}.}
+\item{\code{IsingSampler}}{Calls the \code{\link[IsingSampler]{EstimateIsing}} function from the IsingSampler package. }
 \item{\code{"pcor"}}{Partial correlation network (non-regularized Gaussian Markov random field), using \code{\link[corpcor]{cor2pcor}} from the corpcor package.  Calls \code{bootnet_pcor}.}
 \item{\code{adalasso}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
 \item{\code{huge}}{Uses EBIC model selection of GGM networks estimated via the glasso algorithm as implemented in the huge package (as opposed to glasso and qgraph packages used in \code{default = "EBICglasso"}). Uses nonparanormal transformation in preparing the data and does not use polychoric correlations. Calls \code{bootnet_huge}.}
@@ -76,7 +78,6 @@ A custom estimation function, when no default set is used. This must be a functi
 \item{type}{See \code{\link[mgm]{mgmfit}}.}
 \item{lev}{See \code{\link[mgm]{mgmfit}}.}
 \item{degree}{Degree of mixed model, see \code{\link[mgm]{mgmfit}}}
-\item{construct}{How to construct the estimator? Set to \code{"arguments"} to use old functionality (not recommended).}
   \item{prepFun}{
 A function that takes as input the raw data and returns whatever the estimation function needs (as first argument). Typically this function is used to correlate or binarize the data. Defaults to \code{\link{identity}} if omitted and \code{default} is not set. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
 }
@@ -107,12 +108,19 @@ A character vector containing the node labels. If omitted the column names of th
   \item{verbose}{
 Logical, currently only used when \code{default = "EBICglasso"} in the \code{cor_auto} function.
 }
+
+\item{weighted}{Logical, should the analyzed network be weighted?}
+\item{signed}{Logical, should the analyzed network be signed?}
+\item{construct}{
+Should the estimator function be constructed using new bootnet functionality (\code{function}) or old bootnet functionality (\code{arguments})? Will default to \code{function} unless arguments such as \code{estFun} are used.
+}
 \item{.dots}{
 A list of arguments used in the estimation function set by a default set or by the \code{fun} argument.
 }
 \item{\dots}{
 A list of arguments used in the estimation function set by a default set or by the \code{fun} argument.
 }
+\item{.input}{Used internally in the bootnet function. Do not use.}
 }
 \details{
 NEW FUNCTIONALTIY:
@@ -235,13 +243,13 @@ bfiSub <- bfi[,1:25]
 # Estimate network:
 Network <- estimateNetwork(bfiSub, default = "EBICglasso")
 
+\dontrun{
 # Some pointers:
 print(Network)
 
 # Estimated network:
 plot(Network, layout = 'spring') 
 
-\dontrun{
 # Centrality indices:
 library("qgraph")
 centralityPlot(Network)
