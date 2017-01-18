@@ -1,3 +1,7 @@
+Changes in Verson 0.4.1:
+  - Implemented the netSimulator function that allows for researchers to investigate sample size requirements.
+      - Added simGraph and ggmGenerator functions to be used in netSimulator
+
 Changes in version 0.4:
   - estimateNetwork now accepts a custom estimation function using the argument 'fun'
   - Reworked default sets as functions!

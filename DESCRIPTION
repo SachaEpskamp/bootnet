@@ -1,11 +1,11 @@
 Package: bootnet
 Type: Package
 Title: Bootstrap Methods for Various Network Estimation Routines
-Version: 0.4
+Version: 0.4.1
 Author: Sacha Epskamp and Eiko I. Fried
 Maintainer: Sacha Epskamp <mail@sachaepskamp.com>
 Depends: ggplot2, R (>= 3.0.0)
-Imports: methods, igraph, IsingFit, qgraph, dplyr (>= 0.3.0.2), gtools, corpcor, IsingSampler, mvtnorm, abind, Matrix, parallel, huge, parcor, mgm
+Imports: methods, igraph, IsingFit, qgraph, dplyr (>= 0.3.0.2), tidyr, gtools, corpcor, IsingSampler, mvtnorm, abind, Matrix, parallel, huge, parcor, mgm
 Suggests: psych
 Description: Bootstrap methods to assess accuracy and stability of estimated network structures
               and centrality indices. Allows for flexible specification of any undirected network 

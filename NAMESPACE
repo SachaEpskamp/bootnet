@@ -30,13 +30,22 @@ S3method(summary, bootnetResult)
 S3method(plot, bootnetResult)
 S3method(print, bootnetResult)
 
+S3method(summary, netSimulator)
+S3method(plot, netSimulator)
+S3method(print, netSimulator)
+
+export(netSimulator)
+export(simGraph)
+export(ggmGenerator)
+
 # Imports:
 import(dplyr)
 import(parallel)
 importFrom(IsingFit,"IsingFit")
 import(qgraph)
 import(ggplot2)
-import(igraph)
+importFrom("igraph", "get.adjacency","watts.strogatz.game")
+import(tidyr)
 importFrom(gtools, "mixedorder")
 importFrom(corpcor, "cor2pcor")
 importFrom(IsingSampler, "IsingSampler")
