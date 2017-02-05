@@ -68,7 +68,7 @@ bootnet_EBICglasso <- function(
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","stop"),
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
-  verbose = verbose,
+  verbose = TRUE,
   corArgs = list() # Extra arguments to the correlation function
 ){
   # Check arguments:
