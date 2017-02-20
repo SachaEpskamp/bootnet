@@ -28,9 +28,13 @@ plot.bootnet <- function(
   differenceShowValue, # Show values in difference plots?
   differenceEdgeColor = TRUE, # Show blocks of edges as colors according to standard plot.
   verbose = TRUE,
+  panels = TRUE, # defaults to TRUE if 
   ...
 ){
   bonferroni <- FALSE
+  # if (panels == "default"){
+  #   panels <- length(statistics) > 1
+  # }
   
   if (missing(statistics)){
     if (! x$type %in% c("person","node")){
@@ -138,8 +142,12 @@ plot.bootnet <- function(
       if (perNode){
         
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
-            facet_grid(type ~ ., scales = "free") 
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) 
+          
+          if (panels){
+            g <- g + facet_grid(type ~ ., scales = "free") 
+          }
+          
           
           if (area){
             g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
@@ -155,8 +163,13 @@ plot.bootnet <- function(
           
         } else {
           
-          g <- ggplot(Sum, aes_string(x = 'nPerson', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
-            facet_grid(type ~ ., scales = "free")          
+          g <- ggplot(Sum, aes_string(x = 'nPerson', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id"))        
+          
+          if (isTRUE(panels)){
+            g <- g + facet_grid(type ~ ., scales = "free")   
+          }
+          
+          
           if (area){
             g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
           }
@@ -227,7 +240,6 @@ plot.bootnet <- function(
         
         if (x$type == "node"){
           g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
-            facet_grid(type ~ ., scales = "free") +
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -237,10 +249,12 @@ plot.bootnet <- function(
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
                             limits = c( ncol(x$sample$graph)-1, 1))
           
+          if (panels){
+            g <- g + facet_grid(type ~ ., scales = "free")
+          }
         } else {
           
           g <- ggplot(Sum, aes_string(x = 'nPeople', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
-            facet_grid(type ~ ., scales = "free") +
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -250,6 +264,9 @@ plot.bootnet <- function(
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) *  x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")),
                             limits = c( ncol(x$sample$graph)-1, 1))
           
+          if (panels){
+            g <- g +   facet_grid(type ~ ., scales = "free")
+          }
           
         }
         
@@ -431,9 +448,11 @@ plot.bootnet <- function(
     g <- ggplot(Quantiles,aes(x=id1,y=id2,fill=fill)) + 
       geom_tile(colour = 'white') + xlab("") + ylab("") + 
       scale_fill_manual(values = colorValues) + 
-      theme(legend.position="none") + 
-      facet_grid(~ type)
+      theme(legend.position="none") 
     
+    if (panels){
+      g <- g + facet_grid(~ type)
+    }
     
     
     if (differenceShowValue){
@@ -580,10 +599,15 @@ plot.bootnet <- function(
       g <- ggplot(bootTable, aes_string(x = 'value', y = 'id', group = 'name')) + 
         geom_path(alpha = bootAlpha, lwd = bootlwd) +
         geom_path(data = sampleTable, alpha=1, color = sampleColor, lwd = samplelwd) +
-        facet_grid(~ type, scales = "free") +
+        # facet_grid(~ type, scales = "free") +
         theme_bw() + 
         xlab("") +
         ylab("")
+      
+      if (panels){
+        g <- g +  facet_grid(~ type, scales = "free")
+      }
+      
       
       if (identical(FALSE,legend)){
         g <- g + theme(legend.position = "none")
@@ -659,7 +683,6 @@ plot.bootnet <- function(
         sumTable2$numericID <- as.numeric(sumTable2$id)
         
         g <- ggplot(sumTable2, aes_string(x = "ci", y = "numericID")) + 
-          facet_grid(~ type, scales = "free") +
           geom_polygon(fill = bootColor, colour = NA, alpha = areaAlpha) +
           geom_path(aes_string(x="sample",y="numericID"), colour = sampleColor, lwd = samplelwd, data = sumTable) +
           geom_point(aes_string(x="sample",y="numericID"), colour = sampleColor, data = sumTable) +
@@ -667,6 +690,11 @@ plot.bootnet <- function(
           xlab("") +
           ylab("") + 
           scale_y_continuous(breaks = seq(1:length(levels(sumTable$id))), labels = levels(sumTable$id))
+        
+        if (isTRUE(panels)){
+          g <- g + facet_grid(~ type, scales = "free")
+        }
+        
         if (identical(FALSE,legend)){
           g <- g + theme(legend.position = "none")
         }
@@ -682,10 +710,13 @@ plot.bootnet <- function(
         g <- ggplot(sumTable2, aes_string(x='sample', y='id', group = 'id')) + 
           geom_path(aes_string(x='ci'), colour = bootColor) +
           geom_point(colour = sampleColor) +
-          facet_grid(~ type, scales = "free") +
           theme_bw() + 
           xlab("") +
           ylab("")
+        
+        if (isTRUE(panels)){
+          g <- g + facet_grid(~ type, scales = "free")
+        }
         
         if (identical(FALSE,legend)){
           g <- g + theme(legend.position = "none")

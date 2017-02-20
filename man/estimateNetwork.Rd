@@ -19,7 +19,7 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor","IsingFit","Ising
   "huge","adalasso","mgm"), fun, prepFun, prepArgs, estFun, estArgs, 
   graphFun, graphArgs, intFun, intArgs, labels, verbose = TRUE,  construct = 
   c("default","function","arguments"), .dots = list(), weighted = TRUE, signed = TRUE,
-  \dots, .input)
+  \dots, .input, memorysaver = FALSE)
                 
 bootnet_EBICglasso(data, tuning = 0.5,corMethod = c("cor_auto","cov","cor","npn"), 
   missing = c("pairwise","listwise","stop"), sampleSize = c("maximum","minimim"),
@@ -121,6 +121,8 @@ A list of arguments used in the estimation function set by a default set or by t
 A list of arguments used in the estimation function set by a default set or by the \code{fun} argument.
 }
 \item{.input}{Used internally in the bootnet function. Do not use.}
+\item{memorysaver}{
+Logical. If TRUE attempts to save memory (RAM) by removing some objects from the output. Used by bootnet by default for bootstraps.}
 }
 \details{
 NEW FUNCTIONALTIY:

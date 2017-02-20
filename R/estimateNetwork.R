@@ -19,7 +19,8 @@ estimateNetwork <- function(
   signed = TRUE,
   # plot = TRUE, # Plot the network?
   ..., # Arguments to the 'fun' function
-  .input # Skips most of first steps if supplied
+  .input, # Skips most of first steps if supplied
+  memorysaver = FALSE # If set to FALSE data, estimator and results are not stored.
 ){
 #   if (default[[1]]=="glasso") default <- "EBICglasso"
 #   default <- match.arg(default)
@@ -122,6 +123,15 @@ estimateNetwork <- function(
     .input = .input
   )
   class(sampleResult) <- c("bootnetResult", "list")
+  
+  # Memory save:
+  if(memorysaver)
+  {
+    sampleResult$results <- NA
+    sampleResult$estimator <- NA
+    sampleResult$data <- NA
+    sampleResult$.input <- NA
+  }
   
   # Plot?
 #   if (plot){

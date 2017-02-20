@@ -367,7 +367,8 @@ bootnet <- function(
                           verbose = FALSE,
                           weighted = weighted,
                           signed = signed,
-                          .input = inputCheck)
+                          .input = inputCheck,
+                          memorysaver = TRUE)
           
         }))
         if (is(res, "try-error")){
@@ -477,7 +478,8 @@ bootnet <- function(
                           labels = labels[inSample],
                           verbose = FALSE,
                           weighted = weighted,
-                          signed = signed)
+                          signed = signed,
+                          memorysaver = TRUE)
         }))
         if (is(res, "try-error")){
           if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")
