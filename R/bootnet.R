@@ -90,7 +90,10 @@ bootnet <- function(
       intercepts <- rep(0, Np)
     }
     
-
+    if (!missing(data)){
+      warning("'data' is ignored when using manual parametric bootstrap.")
+      data <- NULL
+    }
     manual <- TRUE
     dots <- list(...)
   } else {
@@ -137,37 +140,55 @@ bootnet <- function(
         }
       }
       
-      
-      inputCheck <- checkInput(
-        default = default,
-        fun = fun,
-        prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-        prepArgs = prepArgs, # list with arguments for the correlation function
-        estFun=estFun, # function that results in a network
-        estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-        graphFun=graphFun, # set to identity if missing
-        graphArgs=graphArgs, # Set to null if missing
-        intFun=intFun, # Set to null if missing
-        intArgs=intArgs, # Set to null if missing
-        sampleSize = Np,
-        construct = construct,
-        .dots = dots
-      )
-      
+      # 
+      # inputCheck <- checkInput(
+      #   default = default,
+      #   fun = fun,
+      #   prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+      #   prepArgs = prepArgs, # list with arguments for the correlation function
+      #   estFun=estFun, # function that results in a network
+      #   estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+      #   graphFun=graphFun, # set to identity if missing
+      #   graphArgs=graphArgs, # Set to null if missing
+      #   intFun=intFun, # Set to null if missing
+      #   intArgs=intArgs, # Set to null if missing
+      #   sampleSize = Np,
+      #   construct = construct,
+      #   .dots = dots
+      # )
+      # 
       
     }
     
-    # Weighted and signed defaults
-    if (missing(weighted)){
-      weighted <- TRUE
-    }
-    if (missing(signed)){
-      signed <- TRUE
-    }
+
  
 
   }
   
+  
+  inputCheck <- checkInput(
+    default = default,
+    fun = fun,
+    prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+    prepArgs = prepArgs, # list with arguments for the correlation function
+    estFun=estFun, # function that results in a network
+    estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+    graphFun=graphFun, # set to identity if missing
+    graphArgs=graphArgs, # Set to null if missing
+    intFun=intFun, # Set to null if missing
+    intArgs=intArgs, # Set to null if missing
+    sampleSize = Np,
+    construct = construct,
+    .dots = dots
+  )
+  
+  # Weighted and signed defaults
+  if (missing(weighted)){
+    weighted <- TRUE
+  }
+  if (missing(signed)){
+    signed <- TRUE
+  }
   
   
   if (type == "jackknife"){
@@ -245,7 +266,6 @@ bootnet <- function(
     
   } else {
    
-    
     sampleResult <- list(
       graph = graph,
       intercepts = intercepts,
@@ -254,7 +274,9 @@ bootnet <- function(
       nPerson = Np,
       estimator = inputCheck$estimator,
       arguments = inputCheck$arguments,
-      default = default
+      default = default,
+      weighted = weighted,
+      signed = signed
     )
     class(sampleResult) <- c("bootnetResult", "list")
     
@@ -406,7 +428,7 @@ bootnet <- function(
       graph <- matrix(0,N,N)
     }
     if (missing(data)){
-      graph <- matrix(0,Np,N)
+      data <- matrix(0,Np,N)
     }
     if (missing(intercepts)){
       intercepts <- rep(0,N)
@@ -417,7 +439,7 @@ bootnet <- function(
     
     # Needed arguments to be excluded:
    excl <- c("prepFun", "prepArgs", "estFun", "estArgs", "graphFun", 
-             "graphArgs", "intFun", "intArgs")
+             "graphArgs", "intFun", "intArgs", "fun")
     
     clusterExport(cl, ls()[!ls()%in%c(excl,"cl")], envir = environment())
     # clusterExport(cl, export, envir = environment())
