@@ -3,6 +3,7 @@ Changes in Verson 0.4.1:
       - Added simGraph and ggmGenerator functions to be used in netSimulator
   - bootnet now stores less results and should have better memory usuage! Thanks to Giulio Costantini!
   - Fixed some bugs related to manual parametric bootstrap
+  - EstimateNetwork now references packages used in a message
 
 Changes in version 0.4:
   - estimateNetwork now accepts a custom estimation function using the argument 'fun'

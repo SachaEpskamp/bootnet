@@ -76,6 +76,21 @@ bootnet_EBICglasso <- function(
   missing <- match.arg(missing)
   sampleSize <- match.arg(sampleSize)
   
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - qgraph::EBICglasso for EBIC model selection\n    - using glasso::glasso")
+    if (corMethod == "cor_auto"){
+      msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "npn"){
+      msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
+    }
+    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
+  
   # First test if data is a data frame:
   if (!(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
@@ -164,6 +179,21 @@ bootnet_pcor <- function(
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
   
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - qgraph::qgraph(..., graph = 'pcor') for network computation")
+    if (corMethod == "cor_auto"){
+      msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "npn"){
+      msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
+    }
+    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
+  
   # First test if data is a data frame:
   if (!(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
@@ -240,6 +270,15 @@ bootnet_IsingFit <- function(
   missing <- match.arg(missing)
   rule <- match.arg(rule)
   
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - IsingFit::IsingFit for network computation\n    - Using glmnet::glmnet")
+    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
+  
   # First test if data is a data frame:
   if (!(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
@@ -290,6 +329,14 @@ bootnet_IsingSampler <- function(
   # Check arguments:
   missing <- match.arg(missing)
   method <- match.arg(method)
+  
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - IsingSampler::EstimateIsing for network computation")
+    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
   
   # First test if data is a data frame:
   if (!(is.data.frame(data) || is.matrix(data))){
@@ -354,6 +401,14 @@ bootnet_adalasso <- function(
   # Check arguments:
   missing <- match.arg(missing)
   
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - parcor::adalasso.net for network computation")
+    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
   # First test if data is a data frame:
   if (!(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
@@ -401,6 +456,15 @@ bootnet_huge <- function(
   missing <- match.arg(missing)
   criterion <- match.arg(criterion)
   # method <- match.arg(method)
+  
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - huge::huge for network computation")
+    msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
+    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
   
   # First test if data is a data frame:
   if (!(is.data.frame(data) || is.matrix(data))){
@@ -459,6 +523,14 @@ bootnet_mgm <- function(
   missing <- match.arg(missing)
   criterion <- match.arg(criterion)
   # method <- match.arg(method)
+  
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - mgm::mgm for network computation\n    - Using glmnet::glmnet")
+    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
   
   # First test if data is a data frame:
   if (!(is.data.frame(data) || is.matrix(data))){
