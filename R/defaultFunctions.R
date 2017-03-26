@@ -86,7 +86,7 @@ bootnet_EBICglasso <- function(
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
     }
-    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
     message(msg)
   }
   
@@ -189,7 +189,7 @@ bootnet_pcor <- function(
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
     }
-    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
     message(msg)
   }
   
@@ -274,7 +274,7 @@ bootnet_IsingFit <- function(
   if (verbose){
     msg <- "Estimating Network. Using package::function:"  
     msg <- paste0(msg,"\n  - IsingFit::IsingFit for network computation\n    - Using glmnet::glmnet")
-    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
     message(msg)
   }
   
@@ -334,7 +334,7 @@ bootnet_IsingSampler <- function(
   if (verbose){
     msg <- "Estimating Network. Using package::function:"  
     msg <- paste0(msg,"\n  - IsingSampler::EstimateIsing for network computation")
-    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
     message(msg)
   }
   
@@ -405,7 +405,7 @@ bootnet_adalasso <- function(
   if (verbose){
     msg <- "Estimating Network. Using package::function:"  
     msg <- paste0(msg,"\n  - parcor::adalasso.net for network computation")
-    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
     message(msg)
   }
   
@@ -462,7 +462,7 @@ bootnet_huge <- function(
     msg <- "Estimating Network. Using package::function:"  
     msg <- paste0(msg,"\n  - huge::huge for network computation")
     msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
-    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
     message(msg)
   }
   
@@ -528,7 +528,7 @@ bootnet_mgm <- function(
   if (verbose){
     msg <- "Estimating Network. Using package::function:"  
     msg <- paste0(msg,"\n  - mgm::mgm for network computation\n    - Using glmnet::glmnet")
-    msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
     message(msg)
   }
   
