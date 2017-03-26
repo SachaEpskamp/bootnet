@@ -35,8 +35,9 @@ S3method(plot, netSimulator)
 S3method(print, netSimulator)
 
 export(netSimulator)
-export(simGraph)
+export(genGGM)
 export(ggmGenerator)
+export(IsingGenerator)
 
 # Imports:
 import(dplyr)
@@ -63,3 +64,5 @@ importFrom(Matrix,"forceSymmetric")
     importFrom("stats", "na.omit", "quantile", "runif", "sd")
   importFrom("utils", "data")
     importFrom("utils", "capture.output")
+  importFrom("stats", "cov2cor")
+  importFrom("utils", "write.table")

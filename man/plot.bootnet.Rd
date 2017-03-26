@@ -15,7 +15,7 @@ This function can be used to plot bootnet results by plotting all bootstrapped s
         order = c("id", "sample", "mean"), decreasing = TRUE, perNode = FALSE, 
         legendNcol = 2, labels=TRUE, legend = TRUE,subsetRange = c(100,0), 
         area = !perNode, alpha = 0.05, onlyNonZero = FALSE, differenceShowValue, 
-        differenceEdgeColor = TRUE, verbose = TRUE,...)
+        differenceEdgeColor = TRUE, verbose = TRUE, panels = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -84,6 +84,7 @@ Alpha of the area
    \item{differenceEdgeColor}{Logical used when \code{plot = "difference", statistics = "edge"}. Should diagonal blocks be colored according to default edge colors?
   }
   \item{verbose}{Should expected alpha be printed?}
+  \item{panels}{Logical, should panel titles be printed?}
   \item{\dots}{Not used.}
 }
 

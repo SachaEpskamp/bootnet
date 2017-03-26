@@ -23,24 +23,24 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor","IsingFit","Ising
                 
 bootnet_EBICglasso(data, tuning = 0.5,corMethod = c("cor_auto","cov","cor","npn"), 
   missing = c("pairwise","listwise","stop"), sampleSize = c("maximum","minimim"),
-  verbose = verbose, corArgs = list())
+  verbose = TRUE, corArgs = list())
   
 bootnet_pcor(data, corMethod = c("cor_auto","cov","cor","npn"), missing = c("pairwise",
-  "listwise","stop"), verbose = verbose, corArgs = list())
+  "listwise","stop"), verbose = TRUE, corArgs = list())
   
-bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = verbose,
+bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = TRUE,
   rule = c("AND","OR"), split = "median")
   
-bootnet_IsingSampler(data, missing = c("listwise","stop"), verbose = verbose,
+bootnet_IsingSampler(data, missing = c("listwise","stop"), verbose = TRUE,
   split = "median", method = c("default","ll","pl","uni","bi"))
   
-bootnet_adalasso(data,missing = c("listwise","stop"), verbose = verbose, nFolds = 10)
+bootnet_adalasso(data,missing = c("listwise","stop"), verbose = TRUE, nFolds = 10)
   
-bootnet_huge(data, tuning = 0.5, missing = c("listwise","stop"), verbose = verbose,
+bootnet_huge(data, tuning = 0.5, missing = c("listwise","stop"), verbose = TRUE,
   npn = TRUE, criterion = c("ebic","ric","stars"))
   
 bootnet_mgm(data, type, lev, tuning = 0.5, missing = c("listwise","stop"), 
-  verbose = verbose, criterion = c("EBIC","CV"), nFolds = 10, degree = 2,
+  verbose = TRUE, criterion = c("EBIC","CV"), nFolds = 10, degree = 2,
   rule = c("AND","OR"))
 }
 %- maybe also 'usage' for other objects documented here.

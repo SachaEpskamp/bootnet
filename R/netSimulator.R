@@ -6,6 +6,7 @@ ggmGenerator <- function(
   ordinal = FALSE,
   nLevels = 4
 ){
+  ORDINALDUMMY <- NULL
   # Generate a function with nCase as first and input as second argument
   
   # Wrapper:
@@ -60,7 +61,61 @@ ggmGenerator <- function(
       Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,rnorm(%f-1),Inf))))
     }',nLevels)
   }
+  
+  # Parse again:
+  Estimator <- eval(parse(text=deparsedEstimator))
+  return(Estimator)
+}
 
+### Ising:
+IsingGenerator <- function(
+  ... # Arguments used in IsingSampler
+){
+  ARGDUMMY <- NULL
+  # Generate a function with nCase as first and input as second argument
+  
+  # Wrapper:
+  Gen <- function(n, input){
+    if (is.list(input)){
+      if ("graph" %in% names(input)){
+        graph <- input$graph
+      } else stop("Input must be a list containing elements 'graph' and 'intercepts'")
+      
+      if ("intercepts" %in% names(input)){
+        intercepts <- input$intercepts
+      } else {
+        stop("Input must be a list containing elements 'graph' and 'intercepts'")
+      }
+    } else {
+      stop("Input must be a list containing elements 'graph' and 'intercepts'")
+    }
+    
+    Data <- IsingSampler::IsingSampler(n, 
+                                       input$graph, 
+                                       ARGDUMMY,
+                                       input$intercepts
+                                       
+    )
+    
+    return(Data)
+  }
+  
+  # Deparse:
+  deparsedEstimator <- deparse(Gen)
+  l <- grep("ARGDUMMY,",deparsedEstimator)
+  
+  dots <-list(...)
+  
+  
+  
+  if (length(dots) == 0){
+    deparsedEstimator[l] <- gsub("ARGDUMMY,","",deparsedEstimator[l])
+  } else {
+    # Construct arguments:
+    txt <- sapply(dots, function(x)paste(deparse(dput(x)),collapse="\n"))
+    deparsedEstimator[l] <- gsub("ARGDUMMY",paste(names(dots), "=", txt, collapse = ", "),deparsedEstimator[l])
+  }
+  
   # Parse again:
   Estimator <- eval(parse(text=deparsedEstimator))
   return(Estimator)
@@ -68,103 +123,140 @@ ggmGenerator <- function(
 
 
 netSimulator <- function(
-  input = simGraph(Nvar = 10),  # A matrix, or a list with graph and intercepts elements.
-  dataGenerator = ggmGenerator(ordinal = FALSE), # Data generating function taking N as first argument and input as second.
+  input = genGGM(Nvar = 10),  # A matrix, or a list with graph and intercepts elements.
   nCases = c(50,100,250,500,1000,2500), # Number of cases
   nReps = 100, # Number of repititions per condition
   nCores = 1, # Number of computer cores used
+  default,
+  dataGenerator, 
   ... # estimateNetwork arguments (if none specified, will default to default = "EBICglasso)
 ){
   # Dots list:
   .dots <- list(...)
-  if (length(.dots) == 0){
-    message("Setting default = 'EBICglasso'")
-    .dots$default <- "EBICglasso"
-  }
-
-  Results <- parSim(
-    # Conditions:
-    nCases = nCases,
-    
-    # Setup:,
-    write=FALSE,
-    nCores = nCores,
-    reps = nReps,
-    debug=FALSE,
-    export = c("input","dataGenerator",".dots"),
-    
-    expression = {
-      cor0 <- function(x,y){
-        if (all(is.na(x)) || all(is.na(y))){
-          return(NA)
-        }
-        
-        if (sd(x,na.rm=TRUE)==0 | sd(y,na.rm=TRUE) == 0){
-          return(0)
-        }
-        
-        return(cor(x,y,use="pairwise.complete.obs"))
-      }
-      
-      # Generate the input:
-      if (is.function(input)){
-        inputResults <- input()
-      } else {
-        inputResults <- input
-      }
-      
-      # True network:
-      if (is.list(inputResults)){
-        trueNet <- inputResults$graph
-      } else {
-        trueNet <- inputResults
-      }
-      
-      # Generate the data:
-      Data <- dataGenerator(nCases, inputResults)
-
-      # Compute the network:
-      .dots$data <- Data
-      netResults <- do.call(bootnet::estimateNetwork,.dots)
-      estNet <- qgraph::getWmat(netResults)
-      
-      # Compute measures:
-      ### STORE RESULTS ###
-      SimulationResults <- list()
-      
-      # Estimated edges:
-      est <- estNet[upper.tri(estNet)]
-      # Real edges:
-      real <- trueNet[upper.tri(trueNet)]
-      
-      # Equal?
-      SimulationResults$correctModel <- all((est == 0) == (real == 0))
-      
-      # True positives:
-      TruePos <- sum(est != 0 &  real != 0)
-      
-      # False pos:
-      FalsePos <- sum(est != 0 & real == 0)
-      
-      # True Neg:
-      TrueNeg <- sum(est == 0 & real == 0)
-      
-      # False Neg:
-      FalseNeg <- sum(est == 0 & real != 0)
-      
-      ### Sensitivity:
-      SimulationResults$sensitivity <- TruePos / (TruePos + FalseNeg)
-      
-      # Specificity:
-      SimulationResults$specificity <- TrueNeg / (TrueNeg + FalsePos)
-      
-      # Correlation:
-      SimulationResults$correlation <- cor0(est,real)
-      
-      SimulationResults
-    })
   
-  class(Results) <- c("netSimulator","data.frame")
-  return(Results)
+  # Check default and dataGenerator:
+  if (missing(default) & missing(dataGenerator)){
+    message("'default' and 'dataGenerator' are missing. Setting default = 'EBICglasso'")
+    default <- "EBICglasso"
+  }
+  
+  if (missing(default) & length(.dots) == 0){
+    message("No estimator specified. Setting default = 'EBICglasso'")
+    default <- "EBICglasso"
+  }
+  
+  # Data generator:
+  if (!missing(default) & missing(dataGenerator)){
+    
+    if (default == "EBICglasso" || default == "glasso" || default == "pcor" || default == "adalasso" || default == "huge"){
+      message("Setting 'dataGenerator = ggmGenerator(ordinal = FALSE)'")
+      dataGenerator <- ggmGenerator(ordinal = FALSE)
+    } else if (default == "IsingFit" || default == "IsingSampler"){
+      message("Setting 'dataGenerator = IsingGenerator()'")
+      dataGenerator <- IsingGenerator()
+    } else {
+      stop(paste0("Default set '",default, "' not yet supported. Please manually specify 'dataGenerator'"))
+    }
+    
+    
+  }
+  
+  # parSim arguments:
+  Args <- c(
+    list(
+      # Conditions:
+      nCases = nCases,
+      default = default,
+      
+      # Setup:,
+      write=FALSE,
+      nCores = nCores,
+      reps = nReps,
+      debug=FALSE,
+      export = c("input","dataGenerator",".dots"),
+      
+      expression = expression({
+        cor0 <- function(x,y){
+          if (all(is.na(x)) || all(is.na(y))){
+            return(NA)
+          }
+          
+          if (sd(x,na.rm=TRUE)==0 | sd(y,na.rm=TRUE) == 0){
+            return(0)
+          }
+          
+          return(cor(x,y,use="pairwise.complete.obs"))
+        }
+        
+        # Generate the input:
+        if (is.function(input)){
+          inputResults <- input()
+        } else {
+          inputResults <- input
+        }
+        
+        # True network:
+        if (is.list(inputResults)){
+          trueNet <- inputResults$graph
+        } else {
+          trueNet <- inputResults
+        }
+        
+        # Generate the data:
+        Data <- dataGenerator(nCases, inputResults)
+        
+        # Compute the network:
+        args <- list()
+        args$data <- Data
+        args$verbose <- FALSE
+        args$default <- default
+        
+        for (i in seq_along(.dots)){
+          args[[names(.dots)[i]]] <- get(names(.dots)[i])
+        }
+        netResults <- do.call(bootnet::estimateNetwork,args)
+        estNet <- qgraph::getWmat(netResults)
+        
+        # Compute measures:
+        ### STORE RESULTS ###
+        SimulationResults <- list()
+        
+        # Estimated edges:
+        est <- estNet[upper.tri(estNet)]
+        # Real edges:
+        real <- trueNet[upper.tri(trueNet)]
+        
+        # Equal?
+        SimulationResults$correctModel <- all((est == 0) == (real == 0))
+        
+        # True positives:
+        TruePos <- sum(est != 0 &  real != 0)
+        
+        # False pos:
+        FalsePos <- sum(est != 0 & real == 0)
+        
+        # True Neg:
+        TrueNeg <- sum(est == 0 & real == 0)
+        
+        # False Neg:
+        FalseNeg <- sum(est == 0 & real != 0)
+        
+        ### Sensitivity:
+        SimulationResults$sensitivity <- TruePos / (TruePos + FalseNeg)
+        
+        # Specificity:
+        SimulationResults$specificity <- TrueNeg / (TrueNeg + FalsePos)
+        
+        # Correlation:
+        SimulationResults$correlation <- cor0(est,real)
+        
+        SimulationResults
+      })),
+      .dots)
+
+    Results <- do.call(parSim, Args)
+    
+    class(Results) <- c("netSimulator","data.frame")
+    return(Results)
 }
 

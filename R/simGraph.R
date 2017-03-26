@@ -1,4 +1,4 @@
-simGraph <- function(
+genGGM <- function(
   Nvar,
   p = 0,
   nei = 1,

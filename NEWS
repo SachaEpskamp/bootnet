@@ -1,6 +1,6 @@
-Changes in Verson 0.4.1:
-  - Implemented the netSimulator function that allows for researchers to investigate sample size requirements.
-      - Added simGraph and ggmGenerator functions to be used in netSimulator
+Changes in Verson 0.5:
+  - Implemented the netSimulator function that allows for researchers to investigate sample size requirements and input arguments to estimateNetwork
+      - Added genGGM, ggmGenerator, and IsingGenerator functions to be used in netSimulator
   - bootnet now stores less results and should have better memory usuage! Thanks to Giulio Costantini!
   - Fixed some bugs related to manual parametric bootstrap
   - EstimateNetwork now references packages used in a message

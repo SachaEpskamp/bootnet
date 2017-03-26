@@ -172,7 +172,7 @@ bootnet_pcor <- function(
   data, # Dataset used
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","stop"),
-  verbose = verbose,
+  verbose = TRUE,
   corArgs = list() # Extra arguments to the correlation function
 ){
   # Check arguments:
@@ -262,7 +262,7 @@ bootnet_IsingFit <- function(
   data, # Dataset used
   tuning = 0.25, # tuning parameter
   missing = c("listwise","stop"),
-  verbose = verbose,
+  verbose = TRUE,
   rule = c("AND","OR"),
   split = "median"
 ){
@@ -322,7 +322,7 @@ bootnet_IsingFit <- function(
 bootnet_IsingSampler <- function(
   data, # Dataset used
   missing = c("listwise","stop"),
-  verbose = verbose,
+  verbose = TRUE,
   split = "median",
   method = c("default","ll","pl","uni","bi")
 ){
@@ -395,7 +395,7 @@ bootnet_IsingSampler <- function(
 bootnet_adalasso <- function(
   data, # Dataset used
   missing = c("listwise","stop"),
-  verbose = verbose,
+  verbose = TRUE,
   nFolds = 10 # Number of folds
 ){
   # Check arguments:
@@ -447,7 +447,7 @@ bootnet_huge <- function(
   data, # Dataset used
   tuning = 0.5,
   missing = c("listwise","stop"),
-  verbose = verbose,
+  verbose = TRUE,
   npn = TRUE, # Compute nonparanormal?
   criterion = c("ebic","ric","stars")
   # method = c("glasso","mb","ct")
@@ -512,7 +512,7 @@ bootnet_mgm <- function(
   lev,
   tuning = 0.5,
   missing = c("listwise","stop"),
-  verbose = verbose,
+  verbose = TRUE,
   criterion = c("EBIC","CV"),
   nFolds = 10,
   degree = 2,
