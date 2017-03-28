@@ -63,6 +63,8 @@ Res
 plot(Res)
 
 \dontrun{
+library("bootnet")
+
 # BFI example:
 # Load data:
 library("psych")
@@ -97,16 +99,11 @@ Sim2 <- netSimulator(Network,
 Sim2
 
 # Plot results:
-library("ggplot2")
-ggplot(Sim2, aes(x = factor(nCases), y = correlation)) + 
-  geom_boxplot() + 
-  ylim(0,1) + 
-  facet_grid( ~ default) + 
-  theme_bw()
+plot(Sim2, xfacet = "default", yvar = "correlation")
 
 # Difference using polychoric or pearson correlations in ordinal data:
 Sim3 <- netSimulator(Network,
-                     dataGenerator = ggmGenerator(ordinal = TRUE, nLevels = 3),
+                     dataGenerator = ggmGenerator(ordinal = TRUE, nLevels = 4),
                      default = "EBICglasso",
                      corMethod = c("cor","cor_auto"),
                      nCases = c(100,250, 500),
@@ -117,12 +114,7 @@ Sim3 <- netSimulator(Network,
 Sim3
 
 # Plot results:
-library("ggplot2")
-ggplot(Sim3, aes(x = factor(nCases), y = correlation)) + 
-  geom_boxplot() + 
-  ylim(0,1) + 
-  facet_grid( ~ corMethod) + 
-  theme_bw()
+plot(Sim3, color = "corMethod")
 
 # Ising model:
 trueNetwork <- read.csv('http://sachaepskamp.com/files/weiadj.csv')[,-1]
@@ -147,7 +139,7 @@ Sim4
 # Plot:
 plot(Sim4)
 
-# Compare AND and OR rule for fixed sampling level:
+# Compare AND and OR rule:
 Sim5 <- netSimulator(
   input = input,
   default = "IsingFit",
@@ -160,14 +152,7 @@ Sim5 <- netSimulator(
 Sim5
 
 # Plot:
-library("tidyr")
-Sim5Gathered <- gather(Sim5, measure, value, sensitivity:correlation)
-ggplot(Sim5Gathered, aes(x = factor(nCases), y = value)) + 
-  geom_boxplot() + 
-  ylim(0,1) + 
-  facet_grid(rule ~ measure) + 
-  theme_bw() + 
-  xlab("Number of subjects") + ylab("")
+plot(Sim5, yfacet = "rule")
 
 }
 }
