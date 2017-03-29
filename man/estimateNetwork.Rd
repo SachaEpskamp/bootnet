@@ -26,7 +26,8 @@ bootnet_EBICglasso(data, tuning = 0.5,corMethod = c("cor_auto","cov","cor","npn"
   verbose = TRUE, corArgs = list())
   
 bootnet_pcor(data, corMethod = c("cor_auto","cov","cor","npn"), missing = c("pairwise",
-  "listwise","stop"), verbose = TRUE, corArgs = list())
+  "listwise","stop"), verbose = TRUE, corArgs = list(), threshold = c('none', 'sig',
+   'holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', 'locfdr'))
   
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = TRUE,
   rule = c("AND","OR"), split = "median")
@@ -69,6 +70,10 @@ A custom estimation function, when no default set is used. This must be a functi
 \item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion and \code{"stop"} to stop with an error.}
 \item{sampleSize}{How will sample size be computed in EBICglasso default set? \code{"maximum"} takes total number of rows including rows with NA, and \code{"minimum"} takes total number of rows that contain no NA.}
 \item{corArgs}{A list with arguments for the function used defined by \code{corMethod}.}
+\item{threshold}{
+Thresholding to use in partial correlation networks. Options correspond to adjustments in \code{\link[psych]{corr.p}}.
+}
+\item{refit}{Logical used in EBICglasso default set: should the estimated model structure be refitted without LASSO regularization?}
 \item{rule}{The rule to use to select an edge in nodewise estimation. \code{"AND"} to only select in edge if both regression coefficients are nonzero and \code{"OR"} if only one is nonzero. Used in 'IsingFit' and 'mgm' default sets.}
 \item{split}{A function or character string (\code{"median"} or \code{"mean"}) indicating how to binarize values when estimating an Ising model.}
 \item{method}{The estimation method used in the IsingSampler default set (see \code{\link[IsingSampler]{EstimateIsing}}).}

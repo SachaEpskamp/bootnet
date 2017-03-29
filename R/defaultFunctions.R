@@ -69,7 +69,8 @@ bootnet_EBICglasso <- function(
   missing = c("pairwise","listwise","stop"),
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
-  corArgs = list() # Extra arguments to the correlation function
+  corArgs = list(), # Extra arguments to the correlation function
+  refit = FALSE
 ){
   # Check arguments:
   corMethod <- match.arg(corMethod)
@@ -160,7 +161,8 @@ bootnet_EBICglasso <- function(
   Results <- qgraph::EBICglasso(corMat,
                                 n =  sampleSize, 
                                 gamma = tuning,
-                                returnAllResults = TRUE)
+                                returnAllResults = TRUE,
+                                refit = refit)
   
   # Return:
   return(list(graph=Results$optnet,results=Results))
@@ -172,12 +174,16 @@ bootnet_pcor <- function(
   data, # Dataset used
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","stop"),
+  sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
-  corArgs = list() # Extra arguments to the correlation function
+  corArgs = list(), # Extra arguments to the correlation function
+  threshold = c('none', 'sig','holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', 'locfdr')
 ){
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
+  sampleSize <- match.arg(sampleSize)
+  threshold <- match.arg(threshold)
   
   # Message:
   if (verbose){
@@ -188,6 +194,14 @@ bootnet_pcor <- function(
     }
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
+    }
+    if (threshold != "none"){
+      if (threshold != "locfdr"){
+        msg <- paste0(msg,"\n  - psych::corr.p for significance thresholding")        
+      } else {
+        msg <- paste0(msg,"\n  - fdrtool for false discovery rate")        
+      }
+
     }
     # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
     message(msg)
@@ -248,9 +262,19 @@ bootnet_pcor <- function(
     corMat <- do.call(corMethod,args)
   } else stop ("Correlation method is not supported.")
   
+  # Sample size:
+  if (missing == "listwise"){
+    sampleSize <- nrow(na.omit(data))
+  } else{
+    if (sampleSize == "maximum"){
+      sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
+    } else {
+      sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
+    }
+  } 
   
   # Estimate network:
-  Results <- getWmat(qgraph::qgraph(corMat,graph = "pcor",DoNotPlot = TRUE))
+  Results <- getWmat(qgraph::qgraph(corMat,graph = "pcor",DoNotPlot = TRUE,threshold=threshold, sampleSize = sampleSize))
   
   # Return:
   return(list(graph=Results,results=Results))
