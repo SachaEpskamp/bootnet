@@ -177,13 +177,16 @@ bootnet_pcor <- function(
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
-  threshold = c('none', 'sig','holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', 'locfdr')
+  threshold = 0
 ){
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
   sampleSize <- match.arg(sampleSize)
-  threshold <- match.arg(threshold)
+  
+  if (identical(threshold,"none")){
+    threshold <- 0
+  }
   
   # Message:
   if (verbose){

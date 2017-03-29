@@ -26,8 +26,7 @@ bootnet_EBICglasso(data, tuning = 0.5,corMethod = c("cor_auto","cov","cor","npn"
   verbose = TRUE, corArgs = list())
   
 bootnet_pcor(data, corMethod = c("cor_auto","cov","cor","npn"), missing = c("pairwise",
-  "listwise","stop"), verbose = TRUE, corArgs = list(), threshold = c('none', 'sig',
-   'holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', 'locfdr'))
+  "listwise","stop"), verbose = TRUE, corArgs = list(), threshold = 0)
   
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = TRUE,
   rule = c("AND","OR"), split = "median")
@@ -71,7 +70,7 @@ A custom estimation function, when no default set is used. This must be a functi
 \item{sampleSize}{How will sample size be computed in EBICglasso default set? \code{"maximum"} takes total number of rows including rows with NA, and \code{"minimum"} takes total number of rows that contain no NA.}
 \item{corArgs}{A list with arguments for the function used defined by \code{corMethod}.}
 \item{threshold}{
-Thresholding to use in partial correlation networks. Options correspond to adjustments in \code{\link[psych]{corr.p}}.
+Thresholding to use in partial correlation networks. Can be a fixed number to thresholda all absolute edges below this value, \code{'locfdr'} for local FDR, or any option corresponding to adjustments in \code{\link[psych]{corr.p}} (\code{'none'}, \code{'sig'}, \code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'} or \code{'fdr'})). 
 }
 \item{refit}{Logical used in EBICglasso default set: should the estimated model structure be refitted without LASSO regularization?}
 \item{rule}{The rule to use to select an edge in nodewise estimation. \code{"AND"} to only select in edge if both regression coefficients are nonzero and \code{"OR"} if only one is nonzero. Used in 'IsingFit' and 'mgm' default sets.}
