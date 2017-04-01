@@ -5,6 +5,7 @@ Changes in Verson 0.5:
   - Fixed some bugs related to manual parametric bootstrap
   - EstimateNetwork now references packages used in a message
   - pcor default set now supports the argument 'threshold'
+  - Fixed a bug where rule argument was not passed in bootnet default set
 
 Changes in version 0.4:
   - estimateNetwork now accepts a custom estimation function using the argument 'fun'

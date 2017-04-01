@@ -549,6 +549,7 @@ bootnet_mgm <- function(
   # Check arguments:
   missing <- match.arg(missing)
   criterion <- match.arg(criterion)
+  rule <- match.arg(rule)
   # method <- match.arg(method)
   
   # Message:
@@ -602,7 +603,16 @@ bootnet_mgm <- function(
   }
   
   # Estimate:
-  log <- capture.output(Results <- mgmfit(data,type=type,lev=lev,lambda.sel = criterion,folds = nFolds,gam = tuning,d = degree,pbar = verbose))
+  log <- capture.output(Results <- mgmfit(
+    data,
+    type=type,
+    lev=lev,
+    lambda.sel = criterion,
+    folds = nFolds,
+    gam = tuning,
+    d = degree,
+    pbar = verbose,
+    rule.reg = rule))
   
   # Warn for unsigned:
   if (any(Results$signs==0,na.rm = TRUE)){
