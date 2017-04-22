@@ -250,6 +250,14 @@ netSimulator <- function(
         # Correlation:
         SimulationResults$correlation <- cor0(est,real)
         
+        # Centrality:
+        centTrue <- qgraph::centrality(trueNet)
+        centEst <- qgraph::centrality(estNet)
+        
+        SimulationResults$strength <- cor0(centTrue$OutDegree,centEst$OutDegree)
+        SimulationResults$closeness <- cor0(centTrue$Closeness,centEst$Closeness)
+        SimulationResults$betweenness <- cor0(centTrue$Betweenness,centEst$Betweenness)
+        
         SimulationResults
       })),
       .dots)

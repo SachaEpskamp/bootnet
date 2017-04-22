@@ -5,7 +5,7 @@ summary.netSimulator <- function(object, digits = 2, ...){
   if (nchar(name) > 10) name <- "object"
   
   Exclude <- c(
-    "rep","id","correctModel","sensitivity","specificity","correlation","error","errorMessage"
+    "rep","id","correctModel","sensitivity","specificity","correlation","strength","closeness","betweenness","error","errorMessage"
   )
   # check number of levels:
   Conditions <- names(object)[!names(object)%in%Exclude]
@@ -17,7 +17,7 @@ summary.netSimulator <- function(object, digits = 2, ...){
   }
   
   # Summarize per case:
-  df <- object %>% dplyr::select_("sensitivity","specificity","correlation",.dots = Conditions) %>% 
+  df <- object %>% dplyr::select_("sensitivity","specificity","correlation","strength","closeness","betweenness",.dots = Conditions) %>% 
     dplyr::group_by_(.dots = Conditions) %>% dplyr::summarize_each(funs(fun(.,digits=digits))) %>% 
     dplyr::arrange_(~nCases) %>% as.data.frame
   # 
@@ -65,6 +65,7 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
   
   # AES:
   if (!is.null(color)){
+    Gathered[[color]] <- as.factor(Gathered[[color]])
     AES <- ggplot2::aes_string(x=xvar,y="value",fill=color)
   } else {
     AES <- ggplot2::aes_string(x=xvar,y="value")
@@ -74,7 +75,7 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
   g <- ggplot2::ggplot(Gathered, AES) + ggplot2::facet_grid(paste0(yfacet," ~ ",xfacet)) + 
     ggplot2::geom_boxplot() + ggplot2::theme_bw() + ggplot2::ylim(ylim[1],ylim[2]) + 
     ggplot2::ylab(ylab) + ggplot2::xlab(xlab)
-  
+
   if (print){
     print(g)
     invisible(g)

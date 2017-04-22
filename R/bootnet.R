@@ -56,6 +56,7 @@ bootnet <- function(
   intercepts, # for parametric bootstrap
   weighted,
   signed,
+  directed,
   ... # Other arguments
   # edgeResample = FALSE # If true, only resample edges from original estimate
   # scaleAdjust = FALSE
@@ -118,6 +119,9 @@ bootnet <- function(
       }
       if (missing(signed)){
         signed <- data$signed
+      }
+      if (missing(directed)){
+        directed <- data$directed
       }
       data <- data$data
       N <- ncol(data)
@@ -188,6 +192,9 @@ bootnet <- function(
   }
   if (missing(signed)){
     signed <- TRUE
+  }
+  if (missing(directed)){
+    if (!default %in% c("graphicalVAR","relimp","DAG")) directed <- FALSE 
   }
   
   
@@ -294,9 +301,9 @@ bootnet <- function(
   # intArgs <- sampleResult$input$intArgs
 
   
-  if (!isSymmetric(as.matrix(sampleResult[['graph']]))){
-    stop("bootnet does not support directed graphs")
-  }
+  # if (!isSymmetric(as.matrix(sampleResult[['graph']]))){
+  #   stop("bootnet does not support directed graphs")
+  # }
   
   
   #   ### Observation-wise bootstrapping!
@@ -536,7 +543,7 @@ bootnet <- function(
   if (verbose){
     message("Computing statistics...")
   }
-  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality,statistics=statistics)
+  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality,statistics=statistics, directed=directed)
   
   if (nCores == 1){
     if (verbose){
@@ -544,7 +551,7 @@ bootnet <- function(
     }
     statTableBoots <- vector("list", nBoots)
     for (b in seq_len(nBoots)){
-      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics)
+      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed)
       if (verbose){
         setTxtProgressBar(pb, b)
       }
@@ -554,7 +561,7 @@ bootnet <- function(
     }
   }  else {
     statTableBoots <- parLapply(cl,seq_len(nBoots),function(b){
-      statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics)
+      statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed)
     })
     # Stop the cluster:
     stopCluster(cl)

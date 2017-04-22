@@ -1,7 +1,7 @@
 
 # Function that checks input and returns the functions:
 checkInput <- function(
-  default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm"),
+  default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp"),
   fun, # Estimator function
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
@@ -65,6 +65,12 @@ checkInput <- function(
     
     stop(paste0("Ambiguous argument specification. Old functonality is used (construct = 'arguments') in combination with new functionality arguments (implying construct = 'function'): ",
                 paste0("'",names(dots),"'",collapse="; "),". These arguments are NOT compatible!"))
+    
+  }
+  
+  # relimp not compatable with old:
+  if (construct == "arguments" & default == "relimp"){
+    stop("default = 'relimp' not supported with old bootnet style (construct = 'arguments')")
     
   }
   
@@ -155,6 +161,8 @@ checkInput <- function(
       Function <- bootnet_huge
     } else if (default == "mgm"){
       Function <- bootnet_mgm
+    } else if (default == "relimp"){
+      Function <- bootnet_relimp
     } else stop("Currently not supported.")
     
   } else {

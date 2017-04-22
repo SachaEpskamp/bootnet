@@ -1,7 +1,7 @@
 # This function takes data as input and produced a network. It is used inside bootnet:
 estimateNetwork <- function(
   data,
-  default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm"),
+  default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp"),
   fun, # A function that takes data and returns a network or list entitled "graph" and "thresholds". optional.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
@@ -17,6 +17,7 @@ estimateNetwork <- function(
   .dots = list(),
   weighted = TRUE,
   signed = TRUE,
+  directed,
   # plot = TRUE, # Plot the network?
   ..., # Arguments to the 'fun' function
   .input, # Skips most of first steps if supplied
@@ -39,8 +40,14 @@ estimateNetwork <- function(
   if (is.matrix(data)){
     data <- as.data.frame(data)
   }
-  
-  
+ 
+  if (missing(directed)){
+    if (!default %in% c("graphicalVAR","relimp","DAG")){
+      directed <- FALSE 
+    } else {
+      directed <- TRUE
+    }
+  }
   
   N <- ncol(data)
   Np <- nrow(data)
@@ -120,6 +127,7 @@ estimateNetwork <- function(
     default = default,
     weighted = weighted,
     signed = signed,
+    directed=directed,
     .input = .input
   )
   class(sampleResult) <- c("bootnetResult", "list")

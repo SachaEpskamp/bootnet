@@ -629,3 +629,66 @@ bootnet_mgm <- function(
     graph=Graph,
     results=Results))
 }
+
+
+
+### RELATIVE IMPORTANCE ###
+bootnet_relimp <- function(
+  data, # Dataset used
+  normalized = TRUE,
+  type = "lmg",
+  structureDefault = c("none", "custom", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm"),
+  ..., # Arguments sent to the structure function
+  verbose = TRUE,
+  threshold = 0
+){
+  nVar <- ncol(data)
+  structureDefault <- match.arg(structureDefault)
+  
+  # Compute structure (if needed)
+  if (structureDefault != "none"){
+    if (verbose){
+      message("Computing network structure")
+    }
+    if (structureDefault == "custom"){
+      struc <- estimateNetwork(data, ...)
+    } else {
+      struc <- estimateNetwork(data, default = structureDefault, ...)
+    }
+    struc <- struc$graph!=0
+  } else {
+    struc <- matrix(TRUE, nVar,nVar)
+  }
+  diag(struc) <- FALSE
+  
+  # Empty matrix:
+  relimp <- matrix(0, nVar,nVar)
+  if (is.null(names(data))){
+    names(data) <- paste0("V",seq_len(nVar))
+  }
+  Vars <- names(data)
+  
+  # For every node, compute incomming relative importance:
+  if (verbose){
+    message("Computing relative importance network")
+    pb <- txtProgressBar(0,nVar,style=3)
+  }
+  for (i in 1:nVar){
+    formula <- as.formula(paste0(Vars[i]," ~ ",paste0(Vars[-i][struc[-i,i]],collapse=" + ")))
+    res <- calc.relimp(formula, data, rela = normalized)
+    relimp[-i,i][struc[-i,i]] <- res@lmg
+    if (verbose){
+      setTxtProgressBar(pb, i)
+    }
+  }
+  if (verbose){
+    close(pb)
+  }
+  
+  # threshold:
+  relimp <- ifelse(relimp<threshold,0,relimp)
+  
+  # Return:
+  return(relimp)
+}
+

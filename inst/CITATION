@@ -5,9 +5,9 @@ citEntry(entry = "Article",
   author       = personList(as.person("Sacha Epskamp"),
                    as.person("Denny Borsboom"),
                    as.person("Eiko I. Fried")),
-  journal      = "arXiv preprint",
+  journal      = "Behavior Research Methods",
   url          = "https://arxiv.org/abs/1604.08462",
 
-  textVersion  = "Epskamp, S., Borsboom, D., & Fried, E. I. (2016). Estimating psychological networks and their accuracy: a tutorial paper. arXiv preprint, arXiv:1604.08462.",
-  year = "2016")
+  textVersion  = "Epskamp, S., Borsboom, D., & Fried, E. I. (2017). Estimating psychological networks and their accuracy: a tutorial paper. Behavior Research Methods.",
+  year = "2017")
 

@@ -7,7 +7,7 @@
 # node2
 # value
 
-statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = c("edge","strength","closeness","betweenness")){
+statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = c("edge","strength","closeness","betweenness"), directed = FALSE){
   # Statistics can be:
   if (!all(statistics %in% c("intercept","edge","length","distance","closeness","betweenness","strength"))){
     stop("'statistics' must be 'edge', 'intercept', 'length', 'distance', 'closeness', 'betweenness' or 'strength'")
@@ -24,7 +24,13 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
   }
   
   # edges:
-  ind <- which(upper.tri(x[['graph']], diag=FALSE), arr.ind=TRUE)
+  if (!directed){
+    index <- upper.tri(x[['graph']], diag=FALSE)
+    ind <- which(index, arr.ind=TRUE)
+  } else {
+    index <- diag(ncol(x[['graph']]))!=1
+    ind <- which(index, arr.ind=TRUE)
+  }
   
   # Weights matrix:
   Wmat <- qgraph::getWmat(x)
@@ -35,7 +41,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       type = "edge",
       node1 = x[['labels']][ind[,1]],
       node2 = x[['labels']][ind[,2]],
-      value = Wmat[upper.tri(Wmat, diag=FALSE)],
+      value = Wmat[index],
       stringsAsFactors = FALSE
     ))
   }
@@ -47,7 +53,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       type = "length",
       node1 = x[['labels']][ind[,1]],
       node2 = x[['labels']][ind[,2]],
-      value = abs(1/abs(Wmat[upper.tri(Wmat, diag=FALSE)])),
+      value = abs(1/abs(Wmat[index])),
       stringsAsFactors = FALSE
     ))
   }
@@ -123,7 +129,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       type = "distance",
       node1 = x[['labels']][ind[,1]],
       node2 = x[['labels']][ind[,2]],
-      value = cent[['ShortestPathLengths']][upper.tri(cent[['ShortestPathLengths']], diag=FALSE)],
+      value = cent[['ShortestPathLengths']][index],
       stringsAsFactors = FALSE
     ))
     }
@@ -135,7 +141,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
   #   }  
   
   for (i in seq_along(tables)){
-    tables[[i]]$id <- ifelse(tables[[i]]$node2=='',tables[[i]]$node1,paste0(tables[[i]]$node1, "--", tables[[i]]$node2))
+    tables[[i]]$id <- ifelse(tables[[i]]$node2=='',tables[[i]]$node1,paste0(tables[[i]]$node1, ifelse(directed,"->","--"), tables[[i]]$node2))
   }  
   
   tab <- dplyr::bind_rows(tables)
