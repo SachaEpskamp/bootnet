@@ -638,12 +638,24 @@ bootnet_relimp <- function(
   normalized = TRUE,
   type = "lmg",
   structureDefault = c("none", "custom", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm"),
+  missing = c("listwise","stop"),
   ..., # Arguments sent to the structure function
   verbose = TRUE,
   threshold = 0
 ){
   nVar <- ncol(data)
   structureDefault <- match.arg(structureDefault)
+  
+  # Check missing:
+  missing <- match.arg(missing)
+  if (missing == "stop"){
+    if (any(is.na(data))){
+      stop("Missing data detected and missing = 'stop'")
+    }
+  } else {
+    # listwise:
+    data <- na.omit(data)
+  }
   
   # Compute structure (if needed)
   if (structureDefault != "none"){
