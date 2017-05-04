@@ -7,6 +7,7 @@
 \alias{bootnet_adalasso}
 \alias{bootnet_huge}
 \alias{bootnet_mgm}
+\alias{bootnet_relimp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Estimate a network structure
@@ -15,18 +16,19 @@ Estimate a network structure
 This function allows for flexible estimation of a network structure using various R packages and model frameworks. This is typically done by using one of the default sets. See details for manual specification. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-estimateNetwork(data, default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", 
-  "huge","adalasso","mgm"), fun, prepFun, prepArgs, estFun, estArgs, 
-  graphFun, graphArgs, intFun, intArgs, labels, verbose = TRUE,  construct = 
-  c("default","function","arguments"), .dots = list(), weighted = TRUE, signed = TRUE,
-  \dots, .input, memorysaver = FALSE)
+estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit", 
+      "IsingSampler", "huge", "adalasso", "mgm", "relimp"), fun, prepFun, prepArgs, 
+      estFun, estArgs, graphFun, graphArgs, intFun, intArgs, labels, verbose = TRUE,
+      construct = c("default","function","arguments"), .dots = list(), weighted = TRUE, 
+      signed = TRUE, directed, \dots, .input, memorysaver = FALSE)
                 
-bootnet_EBICglasso(data, tuning = 0.5,corMethod = c("cor_auto","cov","cor","npn"), 
+bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn"), 
   missing = c("pairwise","listwise","stop"), sampleSize = c("maximum","minimim"),
-  verbose = TRUE, corArgs = list())
+  verbose = TRUE, corArgs = list(), refit = FALSE)
   
-bootnet_pcor(data, corMethod = c("cor_auto","cov","cor","npn"), missing = c("pairwise",
-  "listwise","stop"), verbose = TRUE, corArgs = list(), threshold = 0)
+bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
+  "listwise","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
+  corArgs = list(), threshold = 0)
   
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = TRUE,
   rule = c("AND","OR"), split = "median")
@@ -42,6 +44,11 @@ bootnet_huge(data, tuning = 0.5, missing = c("listwise","stop"), verbose = TRUE,
 bootnet_mgm(data, type, lev, tuning = 0.5, missing = c("listwise","stop"), 
   verbose = TRUE, criterion = c("EBIC","CV"), nFolds = 10, degree = 2,
   rule = c("AND","OR"))
+  
+bootnet_relimp(data, normalized = TRUE, type = "lmg",
+  structureDefault = c("none", "custom", "EBICglasso", "pcor", "IsingFit", 
+  "IsingSampler", "huge", "adalasso", "mgm"),  missing = c("listwise","stop"),
+  ..., verbose = TRUE, threshold = 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -57,7 +64,7 @@ A string indicating the method to use. Specifying a \code{default} sets default 
 \item{\code{"pcor"}}{Partial correlation network (non-regularized Gaussian Markov random field), using \code{\link[corpcor]{cor2pcor}} from the corpcor package.  Calls \code{bootnet_pcor}.}
 \item{\code{adalasso}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
 \item{\code{huge}}{Uses EBIC model selection of GGM networks estimated via the glasso algorithm as implemented in the huge package (as opposed to glasso and qgraph packages used in \code{default = "EBICglasso"}). Uses nonparanormal transformation in preparing the data and does not use polychoric correlations. Calls \code{bootnet_huge}.}
-\item{\code{mgm}}{Estimates a Mixed graphical model by using the \code{\link[mgm]{mgmfit}} function of the mgm package. Calls \code{bootnet_mgm}.}
+\item{\code{mgm}}{Estimates a Mixed graphical model by using the the mgm (or mgmfit in older versions) function of the mgm package. Calls \code{bootnet_mgm}.}
 }
 See details section for a more detailed description.
 }
@@ -70,7 +77,7 @@ A custom estimation function, when no default set is used. This must be a functi
 \item{sampleSize}{How will sample size be computed in EBICglasso default set? \code{"maximum"} takes total number of rows including rows with NA, and \code{"minimum"} takes total number of rows that contain no NA.}
 \item{corArgs}{A list with arguments for the function used defined by \code{corMethod}.}
 \item{threshold}{
-Thresholding to use in partial correlation networks. Can be a fixed number to thresholda all absolute edges below this value, \code{'locfdr'} for local FDR, or any option corresponding to adjustments in \code{\link[psych]{corr.p}} (\code{'none'}, \code{'sig'}, \code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'} or \code{'fdr'})). 
+Thresholding to use in partial correlation networks. Can be a fixed number to threshold all absolute edges below this value, \code{'locfdr'} for local FDR, or any option corresponding to adjustments in \code{\link[psych]{corr.p}} (\code{'none'}, \code{'sig'}, \code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'} or \code{'fdr'})). 
 }
 \item{refit}{Logical used in EBICglasso default set: should the estimated model structure be refitted without LASSO regularization?}
 \item{rule}{The rule to use to select an edge in nodewise estimation. \code{"AND"} to only select in edge if both regression coefficients are nonzero and \code{"OR"} if only one is nonzero. Used in 'IsingFit' and 'mgm' default sets.}
@@ -79,9 +86,11 @@ Thresholding to use in partial correlation networks. Can be a fixed number to th
 \item{npn}{Logical, should nonparanormal be used in huge default set?}
 \item{criterion}{The criterion used in model selection. \code{"ebic"}, \code{"ric"} or \code{"stars"} in the huge default set or \code{"EBIC"} or \code{"CV"} in the mgm default set.}
 \item{nFolds}{Number of folds used in k-fold cross-validation.}
-\item{type}{See \code{\link[mgm]{mgmfit}}.}
-\item{lev}{See \code{\link[mgm]{mgmfit}}.}
-\item{degree}{Degree of mixed model, see \code{\link[mgm]{mgmfit}}}
+\item{type}{For mgm, see mgm or mgmfit; for relative importance networks, see \code{\link[relaimpo]{calc.relimp}}}
+\item{lev}{See mgm or mgmfit.}
+\item{degree}{Degree of mixed model, see mgm or mgmfit}
+\item{normalized}{Should normalized relative importance be used in relative importance networks?}
+\item{structureDefault}{In relative importance networks, default set used to compute the graph structure. Any other arguments used (using ...) are sent to the graph estimator function as well.}
   \item{prepFun}{
 A function that takes as input the raw data and returns whatever the estimation function needs (as first argument). Typically this function is used to correlate or binarize the data. Defaults to \code{\link{identity}} if omitted and \code{default} is not set. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
 }
@@ -115,6 +124,7 @@ Logical, currently only used when \code{default = "EBICglasso"} in the \code{cor
 
 \item{weighted}{Logical, should the analyzed network be weighted?}
 \item{signed}{Logical, should the analyzed network be signed?}
+\item{directed}{Logical, is the analyzed network directed? Usually does not have to be set and is detected automatically.}
 \item{construct}{
 Should the estimator function be constructed using new bootnet functionality (\code{function}) or old bootnet functionality (\code{arguments})? Will default to \code{function} unless arguments such as \code{estFun} are used.
 }
@@ -131,7 +141,7 @@ Logical. If TRUE attempts to save memory (RAM) by removing some objects from the
 \details{
 NEW FUNCTIONALTIY:
 
-The user can manually specify an estimation method by assinging a custom function to the \code{'fun'} argument. This function must take data as input and output an estimated network.
+The user can manually specify an estimation method by assigning a custom function to the \code{'fun'} argument. This function must take data as input and output an estimated network.
 
 
 DEPRECATED OLD FUNCTIONALITY:

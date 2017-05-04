@@ -23,8 +23,8 @@ estimateNetwork <- function(
   .input, # Skips most of first steps if supplied
   memorysaver = FALSE # If set to FALSE data, estimator and results are not stored.
 ){
-#   if (default[[1]]=="glasso") default <- "EBICglasso"
-#   default <- match.arg(default)
+  if (default[[1]]=="glasso") default <- "EBICglasso"
+  default <- match.arg(default)
 #   
   # If NAs and default can't handle, stop:
   # if (any(is.na(data)) && default %in% c("huge","adalasso")){

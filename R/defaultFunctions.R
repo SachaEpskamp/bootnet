@@ -1,3 +1,7 @@
+# Folling R:
+mgm <- NULL
+mgmfit <- NULL
+
 # Null function:
 null <- function(...) NULL
 
@@ -592,6 +596,9 @@ bootnet_mgm <- function(
     }
     type <- ifelse(apply(data,2,function(x)all(x%in%c(0,1))),"c","g")
   }
+  if (length(type) != ncol(data)){
+    type <- rep(type, ncol(data))
+  }
   
   # Set lev automatically:
   if (missing(lev)){
@@ -601,29 +608,58 @@ bootnet_mgm <- function(
     
     lev <- ifelse(type == "c", apply(data,2,function(x)length(unique(x))),1)
   }
+  if (length(lev) != ncol(data)){
+    lev <- rep(lev, ncol(data))
+  }
   
   # Estimate:
-  log <- capture.output(Results <- mgmfit(
-    data,
-    type=type,
-    lev=lev,
-    lambda.sel = criterion,
-    folds = nFolds,
-    gam = tuning,
-    d = degree,
-    pbar = verbose,
-    rule.reg = rule))
-  
-  # Warn for unsigned:
-  if (any(Results$signs==0,na.rm = TRUE)){
-    warning("Bootnet does not support unsigned edges and treats these as positive edges.")
+  mgmfun <- "mgmfit"
+  if (packageVersion("mgm") >= "1.2.0"){
+    log <- capture.output(Results <- do.call(gsub("fit","",mgmfun),list(
+      data,verbatim = !verbose,  warnings = verbose, signInfo = FALSE,
+      type=type,
+      level=lev,
+      lambdaSel = criterion,
+      lambdaFolds = nFolds,
+      lambdaGam = tuning,
+      k = degree + 1,
+      pbar = verbose,
+      ruleReg = rule,
+      saveModels = FALSE, saveData = FALSE)))
+    
+    # Warn for unsigned:
+    if (any(Results$pairwise$signs==0,na.rm = TRUE)){
+      warning("Bootnet does not support unsigned edges and treats these as positive edges.")
+    }
+    Results$pairwise$signs[is.na(Results$pairwise$signs)] <- 0
+    
+    # Graph:
+    Graph <- Results$pairwise$wadj
+    Graph <- ifelse(Results$pairwise$signs==-1,-Graph,Graph)
+    
+  } else {
+    log <- capture.output(Results <- do.call(mgmfun,list(
+      data,
+      type=type,
+      lev=lev,
+      lambda.sel = criterion,
+      folds = nFolds,
+      gam = tuning,
+      d = degree,
+      pbar = verbose,
+      rule.reg = rule)))
+    
+    # Warn for unsigned:
+    if (any(Results$signs==0,na.rm = TRUE)){
+      warning("Bootnet does not support unsigned edges and treats these as positive edges.")
+    }
+    Results$signs[is.na(Results$signs)] <- 0
+    
+    # Graph:
+    Graph <- Results$wadj
+    Graph <- ifelse(Results$signs==-1,-Graph,Graph)
   }
-  Results$signs[is.na(Results$signs)] <- 0
-  
-  # Graph:
-  Graph <- Results$wadj
-  Graph <- ifelse(Results$signs==-1,-Graph,Graph)
-  
+
   # Return:
   return(list(
     graph=Graph,

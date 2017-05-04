@@ -20,7 +20,8 @@ bootnet(data, nBoots = 1000, default = c("none", "EBICglasso", "pcor","IsingFit"
                  subNodes = 2:(ncol(data) - 1), subCases = round((1 -
                  seq(caseMin, caseMax, length = caseN)) * nrow(data)),
                  computeCentrality = TRUE, propBoot = 1, replacement =
-                 TRUE, graph, sampleSize, intercepts, weighted, signed,...)
+                 TRUE, graph, sampleSize, intercepts, weighted, signed,
+                 directed, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -105,6 +106,7 @@ A character vector containing the node labels. If omitted the column names of th
   \item{construct}{How to construct the estimator? Set to \code{"arguments"} to use old functionality (not recommended).}
 \item{weighted}{Logical, should the analyzed network be weighted?}
 \item{signed}{Logical, should the analyzed network be signed?}
+\item{directed}{Logical, is the analyzed network directed? Usually does not have to be set and is detected automatically.}
   \item{\dots}{
   Additional arguments used in the estimator function.
   }
