@@ -70,7 +70,7 @@ bootnet_EBICglasso <- function(
   data, # Dataset used
   tuning = 0.5, # tuning parameter
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
-  missing = c("pairwise","listwise","stop"),
+  missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
@@ -135,7 +135,9 @@ bootnet_EBICglasso <- function(
     corMat <- do.call(qgraph::cor_auto,args)
   } else if (corMethod%in%c("cor","cov")){
     # Normal correlations
-    
+    if (missing == "fiml"){
+      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
+    }
     use <- switch(missing,
                   pairwise = "pairwise.complete.obs",
                   listwise = "complete.obs")
@@ -177,7 +179,7 @@ bootnet_EBICglasso <- function(
 bootnet_pcor <- function(
   data, # Dataset used
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
-  missing = c("pairwise","listwise","stop"),
+  missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
@@ -254,7 +256,9 @@ bootnet_pcor <- function(
     corMat <- do.call(qgraph::cor_auto,args)
   } else if (corMethod%in%c("cor","cov")){
     # Normal correlations
-    
+    if (missing == "fiml"){
+      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
+    }
     use <- switch(missing,
                   pairwise = "pairwise.complete.obs",
                   listwise = "complete.obs")

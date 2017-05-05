@@ -23,11 +23,11 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit",
       signed = TRUE, directed, \dots, .input, memorysaver = FALSE)
                 
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn"), 
-  missing = c("pairwise","listwise","stop"), sampleSize = c("maximum","minimim"),
+  missing = c("pairwise","listwise","fiml",stop"), sampleSize = c("maximum","minimim"),
   verbose = TRUE, corArgs = list(), refit = FALSE)
   
 bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
-  "listwise","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
+  "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
   corArgs = list(), threshold = 0)
   
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = TRUE,
@@ -73,7 +73,7 @@ A custom estimation function, when no default set is used. This must be a functi
 }
 \item{tuning}{EBIC tuning parameter, used in 'EBICglasso', 'IsingFit', 'huge' and 'mgm' default sets.}
 \item{corMethod}{Correlation method, used in 'EBICglasso' and 'pcor' default sets. \code{"cor_auto"} uses \code{\link[qgraph]{cor_auto}} for polychoric and polyserial correlations, \code{"cov"} uses the \code{\link{cov}} function for covariances, \code{"cor"} will use the \code{\link{cor}} function for correlations and \code{"npn"} will apply the nonparanormal transformation (via \code{\link[huge]{huge.npn}}) and then compute correlations.}
-\item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion and \code{"stop"} to stop with an error.}
+\item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion, \code{"fiml"} for full-information maximum likelihood and \code{"stop"} to stop with an error.}
 \item{sampleSize}{How will sample size be computed in EBICglasso default set? \code{"maximum"} takes total number of rows including rows with NA, and \code{"minimum"} takes total number of rows that contain no NA.}
 \item{corArgs}{A list with arguments for the function used defined by \code{corMethod}.}
 \item{threshold}{
