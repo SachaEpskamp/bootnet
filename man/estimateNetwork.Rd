@@ -23,7 +23,7 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit",
       signed = TRUE, directed, \dots, .input, memorysaver = FALSE)
                 
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn"), 
-  missing = c("pairwise","listwise","fiml",stop"), sampleSize = c("maximum","minimim"),
+  missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimim"),
   verbose = TRUE, corArgs = list(), refit = FALSE)
   
 bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",

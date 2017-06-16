@@ -10,7 +10,6 @@ cor0 <- function(x,y,...){
 corStability <- function(x,cor=0.7, statistics = c("strength","closeness","betweenness"),
                          verbose = TRUE){
 
-  
   if (!x$type %in% c("node","person")){
     stop("S-metric only available for person or node drop bootstrap")
   }
