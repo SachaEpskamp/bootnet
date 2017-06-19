@@ -705,7 +705,7 @@ bootnet_relimp <- function(
     if (structureDefault == "custom"){
       struc <- estimateNetwork(data, ...)
     } else {
-      struc <- estimateNetwork(data, default = structureDefault, ...)
+      struc <- estimateNetwork(data, default = structureDefault, ..., verbose = FALSE)
     }
     struc <- struc$graph!=0
   } else {
@@ -726,9 +726,25 @@ bootnet_relimp <- function(
     pb <- txtProgressBar(0,nVar,style=3)
   }
   for (i in 1:nVar){
-    formula <- as.formula(paste0(Vars[i]," ~ ",paste0(Vars[-i][struc[-i,i]],collapse=" + ")))
-    res <- calc.relimp(formula, data, rela = normalized)
-    relimp[-i,i][struc[-i,i]] <- res@lmg
+    if (any(struc[-i,i])){
+      formula <- as.formula(paste0(Vars[i]," ~ ",paste0(Vars[-i][struc[-i,i]],collapse=" + ")))
+      if (sum(struc[-i,i])==1){
+
+        # Only one predictor
+        if (normalized){
+          relimp[-i,i][struc[-i,i]] <- 1
+        } else {
+          res <- lm(formula, data)
+          sum <- summary(res)
+          relimp[-i,i][struc[-i,i]] <- sum$r.squared
+        }
+        
+      } else {
+        res <- calc.relimp(formula, data, rela = normalized)
+        relimp[-i,i][struc[-i,i]] <- res@lmg              
+      }
+
+    }
     if (verbose){
       setTxtProgressBar(pb, i)
     }
