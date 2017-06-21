@@ -114,6 +114,18 @@ plot.bootnet <- function(
   if (x$type %in% c("person","node")){
     # Summarize:
     
+    # Check if sample values have variance:
+    removeStats <- numeric(0)
+    for (i in seq_along(statistics)){
+      if (sd(x$sampleTable$value[x$sampleTable$type == statistics[i]],na.rm=TRUE) == 0){
+        warning(paste0("Statistic ",statistics[i]," does not contain any variance and is therefore not shown."))
+        removeStats <- c(removeStats,i)
+      }
+    }
+    if (length(removeStats)>0){
+      statistics <- statistics[-removeStats]
+    }
+    
     if (perNode){
       x$bootTable <- rbind(x$bootTable,x$sampleTable)
       

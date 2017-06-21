@@ -119,6 +119,7 @@ summary.bootnet <- function(
         ) %>% mutate_(CIlower = ~mean - 2*sd, CIupper = ~mean + 2*sd) %>% arrange_(~nNode,~nPerson)
       
     } else {
+
       tab <- tab %>% group_by_(~name, ~type, ~nNode, ~nPerson)  %>%
         summarize_(cor = ~ suppressWarnings(cor(value,sample, use = "pairwise.complete.obs"))) %>%
         dplyr::group_by_(~nNode, ~nPerson, ~type) %>%
