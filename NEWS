@@ -1,6 +1,7 @@
 Changes in Version 1.0.1
   - missing = "fiml" is now supported for EBICglasso and pcor default sets
   - Relative importance networks now do not crash when the number of predictors is 0 or 1
+  - plotting bootnetResults now supports the labels argument
 
 Changes in Version 1.0.0:
   - Implemented the netSimulator function that allows for researchers to investigate sample size requirements and input arguments to estimateNetwork
