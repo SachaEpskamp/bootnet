@@ -573,10 +573,15 @@ bootnet_mgm <- function(
     stop("'data' argument must be a data frame")
   }
   
-  # If matrix coerce to data frame:
-  if (is.matrix(data)){
-    data <- as.data.frame(data)
-  }
+  # # If matrix coerce to data frame:
+  # if (is.matrix(data)){
+  #   data <- as.data.frame(data)
+  # }
+  # If is not a matrix coerce to matrix (because mgm is silly):
+  # if (!is.matrix(data)){
+    data <- as.matrix(data)
+  # }
+  
   
   # Obtain info from data:
   N <- ncol(data)
@@ -701,6 +706,32 @@ bootnet_relimp <- function(
   if (structureDefault != "none"){
     if (verbose){
       message("Computing network structure")
+      
+      msg <- "Computing network structure. Using package::function:"
+      if (structureDefault == "EBICglasso"){
+        msg <- paste0(msg,"\n  - qgraph::EBICglasso for EBIC model selection\n    - using glasso::glasso")
+      }
+      if (structureDefault == "pcor"){
+        msg <- paste0(msg,"\n  - qgraph::qgraph(..., graph = 'pcor') for network computation")
+      }
+      if (structureDefault == "IsingFit"){
+        msg <- paste0(msg,"\n  - IsingFit::IsingFit for network computation\n    - Using glmnet::glmnet")
+      }
+      if (structureDefault == "IsingSampler"){
+        msg <- paste0(msg,"\n  - IsingSampler::EstimateIsing for network computation")
+      }
+      if (structureDefault == "adalasso"){
+        msg <- paste0(msg,"\n  - parcor::adalasso.net for network computation")
+      }
+      if (structureDefault == "huge"){
+        msg <- paste0(msg,"\n  - huge::huge for network computation")
+        msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
+      }
+      if (structureDefault == "mgm"){
+        msg <- paste0(msg,"\n  - mgm::mgm for network computation")
+      }
+      
+      message(msg)
     }
     if (structureDefault == "custom"){
       struc <- estimateNetwork(data, ...)
@@ -722,7 +753,10 @@ bootnet_relimp <- function(
   
   # For every node, compute incomming relative importance:
   if (verbose){
-    message("Computing relative importance network")
+  
+    msg <- "Computing relative importance network. Using package::function:\n  - relaimpo::calc.relimp for edge weight estimation"
+    message(msg)
+  
     pb <- txtProgressBar(0,nVar,style=3)
   }
   for (i in 1:nVar){

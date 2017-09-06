@@ -9,7 +9,7 @@ This function can be used to bootstrap network estimation methods so that the sp
 }
 \usage{
 bootnet(data, nBoots = 1000, default = c("none", "EBICglasso", "pcor","IsingFit",
-                  "IsingSampler", "huge","adalasso","mgm"), type =
+                  "IsingSampler", "huge","adalasso","mgm","relimp"), type =
                  c("nonparametric", "parametric", "node", "person",
                  "jackknife", "case"), nCores = 1, statistics = c("edge"
                  ,"strength","closeness","betweenness"), model = c("detect",
