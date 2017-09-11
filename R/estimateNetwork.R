@@ -1,7 +1,7 @@
 # This function takes data as input and produced a network. It is used inside bootnet:
 estimateNetwork <- function(
   data,
-  default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp"),
+  default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", "cor"),
   fun, # A function that takes data and returns a network or list entitled "graph" and "thresholds". optional.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function

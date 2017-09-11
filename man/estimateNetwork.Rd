@@ -2,6 +2,7 @@
 \alias{estimateNetwork}
 \alias{bootnet_EBICglasso}
 \alias{bootnet_pcor}
+\alias{bootnet_cor}
 \alias{bootnet_IsingFit}
 \alias{bootnet_IsingSampler}
 \alias{bootnet_adalasso}
@@ -17,16 +18,20 @@ This function allows for flexible estimation of a network structure using variou
 }
 \usage{
 estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit", 
-      "IsingSampler", "huge", "adalasso", "mgm", "relimp"), fun, prepFun, prepArgs, 
-      estFun, estArgs, graphFun, graphArgs, intFun, intArgs, labels, verbose = TRUE,
-      construct = c("default","function","arguments"), .dots = list(), weighted = TRUE, 
-      signed = TRUE, directed, \dots, .input, memorysaver = FALSE)
+      "IsingSampler", "huge", "adalasso", "mgm", "relimp", "cor"), fun, prepFun, 
+      prepArgs, estFun, estArgs, graphFun, graphArgs, intFun, intArgs, labels, 
+      verbose = TRUE, construct = c("default","function","arguments"), .dots = list(), 
+      weighted = TRUE,  signed = TRUE, directed, \dots, .input, memorysaver = FALSE)
                 
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn"), 
   missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimim"),
   verbose = TRUE, corArgs = list(), refit = FALSE)
   
 bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
+  "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
+  corArgs = list(), threshold = 0)
+  
+bootnet_cor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
   "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
   corArgs = list(), threshold = 0)
   
@@ -62,6 +67,7 @@ A string indicating the method to use. Specifying a \code{default} sets default 
 \item{\code{"IsingFit"}}{Ising model estimation using LASSO regularized nodewise logistic regression and extended Bayesian information criterion to select optimal regularization parameter. Using \code{\link[IsingFit]{IsingFit}} from the IsingFit package.  Calls \code{bootnet_IsingFit}.}
 \item{\code{IsingSampler}}{Calls the \code{\link[IsingSampler]{EstimateIsing}} function from the IsingSampler package. }
 \item{\code{"pcor"}}{Partial correlation network (non-regularized Gaussian Markov random field), using \code{\link[corpcor]{cor2pcor}} from the corpcor package.  Calls \code{bootnet_pcor}.}
+\item{\code{"cor"}}{Correlation network.}
 \item{\code{adalasso}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
 \item{\code{huge}}{Uses EBIC model selection of GGM networks estimated via the glasso algorithm as implemented in the huge package (as opposed to glasso and qgraph packages used in \code{default = "EBICglasso"}). Uses nonparanormal transformation in preparing the data and does not use polychoric correlations. Calls \code{bootnet_huge}.}
 \item{\code{mgm}}{Estimates a Mixed graphical model by using the the mgm (or mgmfit in older versions) function of the mgm package. Calls \code{bootnet_mgm}.}

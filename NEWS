@@ -1,3 +1,6 @@
+Changes in Version 1.0.2
+  - Correlation networks are now supported (default = "cor")
+
 Changes in Version 1.0.1
   - missing = "fiml" is now supported for EBICglasso and pcor default sets
   - Relative importance networks now do not crash when the number of predictors is 0 or 1

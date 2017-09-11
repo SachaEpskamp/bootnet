@@ -2,6 +2,7 @@
 export(bootnet_IsingFit)
 export(bootnet_EBICglasso)
 export(bootnet_pcor)
+export(bootnet_cor)
 export(bootnet_IsingSampler)
 export(bootnet_adalasso)
 export(bootnet_huge)

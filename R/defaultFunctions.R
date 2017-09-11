@@ -292,6 +292,123 @@ bootnet_pcor <- function(
 }
 
 
+### COR ESTIMATOR ###
+bootnet_cor <- function(
+  data, # Dataset used
+  corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stop"),
+  sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
+  verbose = TRUE,
+  corArgs = list(), # Extra arguments to the correlation function
+  threshold = 0
+){
+  # Check arguments:
+  corMethod <- match.arg(corMethod)
+  missing <- match.arg(missing)
+  sampleSize <- match.arg(sampleSize)
+  
+  if (identical(threshold,"none")){
+    threshold <- 0
+  }
+  
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    # msg <- paste0(msg,"\n  - qgraph::qgraph(..., graph = 'cor') for network computation")
+    if (corMethod == "cor_auto"){
+      msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "npn"){
+      msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
+    }
+    if (threshold != "none"){
+      if (threshold != "locfdr"){
+        msg <- paste0(msg,"\n  - psych::corr.p for significance thresholding")        
+      } else {
+        msg <- paste0(msg,"\n  - fdrtool for false discovery rate")        
+      }
+      
+    }
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
+  
+  # First test if data is a data frame:
+  if (!(is.data.frame(data) || is.matrix(data))){
+    stop("'data' argument must be a data frame")
+  }
+  
+  # If matrix coerce to data frame:
+  if (is.matrix(data)){
+    data <- as.data.frame(data)
+  }
+  
+  # Obtain info from data:
+  N <- ncol(data)
+  Np <- nrow(data)
+  
+  # Check missing:
+  if (missing == "stop"){
+    if (any(is.na(data))){
+      stop("Missing data detected and missing = 'stop'")
+    }
+  }
+  
+  # Correlate data:
+  # npn:
+  if (corMethod == "npn"){
+    data <- huge::huge.npn(data)
+    corMethod <- "cor"
+  }
+  
+  # cor_auto:
+  if (corMethod == "cor_auto"){
+    args <- list(data=data,missing=missing,verbose=verbose)
+    if (length(corArgs) > 0){
+      for (i in seq_along(corArgs)){
+        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
+      }
+    }
+    corMat <- do.call(qgraph::cor_auto,args)
+  } else if (corMethod%in%c("cor","cov")){
+    # Normal correlations
+    if (missing == "fiml"){
+      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
+    }
+    use <- switch(missing,
+                  pairwise = "pairwise.complete.obs",
+                  listwise = "complete.obs")
+    
+    args <- list(x=data,use=use)
+    if (length(corArgs) > 0){
+      for (i in seq_along(corArgs)){
+        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
+      }
+    }
+    
+    corMat <- do.call(corMethod,args)
+  } else stop ("Correlation method is not supported.")
+  
+  # Sample size:
+  if (missing == "listwise"){
+    sampleSize <- nrow(na.omit(data))
+  } else{
+    if (sampleSize == "maximum"){
+      sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
+    } else {
+      sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
+    }
+  } 
+  
+  # Estimate network:
+  Results <- getWmat(qgraph::qgraph(corMat,graph = "cor",DoNotPlot = TRUE,threshold=threshold, sampleSize = sampleSize))
+  
+  # Return:
+  return(list(graph=Results,results=Results))
+}
+
+
 ### ISINGFIT ESTIMATOR ###
 bootnet_IsingFit <- function(
   data, # Dataset used
