@@ -1,5 +1,6 @@
 Changes in Version 1.0.2
   - Correlation networks are now supported (default = "cor")
+  - Fixed a bug reporting the number of non-zero edges in the print methods
 
 Changes in Version 1.0.1
   - missing = "fiml" is now supported for EBICglasso and pcor default sets

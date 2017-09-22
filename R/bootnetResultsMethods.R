@@ -4,10 +4,20 @@
 # }
 
 summary.bootnetResult <- function(object, ...){
+  
+  directed <- object$directed
+  
+  if (directed){
+    ind <- matrix(TRUE,ncol(object$graph),ncol(object$graph))
+  } else {
+    ind <- upper.tri(object$graph,diag=FALSE)
+  }
+  
+  
   cat("\nNumber of nodes:",nrow(object[['graph']]),
-      "\nNumber of non-zero edges:",sum(object[['graph']][upper.tri(object[['graph']],diag=FALSE)]==0) ,
-      "\nSparsity:",mean(object[['graph']][upper.tri(object[['graph']],diag=FALSE)]) ,
-      "\nNumber of intercepts:",NROW(object[['intercepts']])
+      "\nNumber of non-zero edges:",sum(object[['graph']][ind]!=0),"/",sum(ind),
+      "\nDensity:",mean(object[['graph']][ind]) 
+      # "\nNumber of estimated intercepts:",NROW(object[['intercepts']])
       )
 }
 

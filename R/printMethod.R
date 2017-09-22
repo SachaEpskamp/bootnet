@@ -27,14 +27,21 @@ getRefs <- function(x){
 }
 
 print.bootnet <- function(x, ...){
-
+  directed <- x$sample$directed
+  
+  if (directed){
+    ind <- matrix(TRUE,ncol(x$sample$graph),ncol(x$sample$graph))
+  } else {
+    ind <- upper.tri(x$sample$graph,diag=FALSE)
+  }
+  
+  
   name <- deparse(substitute(x))[[1]]
   if (nchar(name) > 10) name <- "object"
   cat("=== bootnet Results ===")
-  cat("\nNumber of nodes:",nrow(x[['sample']][['graph']]),
-      "\nNumber of non-zero edges in sample:",sum(x[['sample']][['graph']][upper.tri(x[['sample']][['graph']],diag=FALSE)]==0) ,
-      "\nSparsity in sample:",mean(x[['sample']][['graph']][upper.tri(x[['sample']][['graph']],diag=FALSE)]) ,
-      "\nNumber of intercepts:",NROW(x[['sample']][['intercepts']]),
+  cat("\nNumber of nodes:",nrow(x$sample[['graph']]),
+      "\nNumber of non-zero edges in sample:",sum(x$sample[['graph']][ind]!=0),"/",sum(ind),
+      "\nDensity of sample:",mean(x$sample[['graph']][ind]) ,
       "\nNumber of bootstrapped networks:",length(x[['boots']]),
       paste0("\nResults of original sample stored in ",name,"$sample"),
       paste0("\nTable of all statistics from original sample stored in ",name,"$sampleTable"),
@@ -49,12 +56,21 @@ print.bootnet <- function(x, ...){
 }
 
 print.bootnetResult <- function(x, ...){
+  
+  directed <- x$directed
+  
+  if (directed){
+    ind <- matrix(TRUE,ncol(x$graph),ncol(x$graph))
+  } else {
+    ind <- upper.tri(x$graph,diag=FALSE)
+  }
+  
   name <- deparse(substitute(x))[[1]]
   if (nchar(name) > 10) name <- "object"
   cat("=== Estimated network ===")
   cat("\nNumber of nodes:",nrow(x[['graph']]),
-      "\nNumber of non-zero edges:",sum(x[['graph']][upper.tri(x[['graph']],diag=FALSE)]==0) ,
-      "\nSparsity:",mean(x[['graph']][upper.tri(x[['graph']],diag=FALSE)]==0) ,
+      "\nNumber of non-zero edges:",sum(x[['graph']][ind]!=0),"/",sum(ind),
+      "\nDensity:",mean(x[['graph']][ind]) ,
       paste0("\nNetwork stored in ",name,"$graph"),
       "\n",
       paste0("\nDefault set used: ",x$default),     
