@@ -1,6 +1,11 @@
 Changes in Version 1.0.2
   - Correlation networks are now supported (default = "cor")
   - Fixed a bug reporting the number of non-zero edges in the print methods
+  - Some changes to mgm default:
+    - mgm version >= 1.2 is now required
+    - Renamed lev to level
+    - Renamed degree to order, now defaults to 2 instead of 3
+    - Added binarySign argument. Now chosen by defult.
 
 Changes in Version 1.0.1
   - missing = "fiml" is now supported for EBICglasso and pcor default sets

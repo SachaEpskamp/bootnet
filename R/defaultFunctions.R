@@ -661,14 +661,16 @@ bootnet_huge <- function(
 bootnet_mgm <- function(
   data, # Dataset used
   type,
-  lev,
+  level,
   tuning = 0.5,
   missing = c("listwise","stop"),
   verbose = TRUE,
   criterion = c("EBIC","CV"),
   nFolds = 10,
-  degree = 2,
-  rule = c("AND","OR")
+  order = 2,
+  rule = c("AND","OR"),
+  binarySign, # Detected by default
+  ... # mgm functions
   # method = c("glasso","mb","ct")
 ){
   # Check arguments:
@@ -726,32 +728,47 @@ bootnet_mgm <- function(
     type <- rep(type, ncol(data))
   }
   
-  # Set lev automatically:
-  if (missing(lev)){
+  # Set level automatically:
+  if (missing(level)){
     if (verbose){
-      message("'lev' argument not assigned. Setting lev to 1 for all Gaussian/Poisson variables and number of unique values for all categorical variables")  
+      message("'level' argument not assigned. Setting level to 1 for all Gaussian/Poisson variables and number of unique values for all categorical variables")  
     }
     
-    lev <- ifelse(type == "c", apply(data,2,function(x)length(unique(x))),1)
+    level <- ifelse(type == "c", apply(data,2,function(x)length(unique(x))),1)
   }
-  if (length(lev) != ncol(data)){
-    lev <- rep(lev, ncol(data))
+  if (length(level) != ncol(data)){
+    level <- rep(level, ncol(data))
   }
   
   # Estimate:
-  mgmfun <- "mgmfit"
-  if (packageVersion("mgm") >= "1.2.0"){
-    log <- capture.output(Results <- do.call(gsub("fit","",mgmfun),list(
+  # mgmfun <- "mgmfit"
+  # if (packageVersion("mgm") >= "1.2.0"){
+  # Check if all categorical binary variables are encoded 0 and 1:
+  if (missing(binarySign)){
+    if (any(type == "c" & level == 2)){
+      whichBinary <- which(type == "c" & level == 2)
+      enc <- apply(data[,whichBinary],2,function(x)all(x[!is.na(x)]%in%c(0L,1L)))
+      if (!all(enc)){
+        binarySign <- FALSE
+      } else {
+        binarySign <- TRUE
+      }
+    } else {
+      binarySign <- FALSE
+    }
+  }
+  
+    log <- capture.output(Results <- mgm::mgm(
       data,verbatim = !verbose,  warnings = verbose, signInfo = FALSE,
       type=type,
-      level=lev,
+      level=level,
       lambdaSel = criterion,
       lambdaFolds = nFolds,
       lambdaGam = tuning,
-      k = degree + 1,
+      k = order,
       pbar = verbose,
       ruleReg = rule,
-      saveModels = FALSE, saveData = FALSE)))
+      saveModels = FALSE, saveData = FALSE, binarySign = binarySign, ...))
     
     # Warn for unsigned:
     if (any(Results$pairwise$signs==0,na.rm = TRUE)){
@@ -762,29 +779,29 @@ bootnet_mgm <- function(
     # Graph:
     Graph <- Results$pairwise$wadj
     Graph <- ifelse(Results$pairwise$signs==-1,-Graph,Graph)
-    
-  } else {
-    log <- capture.output(Results <- do.call(mgmfun,list(
-      data,
-      type=type,
-      lev=lev,
-      lambda.sel = criterion,
-      folds = nFolds,
-      gam = tuning,
-      d = degree,
-      pbar = verbose,
-      rule.reg = rule)))
-    
-    # Warn for unsigned:
-    if (any(Results$signs==0,na.rm = TRUE)){
-      warning("Bootnet does not support unsigned edges and treats these as positive edges.")
-    }
-    Results$signs[is.na(Results$signs)] <- 0
-    
-    # Graph:
-    Graph <- Results$wadj
-    Graph <- ifelse(Results$signs==-1,-Graph,Graph)
-  }
+  #   
+  # } else {
+  #   log <- capture.output(Results <- do.call(mgmfun,list(
+  #     data,
+  #     type=type,
+  #     lev=lev,
+  #     lambda.sel = criterion,
+  #     folds = nFolds,
+  #     gam = tuning,
+  #     d = degree,
+  #     pbar = verbose,
+  #     rule.reg = rule)))
+  #   
+  #   # Warn for unsigned:
+  #   if (any(Results$signs==0,na.rm = TRUE)){
+  #     warning("Bootnet does not support unsigned edges and treats these as positive edges.")
+  #   }
+  #   Results$signs[is.na(Results$signs)] <- 0
+  #   
+  #   # Graph:
+  #   Graph <- Results$wadj
+  #   Graph <- ifelse(Results$signs==-1,-Graph,Graph)
+  # }
 
   # Return:
   return(list(

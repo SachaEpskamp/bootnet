@@ -46,9 +46,9 @@ bootnet_adalasso(data,missing = c("listwise","stop"), verbose = TRUE, nFolds = 1
 bootnet_huge(data, tuning = 0.5, missing = c("listwise","stop"), verbose = TRUE,
   npn = TRUE, criterion = c("ebic","ric","stars"))
   
-bootnet_mgm(data, type, lev, tuning = 0.5, missing = c("listwise","stop"), 
-  verbose = TRUE, criterion = c("EBIC","CV"), nFolds = 10, degree = 2,
-  rule = c("AND","OR"))
+bootnet_mgm(data, type, level, tuning = 0.5, missing = c("listwise","stop"), 
+  verbose = TRUE, criterion = c("EBIC","CV"), nFolds = 10, order = 2,
+  rule = c("AND","OR"), binarySign)
   
 bootnet_relimp(data, normalized = TRUE, type = "lmg",
   structureDefault = c("none", "custom", "EBICglasso", "pcor", "IsingFit", 
@@ -93,8 +93,9 @@ Thresholding to use in partial correlation networks. Can be a fixed number to th
 \item{criterion}{The criterion used in model selection. \code{"ebic"}, \code{"ric"} or \code{"stars"} in the huge default set or \code{"EBIC"} or \code{"CV"} in the mgm default set.}
 \item{nFolds}{Number of folds used in k-fold cross-validation.}
 \item{type}{For mgm, see mgm or mgmfit; for relative importance networks, see \code{\link[relaimpo]{calc.relimp}}}
-\item{lev}{See mgm or mgmfit.}
-\item{degree}{Degree of mixed model, see mgm or mgmfit}
+\item{level}{See  \code{\link[mgm]{mgm}}. Automatically set if not assigned.}
+\item{order}{Order up until including which interactions are included in the model. See  \code{\link[mgm]{mgm}}. Automatically set if not assigned.}
+\item{binarySign}{See  \code{\link[mgm]{mgm}}. Automatically set if not assigned.}
 \item{normalized}{Should normalized relative importance be used in relative importance networks?}
 \item{structureDefault}{In relative importance networks, default set used to compute the graph structure. Any other arguments used (using ...) are sent to the graph estimator function as well.}
   \item{prepFun}{
@@ -147,7 +148,7 @@ Logical. If TRUE attempts to save memory (RAM) by removing some objects from the
 \details{
 NEW FUNCTIONALTIY:
 
-The user can manually specify an estimation method by assigning a custom function to the \code{'fun'} argument. This function must take data as input and output an estimated network.
+The user can manually specify an estimation method by assigning a custom function to the \code{'fun'} argument. This function must take data as input and output an estimated network. Fhe functions \code{bootnet_} correspond to the functions used when using default sets. E.g, \code{default = "pcor"} sets \code{fun = bootnet_pcor}. As such, the arguments described above can be used depending on the default set used.
 
 
 DEPRECATED OLD FUNCTIONALITY:
