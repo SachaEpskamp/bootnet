@@ -767,8 +767,7 @@ bootnet_mgm <- function(
       lambdaGam = tuning,
       k = order,
       pbar = verbose,
-      ruleReg = rule,
-      saveModels = FALSE, saveData = FALSE, binarySign = binarySign, ...))
+      ruleReg = rule, saveData = FALSE, binarySign = binarySign, ...))
     
     # Warn for unsigned:
     if (any(Results$pairwise$signs==0,na.rm = TRUE)){
