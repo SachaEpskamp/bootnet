@@ -74,7 +74,8 @@ bootnet_EBICglasso <- function(
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
-  refit = FALSE
+  refit = FALSE,
+  ...
 ){
   # Check arguments:
   corMethod <- match.arg(corMethod)
@@ -168,7 +169,8 @@ bootnet_EBICglasso <- function(
                                 n =  sampleSize, 
                                 gamma = tuning,
                                 returnAllResults = TRUE,
-                                refit = refit)
+                                refit = refit,
+                                ...)
   
   # Return:
   return(list(graph=Results$optnet,results=Results))
