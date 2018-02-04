@@ -6,6 +6,8 @@ Changes in Version 1.0.2
     - Renamed lev to level
     - Renamed degree to order, now defaults to 2 instead of 3
     - Added binarySign argument. Now chosen by defult.
+  - Added 'args' argument to netSimulator
+  - Fixed a bug in which fun is not usuable in bootnet()
 
 Changes in Version 1.0.1
   - missing = "fiml" is now supported for EBICglasso and pcor default sets
