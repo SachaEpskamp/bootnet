@@ -16,7 +16,6 @@ parSim <- function(
 ){
   # Collect the condiitions:
   dots <- list(...)
-  
   # Expand all conditions:
   AllConditions <- do.call(expand.grid,c(dots,list(rep=seq_len(reps),stringsAsFactors=FALSE)))
   

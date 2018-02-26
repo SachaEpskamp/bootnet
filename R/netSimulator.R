@@ -129,10 +129,12 @@ netSimulator <- function(
   nCores = 1, # Number of computer cores used
   default,
   dataGenerator, 
-  ... # estimateNetwork arguments (if none specified, will default to default = "EBICglasso)
+  ..., # estimateNetwork arguments (if none specified, will default to default = "EBICglasso)
+  moreArgs = list() # List of extra args not intended to be varied as conditions
 ){
   # Dots list:
   .dots <- list(...)
+  # default <- match.arg(default)
   
   # Check default and dataGenerator:
   if (missing(default) & missing(dataGenerator)){
@@ -173,7 +175,7 @@ netSimulator <- function(
       nCores = nCores,
       reps = nReps,
       debug=FALSE,
-      export = c("input","dataGenerator",".dots"),
+      export = c("input","dataGenerator",".dots","moreArgs"),
       
       expression = expression({
         cor0 <- function(x,y){
@@ -210,6 +212,7 @@ netSimulator <- function(
         args$data <- Data
         args$verbose <- FALSE
         args$default <- default
+        args <- c(args,moreArgs)
         
         for (i in seq_along(.dots)){
           args[[names(.dots)[i]]] <- get(names(.dots)[i])

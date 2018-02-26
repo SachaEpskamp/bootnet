@@ -130,7 +130,9 @@ bootnet <- function(
       dots <- list(...)
       N <- ncol(data)
       Np <- nrow(data)
-      fun <- NULL
+      if (missing(fun)){
+        fun <- NULL        
+      }
       
       # Check and remove any variable that is not ordered, integer or numeric:
       if (!manual){
