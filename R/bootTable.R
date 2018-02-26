@@ -141,7 +141,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
         type = "expectedInfluence",
         node1 = x[['labels']],
         node2 = '',
-        value = cent[['ExpectedInfluenceOut']],
+        value = cent[['OutExpectedInfluence']],
         stringsAsFactors = FALSE
       ))
     }
