@@ -50,7 +50,7 @@ plot.bootnet <- function(
     if (x$type %in% c("person","node")){
       plot <- "area"
     } else {
-      if (all(statistics %in% c("strength","closeness","betweenness"))){
+      if (all(statistics %in% c("strength","closeness","betweenness","expectedInfluence"))){
         plot <- "difference"
       } else {
         plot <- "area"
@@ -102,7 +102,7 @@ plot.bootnet <- function(
     CIstyle <- rep(CIstyle,length=length(statistics))
   }
   
-  if (any(statistics%in%c("strength", "closeness", "betweenness")) & any(statistics%in%c("edge","distance"))){
+  if (any(statistics%in%c("strength", "closeness", "betweenness","expectedInfluence")) & any(statistics%in%c("edge","distance"))){
     stop("Plotting both centrality CIs and edge/distance CIs together is not supported.")
   }
   
@@ -340,12 +340,12 @@ plot.bootnet <- function(
   ### DIFFERENCE PLOTS ####
   if (plot == "difference"){
     
-    if (any(statistics %in% c("strength","betweenness","closeness")) & any(statistics %in% c("edge","distance"))){
+    if (any(statistics %in% c("strength","betweenness","closeness","expectedInfluence")) & any(statistics %in% c("edge","distance"))){
       stop("'difference' plot can not be made for centrality index and edge weights/distances at the same time.")
     }
     
     if (missing(differenceShowValue)){
-      differenceShowValue <- any(statistics %in% c("strength","betweenness","closeness"))
+      differenceShowValue <- any(statistics %in% c("strength","betweenness","closeness","expectedInfluence"))
     }
     
     cent <- x$bootTable %>% filter(type %in% statistics) %>% dplyr::select(name,id,value,type)
@@ -639,6 +639,7 @@ plot.bootnet <- function(
         sumTable$order <- match(as.character(sumTable$id),gtools::mixedsort(as.character(sumTable$id)))
       } else if (order[[1]]%in%c("sample","mean")){
         # Summarize first:
+    
         summary <- sumTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(sample = ~sample[type==statistics[[1]]], mean = ~mean(mean))
         if (order[[1]]=="sample"){
           summary$order <- order(order(summary$sample,summary$mean))

@@ -9,8 +9,8 @@
 
 statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = c("edge","strength","closeness","betweenness"), directed = FALSE){
   # Statistics can be:
-  if (!all(statistics %in% c("intercept","edge","length","distance","closeness","betweenness","strength"))){
-    stop("'statistics' must be 'edge', 'intercept', 'length', 'distance', 'closeness', 'betweenness' or 'strength'")
+  if (!all(statistics %in% c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence"))){
+    stop("'statistics' must be 'edge', 'intercept', 'length', 'distance', 'closeness', 'betweenness', 'strength', or 'expectedInfluence'")
   }
   
   
@@ -132,6 +132,18 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       value = cent[['ShortestPathLengths']][index],
       stringsAsFactors = FALSE
     ))
+    }
+    
+    if ("expectedInfluence" %in% statistics){
+      
+      tables$expectedInfluence <- dplyr::tbl_df(data.frame(
+        name = name,
+        type = "expectedInfluence",
+        node1 = x[['labels']],
+        node2 = '',
+        value = cent[['ExpectedInfluenceOut']],
+        stringsAsFactors = FALSE
+      ))
     }
     
     
