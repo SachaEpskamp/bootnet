@@ -9,6 +9,7 @@
 \alias{bootnet_huge}
 \alias{bootnet_mgm}
 \alias{bootnet_relimp}
+\alias{bootnet_TMFG}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Estimate a network structure
@@ -18,7 +19,7 @@ This function allows for flexible estimation of a network structure using variou
 }
 \usage{
 estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit", 
-      "IsingSampler", "huge", "adalasso", "mgm", "relimp", "cor"), fun, prepFun, 
+      "IsingSampler", "huge", "adalasso", "mgm", "relimp", "cor", "TMFG"), fun, prepFun, 
       prepArgs, estFun, estArgs, graphFun, graphArgs, intFun, intArgs, labels, 
       verbose = TRUE, construct = c("default","function","arguments"), .dots = list(), 
       weighted = TRUE,  signed = TRUE, directed, \dots, .input, memorysaver = FALSE)
@@ -54,6 +55,9 @@ bootnet_relimp(data, normalized = TRUE, type = "lmg",
   structureDefault = c("none", "custom", "EBICglasso", "pcor", "IsingFit", 
   "IsingSampler", "huge", "adalasso", "mgm"),  missing = c("listwise","stop"),
   ..., verbose = TRUE, threshold = 0)
+  
+bootnet_TMFG(data, corMethod = c("cor_auto","cov","cor","npn"), missing = c("pairwise",
+  "listwise","fiml","stop"), verbose = TRUE, corArgs = list(),  ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -71,6 +75,7 @@ A string indicating the method to use. Specifying a \code{default} sets default 
 \item{\code{adalasso}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
 \item{\code{huge}}{Uses EBIC model selection of GGM networks estimated via the glasso algorithm as implemented in the huge package (as opposed to glasso and qgraph packages used in \code{default = "EBICglasso"}). Uses nonparanormal transformation in preparing the data and does not use polychoric correlations. Calls \code{bootnet_huge}.}
 \item{\code{mgm}}{Estimates a Mixed graphical model by using the the mgm (or mgmfit in older versions) function of the mgm package. Calls \code{bootnet_mgm}.}
+\item{\code{TMFG}}{Estimates a Triangulated Maximally Filtered Graph, using the function \code{TMFG} of the NetworkToolbox package}
 }
 See details section for a more detailed description.
 }

@@ -1,3 +1,5 @@
+importFrom(NetworkToolbox,"TMFG")
+
 # Default functions:
 export(bootnet_IsingFit)
 export(bootnet_EBICglasso)
@@ -8,6 +10,7 @@ export(bootnet_adalasso)
 export(bootnet_huge)
 export(bootnet_mgm)
 export(bootnet_relimp)
+export(bootnet_TMFG)
 
 # Defaults:
 importFrom(huge,"huge","huge.npn","huge.select")
