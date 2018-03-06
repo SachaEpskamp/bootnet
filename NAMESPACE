@@ -12,6 +12,8 @@ export(bootnet_mgm)
 export(bootnet_relimp)
 export(bootnet_TMFG)
 
+
+
 # Defaults:
 importFrom(huge,"huge","huge.npn","huge.select")
 importFrom(parcor,"adalasso.net")
@@ -40,6 +42,11 @@ S3method(summary, netSimulator)
 S3method(plot, netSimulator)
 S3method(print, netSimulator)
 
+S3method(summary, replicationSimulator)
+S3method(plot, replicationSimulator)
+S3method(print, replicationSimulator)
+
+export(replicationSimulator)
 export(netSimulator)
 export(genGGM)
 export(ggmGenerator)

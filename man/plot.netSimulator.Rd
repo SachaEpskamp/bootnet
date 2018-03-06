@@ -2,6 +2,11 @@
 \alias{plot.netSimulator}
 \alias{print.netSimulator}
 \alias{summary.netSimulator}
+
+\name{plot.replicationSimulator}
+\alias{plot.replicationSimulator}
+\alias{print.replicationSimulator}
+\alias{summary.replicationSimulator}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 netSimulator S3 methods
@@ -17,6 +22,15 @@ Plot, print and summary methods for \code{\link{netSimulator}} output.
                               ylab, ...)
 \method{print}{netSimulator}(x, digits = 2, ...)
 \method{summary}{netSimulator}(object, digits = 2, ...)
+
+\method{plot}{replicationSimulator}(x, xvar = "factor(nCases)",
+                              yvar = c("correlation","jaccard","replicatedEdges",
+                              "replicatedZeroes"),
+                              xfacet = "measure", yfacet = ".", color = NULL,
+                             ylim = c(0,1), print = TRUE,  xlab = "Number of cases", 
+                              ylab, ...)
+\method{print}{replicationSimulator}(x, digits = 2, ...)
+\method{summary}{replicationSimulator}(object, digits = 2, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
