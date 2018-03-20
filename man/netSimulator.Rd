@@ -1,14 +1,24 @@
 \name{netSimulator}
 \alias{netSimulator}
+\alias{replicationSimulator}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Network Estimation Performance
 }
 \description{
-This function can be used to run a simulation study on the performance of network estimation by varying sample size or any argument used as input to \code{\link{estimateNetwork}}. The purpose of this function is to provide a way to assess the required sample size given a network structure, as well as to easily perform simulation studies. By default, the function uses \code{\link{genGGM}} to simulate a chain graph or small-world network. See details for more information.
+This function can be used to run a simulation study on the performance of network estimation by varying sample size or any argument used as input to \code{\link{estimateNetwork}}. The purpose of this function is to provide a way to assess the required sample size given a network structure, as well as to easily perform simulation studies. By default, the function uses \code{\link{genGGM}} to simulate a chain graph or small-world network. See details for more information. The \code{replicationSimulator} function instead assesses how well a network based on a second independent sample would replicate the network based on the first independent sample.
 }
 \usage{
 netSimulator(
+      input = genGGM(Nvar = 10), 
+      nCases = c(50, 100, 250, 500, 1000, 2500), 
+      nReps = 100,
+      nCores = 1, 
+      default,
+      dataGenerator, 
+    ...)
+    
+replicationSimulator(
       input = genGGM(Nvar = 10), 
       nCases = c(50, 100, 250, 500, 1000, 2500), 
       nReps = 100,
