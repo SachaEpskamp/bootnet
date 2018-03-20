@@ -997,6 +997,7 @@ bootnet_TMFG <- function(
   missing = c("pairwise","listwise","fiml","stop"),
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
+  principalDirection = FALSE,
   ...
 ){
   # Check arguments:
@@ -1073,6 +1074,11 @@ bootnet_TMFG <- function(
     
     corMat <- do.call(corMethod,args)
   } else stop ("Correlation method is not supported.")
+  
+  # Principal direction:
+  if (principalDirection){
+    corMat <- principalDirection(corMat)
+  }
   
   
   # Estimate network:

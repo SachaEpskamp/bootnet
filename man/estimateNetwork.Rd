@@ -26,26 +26,27 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit",
                 
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn"), 
   missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimim"),
-  verbose = TRUE, corArgs = list(), refit = FALSE)
+  verbose = TRUE, corArgs = list(), refit = FALSE, principalDirection = FALSE)
   
 bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
   "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
-  corArgs = list(), threshold = 0)
+  corArgs = list(), threshold = 0, principalDirection = FALSE)
   
 bootnet_cor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
   "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
-  corArgs = list(), threshold = 0)
+  corArgs = list(), threshold = 0, principalDirection = FALSE)
   
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = TRUE,
-  rule = c("AND","OR"), split = "median")
+  rule = c("AND","OR"), split = "median", principalDirection = FALSE)
   
 bootnet_IsingSampler(data, missing = c("listwise","stop"), verbose = TRUE,
-  split = "median", method = c("default","ll","pl","uni","bi"))
+  split = "median", method = c("default","ll","pl","uni","bi"), principalDirection = FALSE)
   
-bootnet_adalasso(data,missing = c("listwise","stop"), verbose = TRUE, nFolds = 10)
+bootnet_adalasso(data,missing = c("listwise","stop"), verbose = TRUE, nFolds = 10, 
+              principalDirection = FALSE)
   
 bootnet_huge(data, tuning = 0.5, missing = c("listwise","stop"), verbose = TRUE,
-  npn = TRUE, criterion = c("ebic","ric","stars"))
+  npn = TRUE, criterion = c("ebic","ric","stars"), principalDirection = FALSE)
   
 bootnet_mgm(data, type, level, tuning = 0.5, missing = c("listwise","stop"), 
   verbose = TRUE, criterion = c("EBIC","CV"), nFolds = 10, order = 2,
@@ -57,7 +58,8 @@ bootnet_relimp(data, normalized = TRUE, type = "lmg",
   ..., verbose = TRUE, threshold = 0)
   
 bootnet_TMFG(data, corMethod = c("cor_auto","cov","cor","npn"), missing = c("pairwise",
-  "listwise","fiml","stop"), verbose = TRUE, corArgs = list(),  ...)
+  "listwise","fiml","stop"), verbose = TRUE, corArgs = list(), principalDirection = FALSE,
+    ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -149,6 +151,9 @@ A list of arguments used in the estimation function set by a default set or by t
 \item{.input}{Used internally in the bootnet function. Do not use.}
 \item{memorysaver}{
 Logical. If TRUE attempts to save memory (RAM) by removing some objects from the output. Used by bootnet by default for bootstraps.}
+\item{principalDirection}{
+Rescales variables according to the sign of the first eigen-vector. This will lead to most correlations to be positive (positive manifold), leading to negative edges to be substantively interpretable.
+}
 }
 \details{
 NEW FUNCTIONALTIY:
