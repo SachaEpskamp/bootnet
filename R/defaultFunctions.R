@@ -1,3 +1,21 @@
+# Principal direction (multiplies columns with sign of first eigenvector correlations):
+principalDirection <- function(corMat){
+  ev <- eigen(corMat)
+  ev1 <- sign(ev$vectors[,1])
+  corMat <- corMat * outer(ev1, ev1)
+  return(corMat)
+}
+
+principalDirection_noCor <- function(data){
+  corMat <- cor(data, use = "pairwise.complete.obs")
+  ev <- eigen(corMat)
+  ev1 <- sign(ev$vectors[,1])
+  for (i in 1:ncol(data)){
+    data[,i] <-  data[,i] * ev1[i]
+  }
+  return(data)
+}
+
 # Folling R:
 mgm <- NULL
 mgmfit <- NULL
@@ -75,6 +93,7 @@ bootnet_EBICglasso <- function(
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   refit = FALSE,
+  principalDirection = FALSE,
   ...
 ){
   # Check arguments:
@@ -164,6 +183,11 @@ bootnet_EBICglasso <- function(
     }
   } 
   
+  # Principal direction:
+  if (principalDirection){
+    corMat <- principalDirection(corMat)
+  }
+  
   # Estimate network:
   Results <- qgraph::EBICglasso(corMat,
                                 n =  sampleSize, 
@@ -185,7 +209,8 @@ bootnet_pcor <- function(
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
-  threshold = 0
+  threshold = 0,
+  principalDirection = FALSE
 ){
   # Check arguments:
   corMethod <- match.arg(corMethod)
@@ -286,6 +311,11 @@ bootnet_pcor <- function(
     }
   } 
   
+  # Principal direction:
+  if (principalDirection){
+    corMat <- principalDirection(corMat)
+  }
+  
   # Estimate network:
   Results <- getWmat(qgraph::qgraph(corMat,graph = "pcor",DoNotPlot = TRUE,threshold=threshold, sampleSize = sampleSize))
   
@@ -302,7 +332,8 @@ bootnet_cor <- function(
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
-  threshold = 0
+  threshold = 0,
+  principalDirection = FALSE
 ){
   # Check arguments:
   corMethod <- match.arg(corMethod)
@@ -403,6 +434,11 @@ bootnet_cor <- function(
     }
   } 
   
+  # Principal direction:
+  if (principalDirection){
+    corMat <- principalDirection(corMat)
+  }
+  
   # Estimate network:
   Results <- getWmat(qgraph::qgraph(corMat,graph = "cor",DoNotPlot = TRUE,threshold=threshold, sampleSize = sampleSize))
   
@@ -418,7 +454,8 @@ bootnet_IsingFit <- function(
   missing = c("listwise","stop"),
   verbose = TRUE,
   rule = c("AND","OR"),
-  split = "median"
+  split = "median",
+  principalDirection = FALSE
 ){
   # Check arguments:
   missing <- match.arg(missing)
@@ -464,6 +501,11 @@ bootnet_IsingFit <- function(
     data <- bootnet::binarize(data, split = split, verbose = verbose)
   }
   
+  # Principal direction:
+  if (principalDirection){
+    data <- principalDirection_noCor(data)
+  }
+  
   # Estimate network:
   Results <- IsingFit::IsingFit(data, AND = rule == "AND", gamma = tuning,progressbar = verbose,plot = FALSE)
   
@@ -478,7 +520,8 @@ bootnet_IsingSampler <- function(
   missing = c("listwise","stop"),
   verbose = TRUE,
   split = "median",
-  method = c("default","ll","pl","uni","bi")
+  method = c("default","ll","pl","uni","bi"),
+  principalDirection = FALSE
 ){
   # Check arguments:
   missing <- match.arg(missing)
@@ -536,6 +579,11 @@ bootnet_IsingSampler <- function(
     data <- bootnet::binarize(data, split = split, verbose = verbose)
   }
   
+  # Principal direction:
+  if (principalDirection){
+    data <- principalDirection_noCor(data)
+  }
+  
   # Estimate network:
   Results <- IsingSampler::EstimateIsing(as.matrix(data), method = method)
   
@@ -550,7 +598,8 @@ bootnet_adalasso <- function(
   data, # Dataset used
   missing = c("listwise","stop"),
   verbose = TRUE,
-  nFolds = 10 # Number of folds
+  nFolds = 10, # Number of folds
+  principalDirection = FALSE
 ){
   # Check arguments:
   missing <- match.arg(missing)
@@ -588,6 +637,11 @@ bootnet_adalasso <- function(
     data <- na.omit(data)
   }
   
+  # Principal direction:
+  if (principalDirection){
+    data <- principalDirection_noCor(data)
+  }
+  
   # Estimate network:
   Results <- parcor::adalasso.net(data, k = nFolds)
   
@@ -603,7 +657,8 @@ bootnet_huge <- function(
   missing = c("listwise","stop"),
   verbose = TRUE,
   npn = TRUE, # Compute nonparanormal?
-  criterion = c("ebic","ric","stars")
+  criterion = c("ebic","ric","stars"),
+  principalDirection = FALSE
   # method = c("glasso","mb","ct")
 ){
   # Check arguments:
@@ -648,6 +703,11 @@ bootnet_huge <- function(
   # Nonparanormal:
   if (npn){
     data <- huge::huge.npn(na.omit(as.matrix(data)),verbose = verbose)
+  }
+  
+  # Principal direction:
+  if (principalDirection){
+    data <- principalDirection_noCor(data)
   }
   
   # Estimate network:
