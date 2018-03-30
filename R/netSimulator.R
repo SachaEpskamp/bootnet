@@ -163,6 +163,10 @@ netSimulator <- function(
     
   }
   
+  
+  # Else none:
+  if (missing(default)) default <- "none"
+  
   # parSim arguments:
   Args <- c(
     list(
