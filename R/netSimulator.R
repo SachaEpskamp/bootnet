@@ -39,7 +39,11 @@ ggmGenerator <- function(
     
     # Generate data:
     # True sigma:
+    if (any(eigen(diag(ncol(graph)) - graph))$values < 0){
+      stop("Precision matrix is not positive semi-definite")
+    }
     Sigma <- cov2cor(solve(diag(ncol(graph)) - graph))
+    
     
     # Generate data:
     Data <- mvtnorm::rmvnorm(n, sigma = Sigma)
@@ -264,6 +268,15 @@ netSimulator <- function(
         SimulationResults$strength <- cor0(centTrue$OutDegree,centEst$OutDegree)
         SimulationResults$closeness <- cor0(centTrue$Closeness,centEst$Closeness)
         SimulationResults$betweenness <- cor0(centTrue$Betweenness,centEst$Betweenness)
+        
+        # 
+        # ### TEMP: REMOVE:
+        # SimulationResults$MeanBiasFalsePositives <- mean(abs(est[real==0 & est!=0]))
+        # # SimulationResults$Q75BiasFalsePositives <- quantile(abs(est[real==0 & est!=0]), 0.75)
+        # SimulationResults$MaxBiasFalsePositives <- max(abs(est[real==0 & est!=0]))
+        # SimulationResults$MaxWeight <- max(abs(est))
+        # SimulationResults$MeanWeight <- mean(abs(est[est!=0]))
+        # ##
         
         SimulationResults
       })),

@@ -4,6 +4,9 @@ summary.netSimulator <- function(object, digits = 2, ...){
   name <- deparse(substitute(x))[[1]]
   if (nchar(name) > 10) name <- "object"
   
+  # Check for errors:
+  if (all(object$error)) stop(paste0("All simulations resulted in errors:\n",paste(unique(object$errorMessage, collapse = "\n"))))
+  
   Exclude <- c(
     "rep","id","correctModel","sensitivity","specificity","correlation","strength","closeness","betweenness","error","errorMessage"
   )

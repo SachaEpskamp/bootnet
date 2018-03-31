@@ -210,6 +210,7 @@ bootnet_pcor <- function(
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   threshold = 0,
+  alpha = 0.05,
   principalDirection = FALSE
 ){
   # Check arguments:
@@ -317,7 +318,7 @@ bootnet_pcor <- function(
   }
   
   # Estimate network:
-  Results <- getWmat(qgraph::qgraph(corMat,graph = "pcor",DoNotPlot = TRUE,threshold=threshold, sampleSize = sampleSize))
+  Results <- getWmat(qgraph::qgraph(corMat,graph = "pcor",DoNotPlot = TRUE,threshold=threshold,alpha=alpha, sampleSize = sampleSize))
   
   # Return:
   return(list(graph=Results,results=Results))
