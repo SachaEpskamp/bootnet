@@ -36,10 +36,10 @@ ggmGenerator <- function(
     
     # Remove diag:
     diag(graph) <- 0
-    
+  
     # Generate data:
     # True sigma:
-    if (any(eigen(diag(ncol(graph)) - graph))$values < 0){
+    if (any(eigen(diag(ncol(graph)) - graph)$values < 0)){
       stop("Precision matrix is not positive semi-definite")
     }
     Sigma <- cov2cor(solve(diag(ncol(graph)) - graph))
@@ -127,14 +127,15 @@ IsingGenerator <- function(
 
 
 netSimulator <- function(
-  input = genGGM(Nvar = 10),  # A matrix, or a list with graph and intercepts elements.
+  input = genGGM(Nvar = 10),  # A matrix, or a list with graph and intercepts elements. Or a generating function
   nCases = c(50,100,250,500,1000,2500), # Number of cases
   nReps = 100, # Number of repititions per condition
   nCores = 1, # Number of computer cores used
   default,
   dataGenerator, 
   ..., # estimateNetwork arguments (if none specified, will default to default = "EBICglasso)
-  moreArgs = list() # List of extra args not intended to be varied as conditions
+  moreArgs = list(), # List of extra args not intended to be varied as conditions
+  moreOutput = list() # List with functions that take two weights matrices and produce some value
 ){
   # Dots list:
   .dots <- list(...)
@@ -183,7 +184,7 @@ netSimulator <- function(
       nCores = nCores,
       reps = nReps,
       debug=FALSE,
-      export = c("input","dataGenerator",".dots","moreArgs"),
+      export = c("input","dataGenerator",".dots","moreArgs","moreOutput"),
       
       expression = expression({
         cor0 <- function(x,y){
@@ -204,7 +205,7 @@ netSimulator <- function(
         } else {
           inputResults <- input
         }
-        
+
         # True network:
         if (is.list(inputResults)){
           trueNet <- inputResults$graph
@@ -276,7 +277,18 @@ netSimulator <- function(
         # SimulationResults$MaxBiasFalsePositives <- max(abs(est[real==0 & est!=0]))
         # SimulationResults$MaxWeight <- max(abs(est))
         # SimulationResults$MeanWeight <- mean(abs(est[est!=0]))
+        SimulationResults$MaxFalseEdgeWidth <- max(abs(est[real==0 & est!=0])) / max(abs(est))
+        SimulationResults$bias <- mean(abs(est - real))
         # ##
+        if (length(moreOutput) > 1){
+          if (is.null(names(moreOutput))){
+            names(moreOutput) <- paste0("moreOutput",seq_along(moreOutput))
+          }
+          
+          for (out in seq_along(moreOutput)){
+            SimulationResults[[out]] <- moreOutput[[i]](estNet, trueNet)
+          }
+        }
         
         SimulationResults
       })),

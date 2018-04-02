@@ -94,6 +94,8 @@ bootnet_EBICglasso <- function(
   corArgs = list(), # Extra arguments to the correlation function
   refit = FALSE,
   principalDirection = FALSE,
+  lambda.min.ratio = 0.01,
+  nlambda = 100,
   ...
 ){
   # Check arguments:
@@ -194,12 +196,136 @@ bootnet_EBICglasso <- function(
                                 gamma = tuning,
                                 returnAllResults = TRUE,
                                 refit = refit,
+                                lambda.min.ratio=lambda.min.ratio,
+                                nlambda = nlambda,
                                 ...)
   
   # Return:
   return(list(graph=Results$optnet,results=Results))
 }
 
+
+
+### EBIC GLASSO 2 ESTIMATOR ###
+bootnet_EBICglasso2 <- function(
+  data, # Dataset used
+  tuning = 0.5, # tuning parameter
+  corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stop"),
+  sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
+  verbose = TRUE,
+  corArgs = list(), # Extra arguments to the correlation function
+  refit = TRUE,
+  principalDirection = FALSE,
+  lambda.min.ratio = 0.01,
+  nlambda = 100,
+  ...
+){
+  # Check arguments:
+  corMethod <- match.arg(corMethod)
+  missing <- match.arg(missing)
+  sampleSize <- match.arg(sampleSize)
+  
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - qgraph::EBICglasso for EBIC model selection\n    - using glasso::glasso")
+    if (corMethod == "cor_auto"){
+      msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "npn"){
+      msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
+    }
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
+  
+  # First test if data is a data frame:
+  if (!(is.data.frame(data) || is.matrix(data))){
+    stop("'data' argument must be a data frame")
+  }
+  
+  # If matrix coerce to data frame:
+  if (is.matrix(data)){
+    data <- as.data.frame(data)
+  }
+  
+  # Obtain info from data:
+  N <- ncol(data)
+  Np <- nrow(data)
+  
+  # Check missing:
+  if (missing == "stop"){
+    if (any(is.na(data))){
+      stop("Missing data detected and missing = 'stop'")
+    }
+  }
+  
+  # Correlate data:
+  # npn:
+  if (corMethod == "npn"){
+    data <- huge::huge.npn(data)
+    corMethod <- "cor"
+  }
+  
+  # cor_auto:
+  if (corMethod == "cor_auto"){
+    args <- list(data=data,missing=missing,verbose=verbose)
+    if (length(corArgs) > 0){
+      for (i in seq_along(corArgs)){
+        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
+      }
+    }
+    corMat <- do.call(qgraph::cor_auto,args)
+  } else if (corMethod%in%c("cor","cov")){
+    # Normal correlations
+    if (missing == "fiml"){
+      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
+    }
+    use <- switch(missing,
+                  pairwise = "pairwise.complete.obs",
+                  listwise = "complete.obs")
+    
+    args <- list(x=data,use=use)
+    if (length(corArgs) > 0){
+      for (i in seq_along(corArgs)){
+        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
+      }
+    }
+    
+    corMat <- do.call(corMethod,args)
+  } else stop ("Correlation method is not supported.")
+  
+  # Sample size:
+  if (missing == "listwise"){
+    sampleSize <- nrow(na.omit(data))
+  } else{
+    if (sampleSize == "maximum"){
+      sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
+    } else {
+      sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
+    }
+  } 
+  
+  # Principal direction:
+  if (principalDirection){
+    corMat <- principalDirection(corMat)
+  }
+  
+  # Estimate network:
+  Results <- qgraph::EBICglasso2(corMat,
+                                n =  sampleSize, 
+                                gamma = tuning,
+                                returnAllResults = TRUE,
+                                refit = refit,
+                                lambda.min.ratio=lambda.min.ratio,
+                                nlambda = nlambda,
+                                ...)
+  
+  # Return:
+  return(list(graph=Results$optnet,results=Results))
+}
 
 ### PCOR ESTIMATOR ###
 bootnet_pcor <- function(
@@ -659,7 +785,9 @@ bootnet_huge <- function(
   verbose = TRUE,
   npn = TRUE, # Compute nonparanormal?
   criterion = c("ebic","ric","stars"),
-  principalDirection = FALSE
+  principalDirection = FALSE,
+  lambda.min.ratio = 0.01,
+  nlambda = 100
   # method = c("glasso","mb","ct")
 ){
   # Check arguments:
@@ -712,7 +840,7 @@ bootnet_huge <- function(
   }
   
   # Estimate network:
-  Results <- huge::huge.select(huge::huge(data,method = "glasso",verbose=verbose), criterion = criterion,verbose = verbose,ebic.gamma = tuning)
+  Results <- huge::huge.select(huge::huge(data,method = "glasso",verbose=verbose,lambda.min.ratio=lambda.min.ratio,nlambda=nlambda), criterion = criterion,verbose = verbose,ebic.gamma = tuning)
   
   # Return:
   return(list(
@@ -906,6 +1034,9 @@ bootnet_relimp <- function(
       msg <- "Computing network structure. Using package::function:"
       if (structureDefault == "EBICglasso"){
         msg <- paste0(msg,"\n  - qgraph::EBICglasso for EBIC model selection\n    - using glasso::glasso")
+      }
+      if (structureDefault == "EBICglasso2"){
+        msg <- paste0(msg,"\n  - qgraph::EBICglasso2 for EBIC model selection\n    - using glasso::glasso")
       }
       if (structureDefault == "pcor"){
         msg <- paste0(msg,"\n  - qgraph::qgraph(..., graph = 'pcor') for network computation")

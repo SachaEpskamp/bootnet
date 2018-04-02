@@ -1,12 +1,14 @@
 genGGM <- function(
   Nvar,
-  p = 0,
+  p = 0, # Rewiring probability if graph = "smallworld", or connection probability if graph = "random"
   nei = 1,
   parRange = c(0.5,1),
   constant = 1.5,
-  propPositive = 0.5
+  propPositive = 0.5,
+  graph = c("smallworld","random")
 ){
-  # Watts Strogatz small-world
+  graph <- match.arg(graph)
+
   
   ## Approach from 
   # Yin, J., & Li, H. (2011). A sparse conditional gaussian graphical model for analysis of genetical genomics data. The annals of applied statistics, 5(4), 2630.
@@ -25,7 +27,13 @@ genGGM <- function(
   #   
   #   # Make edges:
   #   trueKappa[upper.tri(trueKappa)][inclEdges] <- 1
-  trueKappa <- as.matrix(igraph::get.adjacency(igraph::watts.strogatz.game(1,Nvar,nei,p)))
+  if (graph == "smallworld"){
+    # Watts Strogatz small-world
+    trueKappa <- as.matrix(igraph::get.adjacency(igraph::watts.strogatz.game(1,Nvar,nei,p)))    
+  } else if (graph == "random"){
+    trueKappa <- as.matrix(igraph::get.adjacency(igraph::erdos.renyi.game(Nvar, p)))
+  }
+
   
   # Make edges negative and add weights:
   trueKappa[upper.tri(trueKappa)] <- trueKappa[upper.tri(trueKappa)] * sample(c(-1,1),sum(upper.tri(trueKappa)),TRUE,prob=c(propPositive,1-propPositive)) * 

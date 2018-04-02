@@ -47,7 +47,10 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
                               yvar = c("sensitivity", "specificity", "correlation"),
                               xfacet = "measure", yfacet = ".", color = NULL,
                              ylim = c(0,1), print = TRUE,  xlab = "Number of cases", 
-                              ylab, ...){
+                              ylab, outlier.size = 0.5, boxplot.lwd = 0.5, style = c("fancy","basic"), ...){
+  
+  style <- match.arg(style)
+  
   # Check input:
   if (xvar != "factor(nCases)" & xlab != "Number of cases"){
     warning("argument 'xvar' is not 'factor(nCases)' while argument 'xlab' is still 'Number of cases'. X-axis label might be wrong.")
@@ -76,8 +79,20 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
   
   # Create plot:
   g <- ggplot2::ggplot(Gathered, AES) + ggplot2::facet_grid(paste0(yfacet," ~ ",xfacet)) + 
-    ggplot2::geom_boxplot() + ggplot2::theme_bw() + ggplot2::ylim(ylim[1],ylim[2]) + 
-    ggplot2::ylab(ylab) + ggplot2::xlab(xlab)
+    ggplot2::geom_boxplot(outlier.size = outlier.size,lwd=boxplot.lwd,fatten=boxplot.lwd) 
+  
+  
+  if (style == "fancy"){
+    g <- g + ggplot2::theme_bw() +# ggplot2::ylim(ylim[1],ylim[2]) +
+      ggplot2::scale_y_continuous(limits=ylim,breaks=seq(ylim[1],ylim[2],by=0.1)) +
+      ggplot2::ylab(ylab) + ggplot2::xlab(xlab) + 
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+      theme( panel.grid.major.x = element_blank(),panel.grid.minor.x = element_blank()) +
+      geom_vline(xintercept=seq(1.5, length(unique(factor(Gathered$nCases)))-0.5, 1), 
+                 lwd=0.5, colour="black", alpha = 0.25) + 
+      theme(legend.position = "top")
+  }
+  
 
   if (print){
     print(g)

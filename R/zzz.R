@@ -45,5 +45,4 @@
 
 # Ok, here goes some stuff to fool the R check rather than changing all the codes... I am sorry..
 P <- contain0 <- data <- fill <- id1 <- id2 <- label <- lower <- na.omit <- name <- node1 <- node2 <- 
-original <- prop <- quantile <- runif <- sd <- stability <- type <- upper <- value <- value1  <- 
-value2 <- nPerson <- NULL
+original <- prop <- quantile <- runif <- sd <- stability <- type <- upper <- value <- value1  <- value2 <- nPerson <- NULL
