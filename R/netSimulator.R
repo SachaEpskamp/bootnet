@@ -277,7 +277,12 @@ netSimulator <- function(
         # SimulationResults$MaxBiasFalsePositives <- max(abs(est[real==0 & est!=0]))
         # SimulationResults$MaxWeight <- max(abs(est))
         # SimulationResults$MeanWeight <- mean(abs(est[est!=0]))
-        SimulationResults$MaxFalseEdgeWidth <- max(abs(est[real==0 & est!=0])) / max(abs(est))
+        if (any(real==0 & est!=0)){
+          SimulationResults$MaxFalseEdgeWidth <- max(abs(est[real==0 & est!=0])) / max(abs(est))
+        } else {
+          SimulationResults$MaxFalseEdgeWidth <- NA
+        }
+
         SimulationResults$bias <- mean(abs(est - real))
         # ##
         if (length(moreOutput) > 1){

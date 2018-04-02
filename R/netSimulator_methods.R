@@ -79,7 +79,7 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
   
   # Create plot:
   g <- ggplot2::ggplot(Gathered, AES) + ggplot2::facet_grid(paste0(yfacet," ~ ",xfacet)) + 
-    ggplot2::geom_boxplot(outlier.size = outlier.size,lwd=boxplot.lwd,fatten=boxplot.lwd) 
+    ggplot2::geom_boxplot(outlier.size = outlier.size,lwd=boxplot.lwd,fatten=boxplot.lwd,position = position_dodge2(preserve = "total")) 
   
   
   if (style == "fancy"){
