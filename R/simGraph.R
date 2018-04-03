@@ -13,24 +13,12 @@ genGGM <- function(
   ## Approach from 
   # Yin, J., & Li, H. (2011). A sparse conditional gaussian graphical model for analysis of genetical genomics data. The annals of applied statistics, 5(4), 2630.
   
-  # Empty matrix:
-  #   trueKappa <- matrix(0,Nvar,Nvar)
-  #   
-  #   # Total edges:
-  #   totEdges <- sum(upper.tri(trueKappa))
-  #   
-  #   # Included edges:
-  #   nEdges <- round((1-sparsity)*totEdges)
-  #   
-  #   # Sample the edges:
-  #   inclEdges <- sample(seq_len(totEdges),nEdges)
-  #   
-  #   # Make edges:
-  #   trueKappa[upper.tri(trueKappa)][inclEdges] <- 1
+  # Simulate graph structure:
   if (graph == "smallworld"){
     # Watts Strogatz small-world
     trueKappa <- as.matrix(igraph::get.adjacency(igraph::watts.strogatz.game(1,Nvar,nei,p)))    
   } else if (graph == "random"){
+    # Ranodm network:
     trueKappa <- as.matrix(igraph::get.adjacency(igraph::erdos.renyi.game(Nvar, p)))
   }
 
