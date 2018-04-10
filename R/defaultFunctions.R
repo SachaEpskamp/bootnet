@@ -96,6 +96,7 @@ bootnet_EBICglasso <- function(
   principalDirection = FALSE,
   lambda.min.ratio = 0.01,
   nlambda = 100,
+  threshold = FALSE,
   ...
 ){
   # Check arguments:
@@ -198,6 +199,7 @@ bootnet_EBICglasso <- function(
                                 refit = refit,
                                 lambda.min.ratio=lambda.min.ratio,
                                 nlambda = nlambda,
+                                threshold=threshold,
                                 ...)
   
   # Return:
@@ -219,6 +221,7 @@ bootnet_EBICglasso2 <- function(
   principalDirection = FALSE,
   lambda.min.ratio = 0.01,
   nlambda = 100,
+  threshold=FALSE,
   ...
 ){
   # Check arguments:
@@ -321,6 +324,7 @@ bootnet_EBICglasso2 <- function(
                                 refit = refit,
                                 lambda.min.ratio=lambda.min.ratio,
                                 nlambda = nlambda,
+                                threshold=threshold,
                                 ...)
   
   # Return:
