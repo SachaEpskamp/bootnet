@@ -10,6 +10,7 @@ Changes in Version 1.0.2
   - Fixed a bug in which fun is not usuable in bootnet()
   - Default set "TMFG" is now supported (Triangulated Maximally Filtered Graph)
   - Added lambda.min.ratio argument to some estimators. Now defaults to 0.01 for default = "huge"
+  - bootnet and netSimulator now show a progress bar (thanks to pbapply package)
 
 Changes in Version 1.0.1
   - missing = "fiml" is now supported for EBICglasso and pcor default sets

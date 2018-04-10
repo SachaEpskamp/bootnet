@@ -62,7 +62,7 @@ parSim <- function(
     }
     
     # Run the loop:
-    Results <- parLapply(cl, seq_len(totCondition), function(i){
+    Results <- pbapply::pblapply(seq_len(totCondition), function(i){
       
       if (debug){
         cat("\nRunning iteration:",i," / ",nrow(AllConditions),"\nTime:",as.character(Sys.time()),"\n")
@@ -78,7 +78,7 @@ parSim <- function(
       df$error <- FALSE
       df$errorMessage <- ''
       df
-    })
+    }, cl = cl)
     
     # Stop the cluster:
     stopCluster(cl)
@@ -93,7 +93,7 @@ parSim <- function(
     }
     
     # Run the loop:
-    Results <- lapply(seq_len(totCondition), function(i){
+    Results <- pblapply(seq_len(totCondition), function(i){
       
       if (debug){
         cat("\nRunning iteration:",i," / ",nrow(AllConditions),"\nTime:",as.character(Sys.time()),"\n")

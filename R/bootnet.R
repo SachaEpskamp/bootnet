@@ -455,7 +455,7 @@ bootnet <- function(
     
     
     # Run loop:
-    bootResults <- parLapply(cl, seq_len(nBoots), function(b){
+    bootResults <- pblapply(seq_len(nBoots), function(b){
       
       tryLimit <- 10
       tryCount <- 0
@@ -524,7 +524,7 @@ bootnet <- function(
       }
       
       return(res)
-    })
+    }, cl = cl)
   }
   
   
@@ -562,9 +562,9 @@ bootnet <- function(
       close(pb)
     }
   }  else {
-    statTableBoots <- parLapply(cl,seq_len(nBoots),function(b){
+    statTableBoots <- pblapply(seq_len(nBoots),function(b){
       statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed)
-    })
+    }, cl = cl)
     # Stop the cluster:
     stopCluster(cl)
   }
