@@ -88,7 +88,7 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
       ggplot2::ylab(ylab) + ggplot2::xlab(xlab) + 
       theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
       theme( panel.grid.major.x = element_blank(),panel.grid.minor.x = element_blank()) +
-      geom_vline(xintercept=seq(1.5, length(unique(factor(Gathered$nCases)))-0.5, 1), 
+      geom_vline(xintercept=seq(1.5, length(unique(eval( parse(text=xvar),envir = Gathered)))-0.5, 1), 
                  lwd=0.5, colour="black", alpha = 0.25) + 
       theme(legend.position = "top")
   }

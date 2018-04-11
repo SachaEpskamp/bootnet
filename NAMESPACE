@@ -5,7 +5,7 @@ importFrom(NetworkToolbox,"TMFG")
 # Default functions:
 export(bootnet_IsingFit)
 export(bootnet_EBICglasso)
-export(bootnet_EBICglasso2)
+export(bootnet_ggmModSelect)
 export(bootnet_pcor)
 export(bootnet_cor)
 export(bootnet_IsingSampler)
