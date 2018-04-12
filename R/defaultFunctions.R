@@ -1125,6 +1125,7 @@ bootnet_relimp <- function(
 ### Maximally Filtered Graph (TMFG) ###
 bootnet_TMFG <- function(
   data, # Dataset used
+  graphType = c("pcor","cor"),
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   verbose = TRUE,
@@ -1210,6 +1211,12 @@ bootnet_TMFG <- function(
   # Principal direction:
   if (principalDirection){
     corMat <- principalDirection(corMat)
+  }
+  
+  graphType <- match.arg(graphType)
+  # If pcor, invert:
+  if (graphType == "pcor"){
+    corMat <- getWmat(qgraph(corMat, graph = "pcor", DoNotPlot=TRUE))
   }
   
   
