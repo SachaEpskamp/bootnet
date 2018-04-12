@@ -1,7 +1,7 @@
 
 # Function that checks input and returns the functions:
 checkInput <- function(
-  default = c("none", "EBICglasso","EBICglasso2", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", "cor","TMFG"),
+  default = c("none", "EBICglasso","ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", "cor","TMFG"),
   fun, # Estimator function
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
@@ -149,8 +149,8 @@ checkInput <- function(
       Function <- fun
     } else if (default == "EBICglasso"){
       Function <- bootnet_EBICglasso
-    } else if (default == "EBICglasso2"){
-      Function <- bootnet_EBICglasso2
+    } else if (default == "ggmModSelect"){
+      Function <- bootnet_ggmModSelect
     } else if (default == "IsingFit"){
       Function <- bootnet_IsingFit
     } else if (default == "IsingSampler"){

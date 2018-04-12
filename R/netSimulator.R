@@ -155,7 +155,7 @@ netSimulator <- function(
   # Data generator:
   if (!missing(default) & missing(dataGenerator)){
     
-    if (default == "EBICglasso" || default == "glasso" || default == "pcor" || default == "adalasso" || default == "huge"){
+    if (default == "EBICglasso" || default == "glasso" || default == "pcor" || default == "adalasso" || default == "huge"|| default == "ggmModSelect"){
       message("Setting 'dataGenerator = ggmGenerator(ordinal = FALSE)'")
       dataGenerator <- ggmGenerator(ordinal = FALSE)
     } else if (default == "IsingFit" || default == "IsingSampler"){

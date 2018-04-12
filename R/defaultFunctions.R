@@ -96,6 +96,7 @@ bootnet_EBICglasso <- function(
   principalDirection = FALSE,
   lambda.min.ratio = 0.01,
   nlambda = 100,
+  threshold = FALSE,
   ...
 ){
   # Check arguments:
@@ -198,6 +199,7 @@ bootnet_EBICglasso <- function(
                                 refit = refit,
                                 lambda.min.ratio=lambda.min.ratio,
                                 nlambda = nlambda,
+                                threshold=threshold,
                                 ...)
   
   # Return:
@@ -207,7 +209,7 @@ bootnet_EBICglasso <- function(
 
 
 ### EBIC GLASSO 2 ESTIMATOR ###
-bootnet_EBICglasso2 <- function(
+bootnet_ggmModSelect <- function(
   data, # Dataset used
   tuning = 0.5, # tuning parameter
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
@@ -215,10 +217,10 @@ bootnet_EBICglasso2 <- function(
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
-  refit = TRUE,
   principalDirection = FALSE,
-  lambda.min.ratio = 0.01,
-  nlambda = 100,
+  start = c("glasso","empty","full"),
+  stepwise = TRUE,
+  nCores = 1,
   ...
 ){
   # Check arguments:
@@ -229,7 +231,7 @@ bootnet_EBICglasso2 <- function(
   # Message:
   if (verbose){
     msg <- "Estimating Network. Using package::function:"  
-    msg <- paste0(msg,"\n  - qgraph::EBICglasso for EBIC model selection\n    - using glasso::glasso")
+    msg <- paste0(msg,"\n  - qgraph::ggmModSelect for model selection\n    - using glasso::glasso")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
     }
@@ -314,17 +316,16 @@ bootnet_EBICglasso2 <- function(
   }
   
   # Estimate network:
-  Results <- qgraph::EBICglasso2(corMat,
+  Results <- qgraph::ggmModSelect(corMat,
                                 n =  sampleSize, 
                                 gamma = tuning,
-                                returnAllResults = TRUE,
-                                refit = refit,
-                                lambda.min.ratio=lambda.min.ratio,
-                                nlambda = nlambda,
+                                start = start,
+                                stepwise = stepwise,
+                                verbose = verbose,
+                                nCores = 1,
                                 ...)
-  
   # Return:
-  return(list(graph=Results$optnet,results=Results))
+  return(list(graph=as.matrix(Results$graph),results=Results))
 }
 
 ### PCOR ESTIMATOR ###
@@ -1035,8 +1036,8 @@ bootnet_relimp <- function(
       if (structureDefault == "EBICglasso"){
         msg <- paste0(msg,"\n  - qgraph::EBICglasso for EBIC model selection\n    - using glasso::glasso")
       }
-      if (structureDefault == "EBICglasso2"){
-        msg <- paste0(msg,"\n  - qgraph::EBICglasso2 for EBIC model selection\n    - using glasso::glasso")
+      if (structureDefault == "ggmModSelect"){
+        msg <- paste0(msg,"\n  - qgraph::ggmModSelect for EBIC model selection\n    - using glasso::glasso")
       }
       if (structureDefault == "pcor"){
         msg <- paste0(msg,"\n  - qgraph::qgraph(..., graph = 'pcor') for network computation")

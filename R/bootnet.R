@@ -24,7 +24,7 @@ noDiag <- function(x){
 bootnet <- function(
   data, # Dataset
   nBoots = 1000, # Number of bootstrap samples.
-  default = c("none", "EBICglasso", "EBICglasso2", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp","cor","TMFG"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
+  default = c("none", "EBICglasso", "ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp","cor","TMFG"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
   type = c("nonparametric","parametric","node","person","jackknife","case"), # Bootstrap method to use
   nCores = 1,
   statistics = c("edge","strength","closeness","betweenness"),
@@ -455,7 +455,7 @@ bootnet <- function(
     
     
     # Run loop:
-    bootResults <- parLapply(cl, seq_len(nBoots), function(b){
+    bootResults <- pblapply(seq_len(nBoots), function(b){
       
       tryLimit <- 10
       tryCount <- 0
@@ -524,7 +524,7 @@ bootnet <- function(
       }
       
       return(res)
-    })
+    }, cl = cl)
   }
   
   
@@ -562,9 +562,9 @@ bootnet <- function(
       close(pb)
     }
   }  else {
-    statTableBoots <- parLapply(cl,seq_len(nBoots),function(b){
+    statTableBoots <- pblapply(seq_len(nBoots),function(b){
       statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed)
-    })
+    }, cl = cl)
     # Stop the cluster:
     stopCluster(cl)
   }
