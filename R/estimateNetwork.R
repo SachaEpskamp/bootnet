@@ -24,6 +24,9 @@ estimateNetwork <- function(
   .input, # Skips most of first steps if supplied
   memorysaver = FALSE # If set to FALSE data, estimator and results are not stored.
 ){
+  # Borsboom easter egg:
+  if (default[1] == "Borsboom") return(42)
+  
   if (default[[1]]=="glasso") default <- "EBICglasso"
   default <- match.arg(default)
 #   
