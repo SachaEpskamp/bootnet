@@ -62,7 +62,12 @@ ggmGenerator <- function(
   } else {
     deparsedEstimator[l] <- sprintf('
     for (i in 1:ncol(Data)){
-      Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,rnorm(%f-1),Inf))))
+      if (is.null(input$thresholds)){
+        Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,rnorm(%f-1),Inf))))
+      } else {
+        Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,input$thresholds[[i]],Inf))))
+      }
+  
     }',nLevels)
   }
   
