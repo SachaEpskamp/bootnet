@@ -9,6 +9,8 @@ plot.bootnet <- function(
   # CIwidth = c("95%","99%","90%","75%"),
   sampleColor = "darkred",
   samplelwd = 1,
+  meanColor = "black",
+  meanlwd = 0.5,
   bootColor = "black",
   bootAlpha = 0.01,
   bootlwd = 0.9,
@@ -29,6 +31,11 @@ plot.bootnet <- function(
   differenceEdgeColor = TRUE, # Show blocks of edges as colors according to standard plot.
   verbose = TRUE,
   panels = TRUE, # defaults to TRUE if 
+  split0 = FALSE, # Set to TRUE to show # times as 0 and CI of non-zero seperate
+  prop0 = ifelse(split0, TRUE, FALSE),
+  prop0_cex = 1,
+  prop0_alpha = 0.8,
+  prop0_minAlpha = 0.25,
   ...
 ){
   bonferroni <- FALSE
@@ -148,13 +155,21 @@ plot.bootnet <- function(
       minArea <- "q2.5"
       maxArea <- "q97.5"  
     }
+    meanVar <- "mean"
+    
+    # Split0?
+    if (split0){
+      minArea <- paste0(minArea,"_non0")
+      maxArea <- paste0(maxArea,"_non0")
+      meanVar <- paste0(meanVar,"_non0")
+    }
     
     if (plot == "area"){
       
       if (perNode){
         
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) 
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = meanVar, group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) 
           
           if (panels){
             g <- g + facet_grid(type ~ ., scales = "free") 
@@ -175,7 +190,7 @@ plot.bootnet <- function(
           
         } else {
           
-          g <- ggplot(Sum, aes_string(x = 'nPerson', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id"))        
+          g <- ggplot(Sum, aes_string(x = 'nPerson', y = meanVar, group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id"))        
           
           if (isTRUE(panels)){
             g <- g + facet_grid(type ~ ., scales = "free")   
@@ -208,7 +223,7 @@ plot.bootnet <- function(
         
         Sum <- Sum %>% filter(!is.na(mean))
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))         
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = meanVar, group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))         
           if (area){
             g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
           }
@@ -221,8 +236,8 @@ plot.bootnet <- function(
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")))
           
         } else {
-          
-          g <- ggplot(Sum, aes_string(x = 'nPerson', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))         
+ 
+          g <- ggplot(Sum, aes_string(x = 'nPerson', y = meanVar, group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))         
           if (area){
             g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
           }
@@ -251,7 +266,7 @@ plot.bootnet <- function(
       if (perNode){
         
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = meanVar, group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -266,7 +281,7 @@ plot.bootnet <- function(
           }
         } else {
           
-          g <- ggplot(Sum, aes_string(x = 'nPeople', y = 'mean', group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
+          g <- ggplot(Sum, aes_string(x = 'nPeople', y = meanVar, group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) + 
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -294,7 +309,7 @@ plot.bootnet <- function(
       } else {
         
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
+          g <- ggplot(Sum, aes_string(x = 'nNode', y = meanVar, group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -306,7 +321,7 @@ plot.bootnet <- function(
             ylim(-1,1)          
         } else {
           
-          g <- ggplot(Sum, aes_string(x = 'nPeople', y = 'mean', group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
+          g <- ggplot(Sum, aes_string(x = 'nPeople', y = meanVar, group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) + 
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -563,12 +578,35 @@ plot.bootnet <- function(
     #     return(g)
     
   } else {
+    
+    # which to choose?
+    if (CIstyle == "SE"){
+      minArea <- "CIlower"
+      maxArea <- "CIupper"
+    } else {
+      minArea <- "q2.5"
+      maxArea <- "q97.5"  
+    }
+    meanVar <- "mean"
+    
+    # Split0?
+    if (split0){
+      minArea <- paste0(minArea,"_non0")
+      maxArea <- paste0(maxArea,"_non0")
+      meanVar <- paste0(meanVar,"_non0")
+    }
+    
+    
     if (any(statistics %in% c("strength","closeness","betweenness"))){
       warning("Bootstrapping CIs on centrality indices is NOT consistent. Interpret these plots with care.")
     }
-    
+
     # Start plot:
     if (plot[[1]]=="line"){
+      
+      if (split0){
+        stop("'split0' is not yet supported for plot = 'line'")
+      }
       
       sampleTable <- x[['sampleTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
       bootTable <- x[['bootTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
@@ -640,7 +678,7 @@ plot.bootnet <- function(
       } else if (order[[1]]%in%c("sample","mean")){
         # Summarize first:
     
-        summary <- sumTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(sample = ~sample[type==statistics[[1]]], mean = ~mean(mean))
+        summary <- sumTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(sample = ~sample[type==statistics[[1]]], mean = as.formula(paste0("~mean(",meanVar,",na.rm=TRUE)")))
         if (order[[1]]=="sample"){
           summary$order <- order(order(summary$sample,summary$mean))
         } else {
@@ -674,15 +712,17 @@ plot.bootnet <- function(
       #       maxArea <- "q97.5"  
       #     }
       
-      sumTable <- sumTable %>% mutate_(
-        lbound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIlower,q2.5),
-        ubound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIupper, q97.5)
-      )
+      # sumTable <- sumTable %>% mutate_(
+      #   lbound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIlower,q2.5),
+      #   ubound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIupper, q97.5)
+      # )
+      sumTable$lbound <- sumTable[[minArea]]
+      sumTable$ubound <- sumTable[[maxArea]]
       
-      
+
       sumTable2 <- dplyr::bind_rows(
-        sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~lbound),
-        revTable(sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~ubound))
+        sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~lbound, mean = meanVar, ~prop0),
+        revTable(sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~ubound, mean = meanVar, ~prop0))
       )
       
       
@@ -691,19 +731,48 @@ plot.bootnet <- function(
       
       if (plot == "area"){
         
-        
         sumTable$numericID <- as.numeric(sumTable$id)
         sumTable2$numericID <- as.numeric(sumTable2$id)
+
+        gathered_sumTable <- tidyr::gather_(sumTable,"var","value",c("sample",meanVar))
         
-        g <- ggplot(sumTable2, aes_string(x = "ci", y = "numericID")) + 
-          geom_polygon(fill = bootColor, colour = NA, alpha = areaAlpha) +
+      
+        # add transparency:
+        if (split0){
+          gathered_sumTable$alpha <- ifelse(gathered_sumTable$var == meanVar,
+                                            prop0_minAlpha + (1-prop0_minAlpha) * (1-gathered_sumTable$prop0),
+                                            1)
+        } else {
+          gathered_sumTable$alpha <- 1
+        }
+        
+        # Plot:
+        g <- ggplot(gathered_sumTable, aes_string(x='value', y='numericID', colour = "var")) + 
+          geom_polygon(aes_string(x = "ci", y = "numericID"),fill = bootColor, colour = NA, alpha = areaAlpha, data = sumTable2) +
+          geom_path(aes_string(x=meanVar,y="numericID"), colour = meanColor, lwd = meanlwd, data = sumTable) +
           geom_path(aes_string(x="sample",y="numericID"), colour = sampleColor, lwd = samplelwd, data = sumTable) +
-          geom_point(aes_string(x="sample",y="numericID"), colour = sampleColor, data = sumTable) +
+          geom_point(aes_string(alpha = "alpha")) + 
+          # geom_point(aes_string(x="mean",y="numericID"), colour = meanColor, data = sumTable) +
+          # geom_point(aes_string(x="sample",y="numericID"), colour = sampleColor, data = sumTable) +
           theme_bw() + 
           xlab("") +
           ylab("") + 
-          scale_y_continuous(breaks = seq(1:length(levels(sumTable$id))), labels = levels(sumTable$id))
-        
+          scale_y_continuous(breaks = seq(1:length(levels(sumTable$id))), labels = levels(sumTable$id))+ 
+          scale_color_manual("",values = c(meanColor,sampleColor), labels = c("Bootstrap mean","Sample")) + 
+          theme(legend.position = "top")
+        # 
+        # 
+        # g <- ggplot(sumTable2, aes_string(x = "ci", y = "numericID")) + 
+        #   geom_polygon(fill = bootColor, colour = NA, alpha = areaAlpha) +
+        #   geom_path(aes_string(x="mean",y="numericID"), colour = meanColor, lwd = meanlwd, data = sumTable) +
+        #   geom_point(aes_string(x="mean",y="numericID"), colour = meanColor, data = sumTable) +
+        #   geom_path(aes_string(x="sample",y="numericID"), colour = sampleColor, lwd = samplelwd, data = sumTable) +
+        #   geom_point(aes_string(x="sample",y="numericID"), colour = sampleColor, data = sumTable) +
+        #   theme_bw() + 
+        #   xlab("") +
+        #   ylab("") + 
+        #   scale_y_continuous(breaks = seq(1:length(levels(sumTable$id))), labels = levels(sumTable$id))
+        # 
         if (isTRUE(panels)){
           g <- g + facet_grid(~ type, scales = "free")
         }
@@ -715,17 +784,39 @@ plot.bootnet <- function(
           g <- g + theme(axis.text.y = element_blank())
           
         }
-        
-        return(g)
+      
         
       } else {
+        gathered_sumTable <- tidyr::gather_(sumTable,"var","value",c("sample",meanVar))
         
-        g <- ggplot(sumTable2, aes_string(x='sample', y='id', group = 'id')) + 
-          geom_path(aes_string(x='ci'), colour = bootColor) +
-          geom_point(colour = sampleColor) +
+        # add transparency:
+        if (split0){
+          gathered_sumTable$alpha <- ifelse(gathered_sumTable$var == meanVar,
+             prop0_minAlpha + (1-prop0_minAlpha) * (1-gathered_sumTable$prop0),
+             1)
+          sumTable2$alpha <- prop0_minAlpha + (1-prop0_minAlpha) * (1-sumTable2$prop0)
+        } else {
+          gathered_sumTable$alpha <- 1
+          sumTable2$alpha <- 1
+        }
+        
+        
+        g <- ggplot(gathered_sumTable, aes_string(x='value', y='id', group = 'id', colour = "var")) + 
+          geom_point(aes_string(alpha = 'alpha')) +
+   geom_path(aes_string(y='id', group = 'id',x='ci',alpha = 'alpha'), colour = bootColor, data = sumTable2) +
           theme_bw() + 
           xlab("") +
-          ylab("")
+          ylab("") + 
+          scale_color_manual("",values = c(meanColor,sampleColor), labels = c("Bootstrap mean","Sample")) + 
+          theme(legend.position = "top") + scale_alpha(guide="none")
+
+        # g <- ggplot(sumTable2, aes_string(x='sample', y='id', group = 'id')) + 
+        #   geom_path(aes_string(x='ci'), colour = bootColor) +
+        #   geom_point(aes_string(x='mean'), colour = meanColor) +
+        #   geom_point(colour = sampleColor) +
+        #   theme_bw() + 
+        #   xlab("") +
+        #   ylab("")
         
         if (isTRUE(panels)){
           g <- g + facet_grid(~ type, scales = "free")
@@ -739,9 +830,21 @@ plot.bootnet <- function(
           
         }
         
-        return(g)
-        
+   
       }
+      
+      # Include boxes with prop0:
+      
+      if (prop0){
+
+        g <- g + geom_label(aes(x=0,label=format(round(prop0, 2), nsmall = 2)), cex = prop0_cex * 2, data = sumTable,
+                       label.padding = unit(0.1, "lines"),
+                       label.size = 0.1, alpha = prop0_alpha,
+                       colour = "black")
+      }
+      
+      
+      return(g)
     } else stop("Unsupported plot")
   }
 }

@@ -1,4 +1,4 @@
-Changes in Version 1.0.2
+Changes in Version 1.1
   - Correlation networks are now supported (default = "cor")
   - Fixed a bug reporting the number of non-zero edges in the print methods
   - Some changes to mgm default:
@@ -11,6 +11,8 @@ Changes in Version 1.0.2
   - Default set "TMFG" is now supported (Triangulated Maximally Filtered Graph)
   - Added lambda.min.ratio argument to some estimators. Now defaults to 0.01 for default = "huge"
   - bootnet and netSimulator now show a progress bar (thanks to pbapply package)
+  - plot method now supports split0 = TRUE, will show how often an edge was 0 and only show CIs of non-zero estimates (faded relative to proportion of times edge was zero).
+  - plot method now shows bootstrapped mean in addition to sample value
 
 Changes in Version 1.0.1
   - missing = "fiml" is now supported for EBICglasso and pcor default sets
