@@ -36,6 +36,7 @@ plot.bootnet <- function(
   prop0_cex = 1,
   prop0_alpha = 0.8,
   prop0_minAlpha = 0.25,
+  subset,
   ...
 ){
   bonferroni <- FALSE
@@ -646,6 +647,8 @@ plot.bootnet <- function(
           id = ~factor(id, levels = unique(id))
         )
       
+      
+      
       g <- ggplot(bootTable, aes_string(x = 'value', y = 'id', group = 'name')) + 
         geom_path(alpha = bootAlpha, lwd = bootlwd) +
         geom_path(data = sampleTable, alpha=1, color = sampleColor, lwd = samplelwd) +
@@ -746,6 +749,14 @@ plot.bootnet <- function(
           gathered_sumTable$alpha <- 1
         }
         
+        # Subset:
+        # Subset:
+        if (!missing(subset)){
+          gathered_sumTable <- gathered_sumTable %>% filter_(~id %in% subset)
+          sumTable2 <- sumTable2 %>% filter_(~id %in% subset)
+          sumTable <- sumTable %>% filter_(~id %in% subset)
+        }
+        
         # Plot:
         g <- ggplot(gathered_sumTable, aes_string(x='value', y='numericID', colour = "var")) + 
           geom_polygon(aes_string(x = "ci", y = "numericID"),fill = bootColor, colour = NA, alpha = areaAlpha, data = sumTable2) +
@@ -800,6 +811,12 @@ plot.bootnet <- function(
           sumTable2$alpha <- 1
         }
         
+        # Subset:
+        if (!missing(subset)){
+          gathered_sumTable <- gathered_sumTable %>% filter_(~id %in% subset)
+          sumTable <- sumTable %>% filter_(~id %in% subset)
+          sumTable2 <- sumTable2 %>% filter_(~id %in% subset)
+        }
         
         g <- ggplot(gathered_sumTable, aes_string(x='value', y='id', group = 'id', colour = "var")) + 
           geom_point(aes_string(alpha = 'alpha')) +
