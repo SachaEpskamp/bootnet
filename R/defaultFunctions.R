@@ -1127,7 +1127,7 @@ bootnet_relimp <- function(
 ### Maximally Filtered Graph (TMFG) ###
 bootnet_TMFG <- function(
   data, # Dataset used
-  graphType = c("pcor","cor"),
+  graphType = c("cor","pcor"),
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   verbose = TRUE,
@@ -1141,7 +1141,11 @@ bootnet_TMFG <- function(
   
   # Message:
   if (verbose){
-    msg <- "Estimating Network. Using package::function:"  
+    if (graphType == "cor"){
+      msg <- "Estimating correlation network. Using package::function:"  
+    } else {
+      msg <- "Estimating partial correlation network. Using package::function:" 
+    }
     msg <- paste0(msg,"\n  - NetworkToolbox::TMFG for Triangulated Maximally Filtered Graph")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
