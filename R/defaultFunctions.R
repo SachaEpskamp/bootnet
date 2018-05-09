@@ -1230,3 +1230,100 @@ bootnet_TMFG <- function(
 }
 
 
+### Local/Global Sparse Inverse Covariance Matrix ###
+bootnet_LoGo <- function(
+  data, # Dataset used
+  corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stop"),
+  verbose = TRUE,
+  corArgs = list(), # Extra arguments to the correlation function
+  principalDirection = FALSE,
+  ...
+){
+  # Check arguments:
+  corMethod <- match.arg(corMethod)
+  missing <- match.arg(missing)
+  
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - NetworkToolbox::LoGo for Local/Global Sparse Inverse Covariance Matrix")
+    if (corMethod == "cor_auto"){
+      msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "npn"){
+      msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
+    }
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
+  
+  # First test if data is a data frame:
+  if (!(is.data.frame(data) || is.matrix(data))){
+    stop("'data' argument must be a data frame")
+  }
+  
+  # If matrix coerce to data frame:
+  if (is.matrix(data)){
+    data <- as.data.frame(data)
+  }
+  
+  # Obtain info from data:
+  N <- ncol(data)
+  Np <- nrow(data)
+  
+  # Check missing:
+  if (missing == "stop"){
+    if (any(is.na(data))){
+      stop("Missing data detected and missing = 'stop'")
+    }
+  }
+  
+  # Correlate data:
+  # npn:
+  if (corMethod == "npn"){
+    data <- huge::huge.npn(data)
+    corMethod <- "cor"
+  }
+  
+  # cor_auto:
+  if (corMethod == "cor_auto"){
+    args <- list(data=data,missing=missing,verbose=verbose)
+    if (length(corArgs) > 0){
+      for (i in seq_along(corArgs)){
+        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
+      }
+    }
+    corMat <- do.call(qgraph::cor_auto,args)
+  } else if (corMethod%in%c("cor","cov")){
+    # Normal correlations
+    if (missing == "fiml"){
+      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
+    }
+    use <- switch(missing,
+                  pairwise = "pairwise.complete.obs",
+                  listwise = "complete.obs")
+    
+    args <- list(x=data,use=use)
+    if (length(corArgs) > 0){
+      for (i in seq_along(corArgs)){
+        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
+      }
+    }
+    
+    corMat <- do.call(corMethod,args)
+  } else stop ("Correlation method is not supported.")
+  
+  # Principal direction:
+  if (principalDirection){
+    corMat <- principalDirection(corMat)
+  }
+  
+
+  # Estimate network:
+  Results <- NetworkToolbox::LoGo(corMat,normal = FALSE,partial=TRUE,standardize = TRUE,...)
+  
+  # Return:
+  return(Results)
+}
