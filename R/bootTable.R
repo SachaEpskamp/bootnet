@@ -148,7 +148,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       ))
     }
     
-    # randomized shortest paths betweenness:
+    # randomized shortest paths betweenness centrality:
     if ("rspbc" %in% statistics){
     tables$rspbc <- dplyr::tbl_df(data.frame(
       name = name,
