@@ -155,7 +155,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       type = "rspbc",
       node1 = x[['labels']],
       node2 = '',
-      value = cent[['RSPBC']],
+      value = cent[['rspbc']],
       stringsAsFactors = FALSE
     ))
     }
@@ -167,7 +167,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       type = "hybrid",
       node1 = x[['labels']],
       node2 = '',
-      value = cent[['Hybrid']],
+      value = cent[['hybrid']],
       stringsAsFactors = FALSE
     ))
     }
