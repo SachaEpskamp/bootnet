@@ -7,10 +7,10 @@
 # node2
 # value
 
-statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = c("edge","strength","closeness","betweenness","rspbc"), directed = FALSE){
+statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = c("edge","strength","closeness","betweenness","rspbc","hybrid"), directed = FALSE){
   # Statistics can be:
-  if (!all(statistics %in% c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence","rspbc"))){
-    stop("'statistics' must be 'edge', 'intercept', 'length', 'distance', 'closeness', 'betweenness', 'strength', 'expectedInfluence', 'rspbc'")
+  if (!all(statistics %in% c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence","rspbc","hybrid"))){
+    stop("'statistics' must be 'edge', 'intercept', 'length', 'distance', 'closeness', 'betweenness', 'strength', 'expectedInfluence', 'rspbc','hybrid'")
   }
   
   
@@ -79,7 +79,8 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
         Closeness = rep(0,ncol(x[['graph']])),
         Betweenness = rep(0,ncol(x[['graph']])),
         ShortestPathLengths = matrix(Inf,ncol(x[['graph']]),ncol(x[['graph']])),
-        RSPBC = rep(0,ncol(x[['graph']]))
+        RSPBC = rep(0,ncol(x[['graph']])),
+        Hybrid = rep(0,ncol(x[['graph']]))
       )
     } else {
       cent <- qgraph::centrality(Wmat, alpha = alpha, all.shortest.paths = FALSE)
@@ -158,6 +159,19 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       stringsAsFactors = FALSE
     ))
     }
+    
+    # hybrid:
+    if ("hybrid" %in% statistics){
+    tables$hybrid <- dplyr::tbl_df(data.frame(
+      name = name,
+      type = "hybrid",
+      node1 = x[['labels']],
+      node2 = '',
+      value = cent[['Hybrid']],
+      stringsAsFactors = FALSE
+    ))
+    }
+    
   }
   #   for (i in seq_along(tables)){
   #     tables[[i]]$id <- ifelse(tables[[i]]$node2=='',paste0("N: ",tables[[i]]$node1),paste0("E: ",tables[[i]]$node1, "--", tables[[i]]$node2))
