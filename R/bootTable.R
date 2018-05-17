@@ -153,7 +153,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
     tables$rspbc <- dplyr::tbl_df(data.frame(
       name = name,
       type = "rspbc",
-      node1 = data.frame(labels = unlist(x[['labels']])),
+      node1 = x[['labels']],
       node2 = '',
       value = cent[['rspbc']],
       stringsAsFactors = FALSE
