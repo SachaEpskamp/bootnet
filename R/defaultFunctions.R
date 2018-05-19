@@ -1198,7 +1198,7 @@ bootnet_TMFG <- function(
   } else if (corMethod%in%c("cor","cov")){
     # Normal correlations
     if (missing == "fiml"){
-      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
+      corMat <- psych::corFIML(data)
     }
     use <- switch(missing,
                   pairwise = "pairwise.complete.obs",
@@ -1227,7 +1227,7 @@ bootnet_TMFG <- function(
   
   
   # Estimate network:
-  Results <- NetworkToolbox::TMFG(corMat,normal = FALSE)
+  Results <- NetworkToolbox::TMFG(corMat)
   
   # Return:
   return(list(graph=Results$A,results=Results))
