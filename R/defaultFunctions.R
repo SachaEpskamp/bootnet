@@ -1198,7 +1198,7 @@ bootnet_TMFG <- function(
   } else if (corMethod%in%c("cor","cov")){
     # Normal correlations
     if (missing == "fiml"){
-      corMat <- psych::corFiml(data)
+      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
     }
     use <- switch(missing,
                   pairwise = "pairwise.complete.obs",
