@@ -1202,7 +1202,8 @@ bootnet_TMFG <- function(
     }
     use <- switch(missing,
                   pairwise = "pairwise.complete.obs",
-                  listwise = "complete.obs")
+                  listwise = "complete.obs",
+                  fiml = "fiml")
     
     args <- list(x=data,use=use)
     if (length(corArgs) > 0){
