@@ -274,6 +274,7 @@ netSimulator <- function(
         SimulationResults$strength <- cor0(centTrue$OutDegree,centEst$OutDegree)
         SimulationResults$closeness <- cor0(centTrue$Closeness,centEst$Closeness)
         SimulationResults$betweenness <- cor0(centTrue$Betweenness,centEst$Betweenness)
+        SimulationResults$ExpectedInfluence <- cor0(centTrue$ExpectedInfluenceIn,centEst$ExpectedInfluenceIn)
         
         # 
         # ### TEMP: REMOVE:
