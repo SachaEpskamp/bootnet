@@ -15,6 +15,9 @@ Changes in Version 1.1
   - plot method now supports split0 = TRUE, will show how often an edge was 0 and only show CIs of non-zero estimates (faded relative to proportion of times edge was zero).
   - plot method now shows bootstrapped mean in addition to sample value
   - default = "cor" now supports alpha argument
+  - Added functionality for functions returning multiple graphs
+  - Added outStrength, inStrength, outExpectedInfluence and inExpectedInfluence
+  - default = "graphicalVAR" is now supported
 
 Changes in Version 1.0.1
   - missing = "fiml" is now supported for EBICglasso and pcor default sets

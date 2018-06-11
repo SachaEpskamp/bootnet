@@ -1331,3 +1331,74 @@ bootnet_LoGo <- function(
   # Return:
   return(Results)
 }
+
+
+####
+### graphicalVAR ESTIMATOR ###
+bootnet_graphicalVAR <- function(
+  data, # Dataset used
+  tuning = 0.5, # tuning parameter
+  verbose = TRUE,
+  principalDirection = FALSE,
+  missing =c("listwise","stop"),
+  ...
+){
+  dots <- list(...)
+  missing <- match.arg(missing)
+  
+  if (any(names(dots)=="gamma")){
+    stop("Please use 'tuning' argument for EBIC hyperparameter gamma")
+  }
+  
+  
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - graphicalVAR::graphicalVAR for model estimation")
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
+  
+  # First test if data is a data frame:
+  if (!is(data,"tsData") && !(is.data.frame(data) || is.matrix(data))){
+    stop("'data' argument must be a data frame")
+  }
+  
+  # If matrix coerce to data frame:
+  if (!is(data,"tsData") && is.matrix(data)){
+    data <- as.data.frame(data)
+  }
+  
+  # Check missing:
+  if (missing == "stop"){
+    if (any(is.na(data))){
+      stop("Missing data detected and missing = 'stop'")
+    }
+  }
+  
+  
+  # Principal direction:
+  if (principalDirection){
+    data <- principalDirection_noCor(data)
+  }
+  
+
+  # Estimate network:
+  Results <- graphicalVAR::graphicalVAR(data,...,gamma = tuning, verbose = verbose)
+  
+  
+  # Return:
+  return(list(graph=list(
+    contemporaneous = Results$PCC,
+    temporal = Results$PDC),
+    results=Results,
+    specialData = list(
+      data = Results$data,
+      type = "graphicalVAR"
+    )))
+}
+
+
+
+

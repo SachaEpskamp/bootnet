@@ -2,7 +2,7 @@
 estimateNetwork <- function(
   data,
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", "cor","TMFG",
-              "ggmModSelect", "LoGo"),
+              "ggmModSelect", "LoGo","graphicalVAR"),
   fun, # A function that takes data and returns a network or list entitled "graph" and "thresholds". optional.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
@@ -19,6 +19,8 @@ estimateNetwork <- function(
   weighted = TRUE,
   signed = TRUE,
   directed,
+  datatype,
+  checkNumeric = FALSE,
   # plot = TRUE, # Plot the network?
   ..., # Arguments to the 'fun' function
   .input, # Skips most of first steps if supplied
@@ -29,6 +31,20 @@ estimateNetwork <- function(
   
   if (default[[1]]=="glasso") default <- "EBICglasso"
   default <- match.arg(default)
+  
+  # datatype test:
+  if (missing(datatype)){
+    if (is(data,"tsData")){
+      datatype <- "graphicalVAR"
+    } else {
+      datatype <- "normal"
+    }
+      
+  }
+
+  if (!datatype%in% c("normal","graphicalVAR")){
+    stop("Only datatypes 'normal' and 'graphicalVAR' currently supported.")
+  }
 #   
   # If NAs and default can't handle, stop:
   # if (any(is.na(data)) && default %in% c("huge","adalasso")){
@@ -36,41 +52,58 @@ estimateNetwork <- function(
   # }
 
   # First test if data is a data frame:
-  if (!(is.data.frame(data) || is.matrix(data))){
+  if (datatype == "normal" && !(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
   }
   
   # If matrix coerce to data frame:
-  if (is.matrix(data)){
+  if (datatype == "normal" && is.matrix(data)){
     data <- as.data.frame(data)
   }
  
   if (missing(directed)){
-    if (!default %in% c("graphicalVAR","relimp","DAG")){
+    if (default == "graphicalVAR"){
+      directed <- list(contemporaneous = FALSE, temporal = TRUE)
+    } else if (!default %in% c("relimp","DAG")){
       directed <- FALSE 
     } else {
       directed <- TRUE
     }
   }
   
-  N <- ncol(data)
-  Np <- nrow(data)
-  
-  
-  if (missing(labels)){
-    labels <- colnames(data)
-  }
-  
-  
-  # Check and remove any variable that is not ordered, integer or numeric:
-  goodColumns <- sapply(data, function(x) is.numeric(x) | is.ordered(x) | is.integer(x))
-  
-  if (!all(goodColumns)){
-    if (verbose){
-      warning(paste0("Removing non-numeric columns: ",paste(which(!goodColumns),collapse="; ")))
+  if (datatype == "normal"){
+    N <- ncol(data)
+    Np <- nrow(data)   
+    if (missing(labels)){
+      labels <- colnames(data)
     }
-    data <- data[,goodColumns,drop=FALSE]
+    
+    if (checkNumeric){
+      # Check and remove any variable that is not ordered, integer or numeric:
+      goodColumns <- sapply(data, function(x) is.numeric(x) | is.ordered(x) | is.integer(x))
+      
+      if (!all(goodColumns)){
+        if (verbose){
+          warning(paste0("Removing non-numeric columns: ",paste(which(!goodColumns),collapse="; ")))
+        }
+        data <- data[,goodColumns,drop=FALSE]
+      }
+    }
+
+    
+  } else if (datatype == "graphicalVAR"){
+   N <- length(data$vars)
+   Np <- nrow(data$data_c)
+   if (missing(labels)){
+     labels <- data$vars
+   }
   }
+
+  
+  
+ 
+  
+  
   
   
   # Compute estimator:
@@ -104,19 +137,36 @@ estimateNetwork <- function(
   # Compute network:
   Result <- do.call(.input$estimator, c(list(data),.input$arguments))
   
-  if (is.list(Result)){
+  if (is.list(Result$graph)){
     sampleGraph <- Result$graph
     intercepts <- Result$intercepts
     output <- Result$results
+    nNode <- ncol(Result$graph[[1]])
   } else {
-    sampleGraph <- Result
+    sampleGraph <- Result$graph
     intercepts <- NULL
     output <- NULL
+    nNode <- ncol(Result$graph)
   }
 
   
   if (!is.matrix(sampleGraph)){
-    stop("Estimated result is not a matrix encoding a network.")
+    if (is.list(sampleGraph)){
+      if (!is.matrix(sampleGraph[[1]])){
+        stop("Estimated result is not a list of matrices encoding networks.")   
+      }
+    } else {
+      stop("Estimated result is not a matrix encoding a network.")
+    }
+  }
+  
+  # Special data?
+  if (is.null(Result$specialData)){
+    outdata <- data
+    datatype <- "normal"
+  } else {
+    outdata <- Result$specialData$data
+    datatype <- Result$specialData$type
   }
 
   sampleResult <- list(
@@ -124,11 +174,12 @@ estimateNetwork <- function(
     intercepts = intercepts,
     results = output,
     labels = labels,
-    nNodes = ncol(data),
+    nNode = nNode,
     nPerson = Np,
     estimator = .input$estimator,
     arguments = .input$arguments,
-    data = data,
+    data = outdata,
+    datatype = datatype,
     default = default,
     weighted = weighted,
     signed = signed,

@@ -4,6 +4,7 @@ plot.bootnet <- function(
   x, # bootnet object,
   statistics, # "edge" for normal bootstrap, c("strength","closeness","betweenness") for node and person
   plot, # Two types: difference and area. Show area for edges, difference for centralities
+  graph,
   CIstyle = c("default","SE","quantiles"),
   rank = FALSE,
   # CIwidth = c("95%","99%","90%","75%"),
@@ -37,20 +38,37 @@ plot.bootnet <- function(
   prop0_alpha = 0.8,
   prop0_minAlpha = 0.25,
   subset,
+  # subtitle,
   ...
 ){
   bonferroni <- FALSE
   # if (panels == "default"){
   #   panels <- length(statistics) > 1
   # }
+
+  # Check for multiple graphs
+  if (length(unique(x$sampleTable$graph)) > 1){
+    if (missing(graph)){
+      stop("Argument 'graph' can not be missing when multiple graphs have been estimated.")    
+    } else {
+      x$sampleTable <- x$sampleTable[x$sampleTable$graph %in% graph,]
+      x$bootTable <- x$bootTable[x$bootTable$graph %in% graph,]
+    }
+    # if (missing(subtitle)){
+    #   subtitle <- graph
+    # }
+  }
+  # if (missing(subtitle)){
+  #   subtitle <- ""
+  # }
   
   if (missing(statistics)){
     if (! x$type %in% c("person","node")){
       statistics <- "edge"
     } else {
-      statistics <-  c("strength","closeness","betweenness") 
+      statistics <- c("strength","outStrength","inStrength","closeness","betweenness") 
     }
-    
+    statistics <- statistics[statistics %in% x$sampleTable$type]
     
   }
   

@@ -1,12 +1,21 @@
 # Creates the summary table
 summary.bootnet <- function(
   object, # bootnet object
+  graph,
   statistics = c("edge", "intercept", "strength", "closeness", "betweenness","distance"), # stats to include in the table
   perNode = FALSE, # Set to true to investigate nodewise stabilty per node.
   rank = FALSE,
   tol = sqrt(.Machine$double.eps),
   ...
 ){
+  if (length(unique(object$sampleTable$graph)) > 1 && missing(graph)){
+    stop("Argument 'graph' can not be missing when multiple graphs have been estimated.")
+  }
+  if (!missing(graph)){
+    object$sampleTable <- object$sampleTable[object$sampleTable$graph %in% graph,]
+    object$bootTable <- object$bootTable[object$bootTable$graph %in% graph,]
+  }
+  
   
   naTo0 <- function(x){
     x[is.na(x)] <- 0
