@@ -188,6 +188,10 @@ estimateNetwork <- function(
   )
   class(sampleResult) <- c("bootnetResult", "list")
   
+  if (default == "graphicalVAR"){
+    sampleResult$labels <- output$data$vars
+  }
+  
   # Memory save:
   if(memorysaver)
   {
