@@ -637,7 +637,7 @@ bootnet_IsingFit <- function(
   
   # Estimate network:
   Results <- IsingFit::IsingFit(data, AND = rule == "AND", gamma = tuning,progressbar = verbose,plot = FALSE)
-  
+ 
   # Return:
   return(list(graph = Results$weiadj, intercepts = Results$thresholds,
               results = Results))

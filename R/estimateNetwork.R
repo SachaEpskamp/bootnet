@@ -144,8 +144,8 @@ estimateNetwork <- function(
     nNode <- ncol(Result$graph[[1]])
   } else {
     sampleGraph <- Result$graph
-    intercepts <- NULL
-    output <- NULL
+    intercepts <- Result$intercepts
+    output <- Result$results
     nNode <- ncol(Result$graph)
   }
 
