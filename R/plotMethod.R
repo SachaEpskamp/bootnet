@@ -780,7 +780,7 @@ plot.bootnet <- function(
           geom_polygon(aes_string(x = "ci", y = "numericID"),fill = bootColor, colour = NA, alpha = areaAlpha, data = sumTable2) +
           geom_path(aes_string(x=meanVar,y="numericID"), colour = meanColor, lwd = meanlwd, data = sumTable) +
           geom_path(aes_string(x="sample",y="numericID"), colour = sampleColor, lwd = samplelwd, data = sumTable) +
-          geom_point(aes_string(alpha = "alpha")) + 
+          geom_point(aes_string(alpha = "alpha"),show.legend = c(alpha = FALSE, colour = TRUE)) + 
           # geom_point(aes_string(x="mean",y="numericID"), colour = meanColor, data = sumTable) +
           # geom_point(aes_string(x="sample",y="numericID"), colour = sampleColor, data = sumTable) +
           theme_bw() + 

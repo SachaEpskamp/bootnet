@@ -10,6 +10,9 @@
 \alias{bootnet_mgm}
 \alias{bootnet_relimp}
 \alias{bootnet_TMFG}
+\alias{bootnet_LoGo}
+\alias{bootnet_ggmModSelect}
+\alias{bootnet_graphicalVAR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Estimate a network structure
@@ -18,48 +21,68 @@ Estimate a network structure
 This function allows for flexible estimation of a network structure using various R packages and model frameworks. This is typically done by using one of the default sets. See details for manual specification. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-estimateNetwork(data, default = c("none", "EBICglasso", "pcor", "IsingFit", 
-      "IsingSampler", "huge", "adalasso", "mgm", "relimp", "cor", "TMFG"), fun, prepFun, 
-      prepArgs, estFun, estArgs, graphFun, graphArgs, intFun, intArgs, labels, 
-      verbose = TRUE, construct = c("default","function","arguments"), .dots = list(), 
-      weighted = TRUE,  signed = TRUE, directed, \dots, .input, memorysaver = FALSE)
+estimateNetwork(data, default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", 
+    "huge","adalasso","mgm","relimp", "cor","TMFG", "ggmModSelect", "LoGo",
+    "graphicalVAR"), fun, prepFun, prepArgs, estFun, estArgs, graphFun, graphArgs, 
+    intFun, intArgs, labels, verbose = TRUE, construct = c("default","function",
+    "arguments"), .dots = list(), weighted = TRUE,  signed = TRUE, directed, datatype, 
+    checkNumeric = FALSE, \dots, .input, memorysaver = FALSE)
                 
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn"), 
   missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimim"),
-  verbose = TRUE, corArgs = list(), refit = FALSE, principalDirection = FALSE)
+  verbose = TRUE, corArgs = list(), refit = FALSE, principalDirection = FALSE, 
+  lambda.min.ratio = 0.01, nlambda = 100, threshold = FALSE, ...)
   
 bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
   "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
-  corArgs = list(), threshold = 0, principalDirection = FALSE)
+  corArgs = list(), threshold = 0, alpha = 0.05, principalDirection = FALSE)
   
 bootnet_cor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
   "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
-  corArgs = list(), threshold = 0, principalDirection = FALSE)
+  corArgs = list(), threshold = 0, alpha = 0.05, principalDirection = FALSE)
   
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = TRUE,
   rule = c("AND","OR"), split = "median", principalDirection = FALSE)
   
 bootnet_IsingSampler(data, missing = c("listwise","stop"), verbose = TRUE,
-  split = "median", method = c("default","ll","pl","uni","bi"), principalDirection = FALSE)
+  split = "median", method = c("default","ll","pl","uni","bi"), 
+  principalDirection = FALSE)
   
 bootnet_adalasso(data,missing = c("listwise","stop"), verbose = TRUE, nFolds = 10, 
               principalDirection = FALSE)
   
 bootnet_huge(data, tuning = 0.5, missing = c("listwise","stop"), verbose = TRUE,
-  npn = TRUE, criterion = c("ebic","ric","stars"), principalDirection = FALSE)
+  npn = TRUE, criterion = c("ebic","ric","stars"), principalDirection = FALSE,
+                 lambda.min.ratio = 0.01, nlambda = 100)
   
 bootnet_mgm(data, type, level, tuning = 0.5, missing = c("listwise","stop"), 
   verbose = TRUE, criterion = c("EBIC","CV"), nFolds = 10, order = 2,
-  rule = c("AND","OR"), binarySign)
+  rule = c("AND","OR"), binarySign, ...)
   
 bootnet_relimp(data, normalized = TRUE, type = "lmg",
-  structureDefault = c("none", "custom", "EBICglasso", "pcor", "IsingFit", 
-  "IsingSampler", "huge", "adalasso", "mgm"),  missing = c("listwise","stop"),
-  ..., verbose = TRUE, threshold = 0)
+                 structureDefault = c("none", "custom", "EBICglasso",
+                 "pcor", "IsingFit", "IsingSampler", "huge",
+                 "adalasso", "mgm", "cor", "TMFG", "ggmModSelect",
+                 "LoGo"), missing = c("listwise", "stop"), ..., verbose
+                 = TRUE, threshold = 0)
   
-bootnet_TMFG(data, corMethod = c("cor_auto","cov","cor","npn"), missing = c("pairwise",
+bootnet_TMFG(data, graphType = c("cor", "pcor"), corMethod =
+                 c("cor_auto", "cov", "cor", "npn"), missing =
+                 c("pairwise", "listwise", "fiml", "stop"), verbose =
+                 TRUE, corArgs = list(), principalDirection = FALSE,
+                 ...)
+    
+bootnet_LoGo(data, corMethod = c("cor_auto","cov","cor","npn"), missing = c("pairwise",
   "listwise","fiml","stop"), verbose = TRUE, corArgs = list(), principalDirection = FALSE,
-    ...)
+  ...)
+  
+bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection = FALSE,
+  missing = c("listwise","stop"), ...)
+  
+bootnet_ggmModSelect(data,tuning = 0, corMethod = c("cor_auto","cov","cor","npn"),
+  missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimim"), 
+  verbose = TRUE, corArgs = list(), principalDirection = FALSE, start = c("glasso",
+  "empty","full"), stepwise = TRUE, nCores = 1, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -71,20 +94,24 @@ A string indicating the method to use. Specifying a \code{default} sets default 
 \describe{
 \item{\code{"EBICglasso"}}{Gaussian Markov random field estimation using graphical LASSO and extended Bayesian information criterion to select optimal regularization parameter. Using \code{\link[qgraph]{EBICglasso}} from the qgraph package. Calls \code{bootnet_EBICglasso}.}
 \item{\code{"IsingFit"}}{Ising model estimation using LASSO regularized nodewise logistic regression and extended Bayesian information criterion to select optimal regularization parameter. Using \code{\link[IsingFit]{IsingFit}} from the IsingFit package.  Calls \code{bootnet_IsingFit}.}
-\item{\code{IsingSampler}}{Calls the \code{\link[IsingSampler]{EstimateIsing}} function from the IsingSampler package. }
+\item{\code{"IsingSampler""}}{Calls the \code{\link[IsingSampler]{EstimateIsing}} function from the IsingSampler package. }
 \item{\code{"pcor"}}{Partial correlation network (non-regularized Gaussian Markov random field), using \code{\link[corpcor]{cor2pcor}} from the corpcor package.  Calls \code{bootnet_pcor}.}
 \item{\code{"cor"}}{Correlation network.}
-\item{\code{adalasso}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
-\item{\code{huge}}{Uses EBIC model selection of GGM networks estimated via the glasso algorithm as implemented in the huge package (as opposed to glasso and qgraph packages used in \code{default = "EBICglasso"}). Uses nonparanormal transformation in preparing the data and does not use polychoric correlations. Calls \code{bootnet_huge}.}
-\item{\code{mgm}}{Estimates a Mixed graphical model by using the the mgm (or mgmfit in older versions) function of the mgm package. Calls \code{bootnet_mgm}.}
-\item{\code{TMFG}}{Estimates a Triangulated Maximally Filtered Graph, using the function \code{TMFG} of the NetworkToolbox package}
+\item{\code{"adalasso""}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
+\item{\code{"huge"}}{Uses EBIC model selection of GGM networks estimated via the glasso algorithm as implemented in the huge package (as opposed to glasso and qgraph packages used in \code{default = "EBICglasso"}). Uses nonparanormal transformation in preparing the data and does not use polychoric correlations. Calls \code{bootnet_huge}.}
+\item{\code{"mgm"}}{Estimates a Mixed graphical model by using the the mgm (or mgmfit in older versions) function of the mgm package. Calls \code{bootnet_mgm}.}
+\item{\code{"TMFG"}}{Estimates a Triangulated Maximally Filtered Graph, using the function \code{TMFG} of the NetworkToolbox package.  Calls \code{bootnet_TMFG}. Note that this estimates a *correlation network* by default (use the 'graphType' argument to estimate a partial correlation network instead).}
+\item{\code{"LoGo"}}{Estimates a Local/Global Sparse Inverse Covariance Matrix, using the function \code{LoGo} of the NetworkToolbox package.  Calls \code{bootnet_LoGo}.}
+\item{\code{"relimp"}}{Estimates a (directed) relative importance network, using the function 'calc.relimp' of the 'relaimpo' package. The 'structureDefault' argument can be used to use a different default set for estimating the structure of the graph. Calls \code{bootnet_relimp}.}
+\item{\code{"ggmModSelect"}}{Estimates an unregularized GGM using the glasso algorithm and stepwise model selection, using the 'ggmModSelect' function from the qgraph package. Calls \code{bootnet_ggmModSelect}.}
+\item{\code{"graphicalVAR"}}{Estimates a graphical VAR model using the graphicalVAR package. This results in two networks which can be plotted using the 'graph' argument in the plot method. Calls \code{bootnet_graphicalVAR}.}
 }
 See details section for a more detailed description.
 }
 \item{fun}{
 A custom estimation function, when no default set is used. This must be a function that takes the data as input (first argument) and returns either a weights matrix or a list containing the elements \code{"graph"} for the weights matrix, \code{"intercepts"} for the intercepts (optional) and \code{"results"} for the full estimation results (optional).
 }
-\item{tuning}{EBIC tuning parameter, used in 'EBICglasso', 'IsingFit', 'huge' and 'mgm' default sets.}
+\item{tuning}{EBIC tuning parameter, used in 'EBICglasso', 'IsingFit', 'huge', 'mgm' and 'ggmModSelect' default sets. Note that the default value differs: 'EBICglasso', 'huge' and 'mgm' use 0.5, 'IsingFit' uses 0.25 and 'ggmModSelect uses 0.}
 \item{corMethod}{Correlation method, used in 'EBICglasso' and 'pcor' default sets. \code{"cor_auto"} uses \code{\link[qgraph]{cor_auto}} for polychoric and polyserial correlations, \code{"cov"} uses the \code{\link{cov}} function for covariances, \code{"cor"} will use the \code{\link{cor}} function for correlations and \code{"npn"} will apply the nonparanormal transformation (via \code{\link[huge]{huge.npn}}) and then compute correlations.}
 \item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion, \code{"fiml"} for full-information maximum likelihood and \code{"stop"} to stop with an error.}
 \item{sampleSize}{How will sample size be computed in EBICglasso default set? \code{"maximum"} takes total number of rows including rows with NA, and \code{"minimum"} takes total number of rows that contain no NA.}
@@ -105,6 +132,13 @@ Thresholding to use in partial correlation networks. Can be a fixed number to th
 \item{binarySign}{See  \code{\link[mgm]{mgm}}. Automatically set if not assigned.}
 \item{normalized}{Should normalized relative importance be used in relative importance networks?}
 \item{structureDefault}{In relative importance networks, default set used to compute the graph structure. Any other arguments used (using ...) are sent to the graph estimator function as well.}
+\item{graphType}{\code{"cor"} to estimate a correlation network and \code{"pcor"} to estimate a partial correlation network (GGM)}
+\item{alpha}{Significance level to test at.}
+\item{principalDirection}{
+Rescales variables according to the sign of the first eigen-vector. This will lead to most correlations to be positive (positive manifold), leading to negative edges to be substantively interpretable.
+}
+\item{stepwise}{Logical indicating if 'ggmModSelect' should use stepwise estimation.}
+\item{start}{See \code{\link[qgraph]{ggmModSelect}}}
   \item{prepFun}{
 A function that takes as input the raw data and returns whatever the estimation function needs (as first argument). Typically this function is used to correlate or binarize the data. Defaults to \code{\link{identity}} if omitted and \code{default} is not set. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
 }
@@ -142,6 +176,20 @@ Logical, currently only used when \code{default = "EBICglasso"} in the \code{cor
 \item{construct}{
 Should the estimator function be constructed using new bootnet functionality (\code{function}) or old bootnet functionality (\code{arguments})? Will default to \code{function} unless arguments such as \code{estFun} are used.
 }
+\item{datatype}{
+\code{"normal"} if the data argument is a data frame, or \code{"graphicalVAR"} if the data argument is a data list that can be used as input to the graphicalVAR package.}
+\item{checkNumeric}{
+Logical: should the data be checked to be numeric?
+}
+\item{lambda.min.ratio}{
+Minimal lambda ratio (LASSO tuning parameter)
+}
+\item{nlambda}{
+Number of LASSO tuning parameters to test
+}
+\item{nCores}{
+Number of cores to use in estimating networks
+}
 \item{.dots}{
 A list of arguments used in the estimation function set by a default set or by the \code{fun} argument.
 }
@@ -151,9 +199,6 @@ A list of arguments used in the estimation function set by a default set or by t
 \item{.input}{Used internally in the bootnet function. Do not use.}
 \item{memorysaver}{
 Logical. If TRUE attempts to save memory (RAM) by removing some objects from the output. Used by bootnet by default for bootstraps.}
-\item{principalDirection}{
-Rescales variables according to the sign of the first eigen-vector. This will lead to most correlations to be positive (positive manifold), leading to negative edges to be substantively interpretable.
-}
 }
 \details{
 NEW FUNCTIONALTIY:

@@ -14,6 +14,9 @@ export(bootnet_huge)
 export(bootnet_mgm)
 export(bootnet_relimp)
 export(bootnet_TMFG)
+export(bootnet_LoGo)
+export(bootnet_ggmModSelect)
+export(bootnet_graphicalVAR)
 
 
 
@@ -71,6 +74,7 @@ importFrom(mvtnorm, "rmvnorm")
 importFrom(IsingSampler, "EstimateIsing")
 importFrom(abind,"abind")
 importFrom(Matrix,"forceSymmetric")
+importFrom(BDgraph, "bdgraph.sim")
 
 #export(centrality)
 

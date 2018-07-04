@@ -7,14 +7,14 @@ Plot method for bootnetResult objects
 Plots the graph using the qgraph package and the \code{\link[qgraph]{qgraph}} function. Defined as \code{qgraph::qgraph(x[['graph']],labels=x[['labels']],...)}
 }
 \usage{
-\method{plot}{bootnetResult}(x, weighted, signed, directed, labels, 
-          layout = "spring", parallelEdge = TRUE, cut = 0, 
-          theme = "colorblind", ...)
+\method{plot}{bootnetResult}(x, graph, weighted, signed, directed, labels, 
+      layout = "spring", parallelEdge = TRUE, cut = 0, theme = "colorblind", ...)
 }
 \arguments{
   \item{x}{
 A \code{bootnetResult} object
 }
+\item{graph}{Numeric or string indicating which graph to plot. Only needed when multiple graphs are estimated. For example, when using \code{default = "graphicalVAR"}, \code{graph = "temporal"} plots the temporal network and \code{graph = "contemporaneous"} plots the contemporaneous network.}
 \item{weighted}{Logical, should the analyzed network be weighted?}
 \item{signed}{Logical, should the analyzed network be signed?}
 \item{directed}{Logical, is the analyzed network directed? Usually does not have to be set and is detected automatically.}

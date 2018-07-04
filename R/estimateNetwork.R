@@ -136,8 +136,13 @@ estimateNetwork <- function(
 
   # Compute network:
   Result <- do.call(.input$estimator, c(list(data),.input$arguments))
-  
-  if (is.list(Result$graph)){
+
+  if (!is.list(Result)){
+    sampleGraph <- Result
+    intercepts <- NULL
+    output <- Result
+    nNode <- ncol(Result)
+  } else if (is.list(Result$graph)){
     sampleGraph <- Result$graph
     intercepts <- Result$intercepts
     output <- Result$results
@@ -161,7 +166,7 @@ estimateNetwork <- function(
   }
   
   # Special data?
-  if (is.null(Result$specialData)){
+  if (!is.list(Result) || is.null(Result$specialData)){
     outdata <- data
     datatype <- "normal"
   } else {

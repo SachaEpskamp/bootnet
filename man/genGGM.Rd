@@ -8,7 +8,8 @@ Generates a GGM small-world network.
 Simulates a GGM as described by Yin and Li (2011), using the Watts and Strogatz (1998) algorithm for generating the graph structure (see \code{\link[igraph]{watts.strogatz.game}}).
 }
 \usage{
-genGGM(Nvar, p = 0, nei = 1, parRange = c(0.5, 1), constant = 1.5, propPositive = 0.5)
+genGGM(Nvar, p = 0, nei = 1, parRange = c(0.5,1), constant = 1.5, propPositive = 0.5,
+  clusters = NULL, graph = c("smallworld","random", "scalefree", "hub", "cluster"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,7 +17,7 @@ genGGM(Nvar, p = 0, nei = 1, parRange = c(0.5, 1), constant = 1.5, propPositive 
 Number of nodes
 }
   \item{p}{
-Rewiring probability (see \code{\link[igraph]{watts.strogatz.game}}).
+Rewiring probability if graph = "smallworld" or "cluster", or connection probability if graph = "random". If cluster, can add multiple p's for each cluster, e.g., "c(.1, .5)" 
 }
   \item{nei}{
 Neighborhood (see \code{\link[igraph]{watts.strogatz.game}}).
@@ -30,6 +31,10 @@ A constant as described by  Yin and Li (2011).
   \item{propPositive}{
 Proportion of edges to be set positive.
 }
+\item{clusters}{
+Number of clusters if graph = "cluster"
+}
+\item{graph}{Type of graph to simulate}
 }
 \references{
 Yin, J., and Li, H. (2011). A sparse conditional gaussian graphical model for analysis of genetical genomics data. The annals of applied statistics, 5(4), 2630.

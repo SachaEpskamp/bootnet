@@ -3,7 +3,7 @@ getRefs <- function(x){
     x,
     "none" = "",
     "EBICglasso" = c("Friedman, J. H., Hastie, T., & Tibshirani, R. (2008). Sparse inverse covariance estimation with the graphical lasso. Biostatistics, 9 (3), 432-441.",
-                     "Foygel, R., & Drton, M. (2010). Extended Bayesian information criteria for Gaussian graphical models. , 23 , 2020-2028.",
+                     "Foygel, R., & Drton, M. (2010). Extended Bayesian information criteria for Gaussian graphical models. ",
                      "Friedman, J. H., Hastie, T., & Tibshirani, R. (2014). glasso: Graphical lasso estimation of gaussian graphical models. Retrieved from https://CRAN.R-project.org/package=glasso",
                      "Epskamp, S., Cramer, A., Waldorp, L., Schmittmann, V. D., & Borsboom, D. (2012). qgraph: Network visualizations of relationships in psychometric data. Journal of Statistical Software, 48 (1), 1-18."
     ),
@@ -22,11 +22,11 @@ getRefs <- function(x){
                "Christensen, A. P. (2018). NetworkToolbox: Methods and Measures for Brain, Cognitive, and Psychometric Network Analysis in R"),
     "LoGo" = c("Barfuss, W., Massara, G. P., Di Matteo, T., & Aste, T. (2016). Parsimonious modeling with information filtering networks. Physical Review E, 94(6), 062306.",
                "Christensen, A. P. (2018). NetworkToolbox: Methods and Measures for Brain, Cognitive, and Psychometric Network Analysis in R"),
-    "ggmModSelect" = c("Foygel, R., & Drton, M. (2010). Extended Bayesian information criteria for Gaussian graphical models. , 23 , 2020-2028.",
+    "ggmModSelect" = c("Foygel, R., & Drton, M. (2010). Extended Bayesian information criteria for Gaussian graphical models.",
                        "http://psychosystems.org/qgraph_1.5"),
-    "graphicalVAR" = c("Abegaz, F., & Wit, E. (2013). Sparse time series chain graphical models for reconstructing genetic networks. Biostatistics, 14(3), 586–599.",
+    "graphicalVAR" = c("Abegaz, F., & Wit, E. (2013). Sparse time series chain graphical models for reconstructing genetic networks. Biostatistics, 14(3), 586???599.",
                        "Epskamp, S., Waldorp, L. J., Mottus, R., & Borsboom, D. (2018). The Gaussian Graphical Model in Cross-sectional and Time-series Data. Multivariate Behavioral Research",
-                       "Rothman, A. J., Levina, E., & Zhu, J. (2010). Sparse multivariate regression with covariance estimation. Journal of Computational and Graphical Statistics, 19(4), 947–962.",
+                       "Rothman, A. J., Levina, E., & Zhu, J. (2010). Sparse multivariate regression with covariance estimation. Journal of Computational and Graphical Statistics, 19(4), 947???962.",
                        "Wild, B., Eichler, M., Friederich, H.-C., Hartmann, M., Zipfel, S., & Herzog, W. (2010). A graphical vector autoregressive modeling approach to the analysis of electronic diary data. BMC Medical Research Methodology, 10(1), 28. doi: 10.1186/1471-2288-10-28."
                        )
   )

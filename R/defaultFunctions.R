@@ -211,7 +211,7 @@ bootnet_EBICglasso <- function(
 ### EBIC GLASSO 2 ESTIMATOR ###
 bootnet_ggmModSelect <- function(
   data, # Dataset used
-  tuning = 0.5, # tuning parameter
+  tuning = 0, # tuning parameter
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
@@ -1008,7 +1008,8 @@ bootnet_relimp <- function(
   data, # Dataset used
   normalized = TRUE,
   type = "lmg",
-  structureDefault = c("none", "custom", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm"),
+  structureDefault = c("none", "custom", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","cor","TMFG",
+                       "ggmModSelect", "LoGo"),
   missing = c("listwise","stop"),
   ..., # Arguments sent to the structure function
   verbose = TRUE,

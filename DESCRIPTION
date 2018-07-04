@@ -8,7 +8,7 @@ Depends: ggplot2, R (>= 3.0.0)
 Imports: methods, igraph, IsingFit, qgraph, dplyr (>= 0.3.0.2), tidyr, 
         gtools, corpcor, IsingSampler, mvtnorm, abind, Matrix, parallel, 
         huge, parcor, mgm (>= 1.2), relaimpo, NetworkToolbox (>= 1.1.0),
-        pbapply, graphicalVAR
+        pbapply, graphicalVAR, BDgraph
 Suggests: psych
 Description: Bootstrap methods to assess accuracy and stability of estimated network structures
               and centrality indices. Allows for flexible specification of any undirected network 
