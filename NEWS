@@ -5,23 +5,23 @@ Changes in Version 1.1
       - "LoGo"- Local/Global Sparse Inverse Covariance Matrix
       - "ggmModSelect" - Unregularized stepwise GGM model selection
       - "graphicalVAR" - LASSO regularized graphical VAR models
-  - Added the 'replicationSimulator' function, which can be used to assess expected replicability of networks
-  - Many default sets now support the 'principalDirection' argument, which can be used to multiply variables with the sign of the first principal component
-  - Updated the 'genGGM' function to support various different network structures
-  - Added the 'alpha' argument to default set "pcor"
-  - Added functionality for functions returning multiple graphs
-  - Added outStrength, inStrength, outExpectedInfluence and inExpectedInfluence
-  - Fixed a bug reporting the number of non-zero edges in the print methods
   - Some changes to mgm default:
     - mgm version >= 1.2 is now required
     - Renamed lev to level
     - Renamed degree to order, now defaults to 2 instead of 3
     - Added binarySign argument. Now chosen by defult.
+  - Added the 'replicationSimulator' function, which can be used to assess expected replicability of networks
+  - Many default sets now support the 'principalDirection' argument, which can be used to multiply variables with the sign of the first principal component
+  - plot method now supports split0 = TRUE, will show how often an edge was 0 and only show CIs of non-zero estimates (faded relative to proportion of times edge was zero).
+  - Updated the 'genGGM' function to support various different network structures, with thanks to Mark Brandt!
+  - Added the 'alpha' argument to default set "pcor"
+  - Added functionality for functions returning multiple graphs
+  - Added outStrength, inStrength, outExpectedInfluence and inExpectedInfluence
+  - Fixed a bug reporting the number of non-zero edges in the print methods
   - Added 'args' argument to netSimulator
   - Fixed a bug in which fun is not usuable in bootnet()
   - Added lambda.min.ratio argument to some estimators. Now defaults to 0.01 for default = "huge"
   - bootnet and netSimulator now show a progress bar (thanks to pbapply package)
-  - plot method now supports split0 = TRUE, will show how often an edge was 0 and only show CIs of non-zero estimates (faded relative to proportion of times edge was zero).
   - plot method now shows bootstrapped mean in addition to sample value
 
 
