@@ -28,7 +28,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
   
   if (!all(statistics %in% c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence",
                              "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid"))){
-    stop("'statistics' must be 'edge', 'intercept', 'length', 'distance', 'closeness', 'betweenness', 'strength', 'inStrength', 'outStrength', 'expectedInfluence', 'inExpectedInfluence', 'outExpectedInfluence', 'rspbc', 'hybrid')
+    stop("'statistics' must be 'edge', 'intercept', 'length', 'distance', 'closeness', 'betweenness', 'strength', 'inStrength', 'outStrength', 'expectedInfluence', 'inExpectedInfluence', 'outExpectedInfluence', 'rspbc', 'hybrid'")
   }
   
   
