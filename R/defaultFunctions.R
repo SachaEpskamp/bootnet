@@ -1203,7 +1203,8 @@ bootnet_TMFG <- function(
     }
     use <- switch(missing,
                   pairwise = "pairwise.complete.obs",
-                  listwise = "complete.obs")
+                  listwise = "complete.obs",
+                  fiml = "fiml")
     
     args <- list(x=data,use=use)
     if (length(corArgs) > 0){
@@ -1228,7 +1229,7 @@ bootnet_TMFG <- function(
   
   
   # Estimate network:
-  Results <- NetworkToolbox::TMFG(corMat,normal = FALSE)
+  Results <- NetworkToolbox::TMFG(corMat)
   
   # Return:
   return(list(graph=Results$A,results=Results))
