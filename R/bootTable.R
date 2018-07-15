@@ -23,6 +23,9 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
   
   
   # Statistics can be:
+  # Change first letter of statistics to lowercase:
+  substr(statistics,0,1) <- tolower(substr(statistics,0,1))
+  
   if (!all(statistics %in% c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence",
                              "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence"))){
     stop("'statistics' must be 'edge', 'intercept', 'length', 'distance', 'closeness', 'betweenness', 'strength', 'inStrength', 'outStrength', 'expectedInfluence', 'inExpectedInfluence' or 'outExpectedInfluence'")

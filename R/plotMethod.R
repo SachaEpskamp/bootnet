@@ -72,6 +72,9 @@ plot.bootnet <- function(
     
   }
   
+  # Change first letter of statistics to lowercase:
+  substr(statistics,0,1) <- tolower(substr(statistics,0,1))
+  
   if (missing(plot)){
     if (x$type %in% c("person","node")){
       plot <- "area"

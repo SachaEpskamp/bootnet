@@ -82,6 +82,7 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
     ggplot2::geom_boxplot(outlier.size = outlier.size,lwd=boxplot.lwd,fatten=boxplot.lwd,position = position_dodge2(preserve = "total")) 
   
   
+  
   if (style == "fancy"){
     g <- g + ggplot2::theme_bw() +# ggplot2::ylim(ylim[1],ylim[2]) +
       ggplot2::scale_y_continuous(limits=ylim,breaks=seq(ylim[1],ylim[2],by=0.1)) +

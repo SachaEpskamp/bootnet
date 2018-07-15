@@ -37,7 +37,7 @@ A string indicating the method to use. See documentation at \code{\link[bootnet]
 Number of cores to use in computing results. Set to 1 to not use parallel computing.
 }
 \item{statistics}{
-Vector indicating which statistics to store. Can contain \code{"edge"}, \code{"strength"}, \code{"closeness"}, \code{"betweenness"}, \code{"length"} and \code{"distance"}. By default, length and distance are not stored.
+Vector indicating which statistics to store. Can contain \code{"edge"}, \code{"strength"}, \code{"closeness"}, \code{"betweenness"}, \code{"length"}, \code{"distance"}, \code{"expectedInfluence"}, \code{"inExpectedInfluence"}, or \code{"outExpectedInfluence"}. By default, length and distance are not stored.
 }
 \item{model}{
  The modeling framework to use. Automatically detects if data is binary or not.
