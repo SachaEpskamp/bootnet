@@ -34,7 +34,7 @@ Character string indicating what to plot. Can be \code{"area"} to produce a grap
 }
 \item{graph}{If multipe graphs are estimated, which graph should be plotted? Currently used for \code{default = "graphicalVAR"} to plot a temporal network using \code{graph = "temporal"} or a contemporaneous network using \code{graph = "contemporaneous"}}
 \item{CIstyle}{
- Style of CIs to construct. \code{"SE"} shows the sample statistic plus and minus two times the standard deviation of bootstraps, and \code{"quantiles"} the area between the 2.5th and 97.5th quantile. Defaults to  \code{"SE"} for strength and betweenness and \code{"quantiles"} otherwise
+ Style of CIs to construct. \code{"SE"} shows the sample statistic plus and minus two times the standard deviation of bootstraps, and \code{"quantiles"} the area between the 2.5th and 97.5th quantile. Defaults to  \code{"quantiles"}.
 }
 \item{rank}{
   Logical, should plots show rank of statistics instead of statistics?

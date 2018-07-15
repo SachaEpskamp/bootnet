@@ -25,7 +25,7 @@ Changes in Version 1.1
   - bootnet and netSimulator now show a progress bar (thanks to pbapply package)
   - plot method now shows bootstrapped mean in addition to sample value
   - The 'statistics' argument in bootnet and plot method now accept statistics with a upper case first letter, to be consistent with qgraph
-
+  - CIstyle argument can now only be one value, and always defaults to quantiles
 
 
 

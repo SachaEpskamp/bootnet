@@ -5,7 +5,7 @@ plot.bootnet <- function(
   statistics, # "edge" for normal bootstrap, c("strength","closeness","betweenness") for node and person
   plot, # Two types: difference and area. Show area for edges, difference for centralities
   graph,
-  CIstyle = c("default","SE","quantiles"),
+  CIstyle = c("quantiles","SE"), #c("default","SE","quantiles"),
   rank = FALSE,
   # CIwidth = c("95%","99%","90%","75%"),
   sampleColor = "darkred",
@@ -79,7 +79,7 @@ plot.bootnet <- function(
     if (x$type %in% c("person","node")){
       plot <- "area"
     } else {
-      if (all(statistics %in% c("strength","closeness","betweenness","expectedInfluence"))){
+      if (all(statistics %in% c("strength","closeness","betweenness","expectedInfluence","inStrength","outStrength","inExpectedInfluence","outExpectedInfluence","hybrid","rspbc"))){
         plot <- "difference"
       } else {
         plot <- "area"
@@ -116,7 +116,8 @@ plot.bootnet <- function(
       if(x$type %in% c("person","node")){
         CIstyle <- "quantiles"
       } else {
-        CIstyle <- ifelse(statistics %in% c("closeness","strength"),"SE","quantile")
+        # CIstyle <- ifelse(statistics %in% c("closeness","strength"),"SE","quantile")
+        CIstyle <- "quantile"
       }
     }
     
@@ -127,9 +128,9 @@ plot.bootnet <- function(
     }
   }
   
-  if (! x$type %in% c("person","node")){
-    CIstyle <- rep(CIstyle,length=length(statistics))
-  }
+  # if (! x$type %in% c("person","node")){
+  #   CIstyle <- rep(CIstyle,length=length(statistics))
+  # }
   
   if (any(statistics%in%c("strength", "closeness", "betweenness","expectedInfluence")) & any(statistics%in%c("edge","distance"))){
     stop("Plotting both centrality CIs and edge/distance CIs together is not supported.")

@@ -187,7 +187,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
         stringsAsFactors = FALSE
       ))
     }
-    
+
     # randomized shortest paths betweenness centrality:
     if ("rspbc" %in% statistics){
     tables$rspbc <- dplyr::tbl_df(data.frame(
@@ -195,7 +195,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       type = "rspbc",
       node1 = x[['labels']],
       node2 = '',
-      value = cent[['rspbc']],
+      value = as.vector(NetworkToolbox::rspbc(abs(Wmat))),
       stringsAsFactors = FALSE
     ))
     }
@@ -207,7 +207,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       type = "hybrid",
       node1 = x[['labels']],
       node2 = '',
-      value = cent[['hybrid']],
+      value = as.vector(NetworkToolbox::hybrid(abs(Wmat), BC = "random")),
       stringsAsFactors = FALSE
     ))
     }
