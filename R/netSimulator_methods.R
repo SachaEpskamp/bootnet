@@ -52,7 +52,7 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
   style <- match.arg(style)
   
   # Check input:
-  if (xvar != "factor(nCases)" & xlab != "Number of cases"){
+  if (xvar != "factor(nCases)" && xlab == "Number of cases"){
     warning("argument 'xvar' is not 'factor(nCases)' while argument 'xlab' is still 'Number of cases'. X-axis label might be wrong.")
   }
   

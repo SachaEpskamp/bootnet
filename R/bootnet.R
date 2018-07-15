@@ -27,8 +27,8 @@ bootnet <- function(
   default = c("none", "EBICglasso", "ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp","cor","TMFG", "ggmModSelect", "LoGo"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
   type = c("nonparametric","parametric","node","person","jackknife","case"), # Bootstrap method to use
   nCores = 1,
-  statistics = c("edge","strength","closeness","betweenness"),
-  model = c("detect","GGM","Ising"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
+  statistics = c("edge","strength","closeness","betweenness","outStrength","inStrength"),
+  model = c("detect","GGM","Ising","graphicalVAR"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   fun,
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
@@ -45,8 +45,8 @@ bootnet <- function(
   caseMin = 0.05, # minimum proportion to DROP
   caseMax = 0.75, # Maximum proportion to DROP
   caseN = 10,
-  subNodes = 2:(ncol(data)-1), # if type = "node", defaults to 2:(p-1)
-  subCases = round((1-seq(caseMin,caseMax,length=caseN)) * nrow(data)),
+  subNodes, # if type = "node", defaults to 2:(p-1)
+  subCases,
   computeCentrality = TRUE,
   propBoot = 1, # M out of N
   # subsampleSize,
@@ -57,13 +57,22 @@ bootnet <- function(
   weighted,
   signed,
   directed,
+  # datatype = c("normal","graphicalVAR"), # Extracted from object or given
   ... # Other arguments
   # edgeResample = FALSE # If true, only resample edges from original estimate
   # scaleAdjust = FALSE
 ){
   if (default[[1]]=="glasso") default <- "EBICglasso"
   default <- match.arg(default)
+  
+  # Check default:
+  if (default == "graphicalVAR" && !is(data,"bootnetResult")){
+    stop("default = 'graphicalVAR' only supported for output of estimateNetwork()")
+  }
+  
+  
   type <- match.arg(type)
+  # datatype <- match.arg(datatype)
   if (type == "case") type <- "person"
   model <- match.arg(model)
   
@@ -98,12 +107,16 @@ bootnet <- function(
     manual <- TRUE
     dots <- list(...)
   } else {
-
+    
     manual <- FALSE
     
     if (is(data,"bootnetResult")){
-        default <- data$default
-        inputCheck <- data$.input
+      default <- data$default
+      inputCheck <- data$.input
+      datatype <- data$datatype
+      if (missing(labels)){
+        labels <- data$labels
+      }
       # prepFun <- data$input$prepFun
       # prepArgs <- data$input$prepArgs
       # estFun <- data$input$estFun
@@ -123,10 +136,15 @@ bootnet <- function(
       if (missing(directed)){
         directed <- data$directed
       }
+      
+      N <- data$nNode
+      Np <- data$nPerson
       data <- data$data
-      N <- ncol(data)
-      Np <- nrow(data)
+      
+      
     } else {
+      
+      datatype <- "normal"
       dots <- list(...)
       N <- ncol(data)
       Np <- nrow(data)
@@ -166,9 +184,26 @@ bootnet <- function(
       
     }
     
-
- 
-
+    
+    
+    
+  }
+  
+  # subNodes and subCases:
+  if (missing(subNodes)){
+    if (datatype == "normal"){
+      subNodes <- 2:(ncol(data)-1)
+    } else if (datatype == "graphicalVAR"){
+      subNodes <- 2:(length(vars)-1)
+    }
+  }
+  
+  if (missing(subCases)){
+    if (datatype == "normal"){
+      subCases <- round((1-seq(caseMin,caseMax,length=caseN)) * nrow(data))
+    } else if (datatype == "graphicalVAR"){
+      subCases <- round((1-seq(caseMin,caseMax,length=caseN)) * nrow(data$data_c))
+    }
   }
   
   
@@ -204,14 +239,14 @@ bootnet <- function(
     message("Jacknife overwrites nBoot to sample size")
     nBoots <- Np
   }
-
+  
   
   if (type == "node" & N < 3){
     stop("Node-wise bootstrapping requires at least three nodes.")
   }
   
   # First test if data is a data frame:
-  if (!manual && !(is.data.frame(data) || is.matrix(data))){
+  if (datatype == "normal" && !manual && !(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
   }
   
@@ -233,10 +268,10 @@ bootnet <- function(
       }
     }
     
-
+    
   }
   
-
+  
   
   ## For parametric bootstrap, detect model
   if (type == "parametric" & model == "detect"){
@@ -244,7 +279,9 @@ bootnet <- function(
       stop("'model' must be set in parametric bootstrap without 'data'.")
     }
     
-    if (default != "none"){
+    if (default == "graphicalVAR") {
+      model <- "graphicalVAR"  
+    } else if (default != "none"){
       model <- ifelse(grepl("ising",default,ignore.case=TRUE),"Ising","GGM")
     } else {
       model <- ifelse(any(grepl("ising",deparse(estFun),ignore.case=TRUE)),"Ising","GGM")
@@ -254,27 +291,28 @@ bootnet <- function(
   
   # Estimate sample result:
   # Check the input:
- 
+  
   
   if (!manual)
   {
     if (verbose){
       message("Estimating sample network...")
     }
-
+    
     sampleResult <- estimateNetwork(data, 
-                        default = default,
-                        fun = inputCheck$estimator,
-                        .dots = inputCheck$arguments,
-                        labels = labels,
-                        verbose = verbose,
-                        weighted = weighted,
-                        signed = signed,
-                        .input = inputCheck)
+                                    default = default,
+                                    fun = inputCheck$estimator,
+                                    .dots = inputCheck$arguments,
+                                    labels = labels,
+                                    verbose = verbose,
+                                    weighted = weighted,
+                                    signed = signed,
+                                    .input = inputCheck,
+                                    datatype = datatype)
     
     
   } else {
-   
+    
     sampleResult <- list(
       graph = graph,
       intercepts = intercepts,
@@ -301,7 +339,7 @@ bootnet <- function(
   # graphArgs <- sampleResult$input$graphArgs
   # intFun <- sampleResult$input$intFun
   # intArgs <- sampleResult$input$intArgs
-
+  
   
   # if (!isSymmetric(as.matrix(sampleResult[['graph']]))){
   #   stop("bootnet does not support directed graphs")
@@ -330,7 +368,14 @@ bootnet <- function(
           inSample <- seq_len(N)
           
           if (type == "jackknife"){
-            bootData <- data[-b,,drop=FALSE]    
+            if (datatype == "normal"){
+              bootData <- data[-b,,drop=FALSE]                  
+            } else {
+              bootData <- data
+              bootData$data_c <- bootData$data_c[-b,,drop=FALSE]
+              bootData$data_l <- bootData$data_l[-b,,drop=FALSE]    
+            }
+            
             nPerson <- Np - 1
           } else if (type == "parametric"){
             nPerson <- Np
@@ -342,29 +387,55 @@ bootnet <- function(
               diag(g) <- 1
               bootData <- mvtnorm::rmvnorm(round(propBoot*Np), sigma = corpcor::pseudoinverse(g))
               
+            } else if (model == "graphicalVAR"){
+              
+              stop("model = 'graphicalVAR' not yet supported")
+              
+              
             } else stop(paste0("Model '",model,"' not supported."))
             
           } else {
             nPerson <- Np
-            bootData <- data[sample(seq_len(Np), round(propBoot*Np), replace=replacement), ]        
+            
+            if (datatype == "normal"){
+              bootData <- data[sample(seq_len(Np), round(propBoot*Np), replace=replacement), ]                      
+            } else {
+              bootData <- data
+              bootSample <- sample(seq_len(Np), round(propBoot*Np), replace=replacement)
+              bootData$data_c <- bootData$data_c[bootSample,]
+              bootData$data_l <- bootData$data_l[bootSample,]
+            }
+            
           }
           
         } else if (type == "node") {
+          
           # Nodewise
           nPerson <- Np
           nNode <- sample(subNodes,1)
           inSample <- sort(sample(seq_len(N),nNode))
-          bootData <- data[,inSample, drop=FALSE]
+          if (datatype == "normal"){
+            bootData <- data[,inSample, drop=FALSE]            
+          } else if (datatype == "graphicalVAR") {
+            bootData <- data
+            bootData$data_c <- bootData$data_c[,data$vars[inSample], drop = FALSE]
+            bootData$data_l <- bootData$data_l[,c("1",grep(data$vars[inSample],names(data$data_l),value=TRUE)), drop = FALSE]
+          }
+          
         } else {
           # Personwise:
-          nNode <- ncol(data)
           nPerson <- sample(subCases,1)
           inSample <- 1:N
           persSample <- sort(sample(seq_len(Np),nPerson))
-          bootData <- data[persSample,,drop=FALSE]
-          
+          if (datatype == "normal"){
+            bootData <- data[persSample,, drop=FALSE]            
+          } else if (datatype == "graphicalVAR") {
+            bootData <- data
+            bootData$data_c <- bootData$data_c[persSample,, drop = FALSE]
+            bootData$data_l <- bootData$data_l[persSample,, drop = FALSE]
+          }
         }
-
+        
         # Some checks to remove progress bars:
         if (!missing(prepFun)){
           # EBICglasso:
@@ -403,7 +474,7 @@ bootnet <- function(
           
         }))
         if (is(res, "try-error")){
-
+          
           if (tryCount == tryLimit) {
             stop("Maximum number of errors in bootstraps reached")
           }
@@ -431,7 +502,7 @@ bootnet <- function(
     }
     nClust <- nCores - 1
     cl <- makePSOCKcluster(nClust)
-
+    
     # IF graph or data is missing, dummy graph:
     if (missing(graph)){
       graph <- matrix(0,N,N)
@@ -447,8 +518,8 @@ bootnet <- function(
     }
     
     # Needed arguments to be excluded:
-   excl <- c("prepFun", "prepArgs", "estFun", "estArgs", "graphFun", 
-             "graphArgs", "intFun", "intArgs", "fun")
+    excl <- c("prepFun", "prepArgs", "estFun", "estArgs", "graphFun", 
+              "graphArgs", "intFun", "intArgs", "fun")
     
     clusterExport(cl, ls()[!ls()%in%c(excl,"cl")], envir = environment())
     # clusterExport(cl, export, envir = environment())
@@ -460,13 +531,20 @@ bootnet <- function(
       tryLimit <- 10
       tryCount <- 0
       repeat{
-        
+       
         if (! type %in% c("node","person")){
-          nNode <- ncol(data)
+          nNode <- N
           inSample <- seq_len(N)
           
           if (type == "jackknife"){
-            bootData <- data[-b,,drop=FALSE]    
+            if (datatype == "normal"){
+              bootData <- data[-b,,drop=FALSE]                  
+            } else {
+              bootData <- data
+              bootData$data_c <- bootData$data_c[-b,,drop=FALSE]
+              bootData$data_l <- bootData$data_l[-b,,drop=FALSE]    
+            }
+            
             nPerson <- Np - 1
           } else if (type == "parametric"){
             nPerson <- Np
@@ -478,30 +556,80 @@ bootnet <- function(
               diag(g) <- 1
               bootData <- mvtnorm::rmvnorm(round(propBoot*Np), sigma = corpcor::pseudoinverse(g))
               
+            } else if (model == "graphicalVAR"){
+              
+              stop("model = 'graphicalVAR' not yet supported")
+              
+              
             } else stop(paste0("Model '",model,"' not supported."))
             
           } else {
             nPerson <- Np
-            bootData <- data[sample(seq_len(Np), round(propBoot*Np), replace=replacement), ]        
+            
+            if (datatype == "normal"){
+              bootData <- data[sample(seq_len(Np), round(propBoot*Np), replace=replacement), ]                      
+            } else {
+              bootData <- data
+              bootSample <- sample(seq_len(Np), round(propBoot*Np), replace=replacement)
+              bootData$data_c <- bootData$data_c[bootSample,]
+              bootData$data_l <- bootData$data_l[bootSample,]
+            }
+            
           }
           
         } else if (type == "node") {
+          
           # Nodewise
           nPerson <- Np
           nNode <- sample(subNodes,1)
           inSample <- sort(sample(seq_len(N),nNode))
-          bootData <- data[,inSample, drop=FALSE]
+          if (datatype == "normal"){
+            bootData <- data[,inSample, drop=FALSE]            
+          } else if (datatype == "graphicalVAR") {
+            bootData <- data
+            bootData$data_c <- bootData$data_c[,data$vars[inSample], drop = FALSE]
+            bootData$data_l <- bootData$data_l[,c("1",grep(data$vars[inSample],names(data$data_l),value=TRUE)), drop = FALSE]
+          }
+          
         } else {
           # Personwise:
-          nNode <- ncol(data)
           nPerson <- sample(subCases,1)
           inSample <- 1:N
           persSample <- sort(sample(seq_len(Np),nPerson))
-          bootData <- data[persSample,,drop=FALSE]
-          
+          if (datatype == "normal"){
+            bootData <- data[persSample,, drop=FALSE]            
+          } else if (datatype == "graphicalVAR") {
+            bootData <- data
+            bootData$data_c <- bootData$data_c[persSample,, drop = FALSE]
+            bootData$data_l <- bootData$data_l[persSample,, drop = FALSE]
+          }
         }
         
+        # Some checks to remove progress bars:
+        # if (!missing(prepFun)){
+        #   # EBICglasso:
+        #   if (!missing(prepArgs) & is.list(prepArgs) & identical(prepFun,qgraph::cor_auto)){
+        #     prepArgs$verbose <- FALSE
+        #   }
+        # }
+        
         res <- suppressWarnings(try({
+          # estimateNetwork(bootData,
+          #                 default = default,
+          #                 fun = fun,
+          #                 prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+          #                 prepArgs = prepArgs, # list with arguments for the correlation function
+          #                 estFun = estFun, # function that results in a network
+          #                 estArgs = estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+          #                 graphFun = graphFun, # set to identity if missing
+          #                 graphArgs = graphArgs, # Set to null if missing
+          #                 intFun = intFun, # Set to null if missing
+          #                 intArgs = intArgs, # Set to null if missing
+          #                 labels = labels[inSample],
+          #                 verbose = FALSE,
+          #                 construct = construct)
+          # 
+          
           estimateNetwork(bootData, 
                           default = default,
                           fun = inputCheck$estimator,
@@ -510,10 +638,15 @@ bootnet <- function(
                           verbose = FALSE,
                           weighted = weighted,
                           signed = signed,
+                          .input = inputCheck,
                           memorysaver = TRUE)
+          
         }))
         if (is(res, "try-error")){
-          if (tryCount == tryLimit) stop("Maximum number of errors in bootstraps reached")
+          
+          if (tryCount == tryLimit) {
+            stop("Maximum number of errors in bootstraps reached")
+          }
           
           # warning("Error in bootstrap; retrying")
           tryCount <- tryCount + 1
@@ -528,18 +661,18 @@ bootnet <- function(
   }
   
   
-#   if (edgeResample){
-#     bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
-#     
-#     sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
-#     for (b in seq_along(bootResults)){
-#       bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
-#       bootRank <- order(order(bootEdges))
-#       bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- sampleDistribution[bootRank]
-#       bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
-#     }
-#     
-#   }
+  #   if (edgeResample){
+  #     bootGraphs <- do.call(abind::abind,c(lapply(bootResults,'[[','graph'),along=3))
+  #     
+  #     sampleDistribution <- sort(sampleGraph[upper.tri(sampleGraph,diag=FALSE)])
+  #     for (b in seq_along(bootResults)){
+  #       bootEdges <- bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)]
+  #       bootRank <- order(order(bootEdges))
+  #       bootResults[[b]]$graph[upper.tri(bootResults[[b]]$graph,diag=FALSE)] <- sampleDistribution[bootRank]
+  #       bootResults[[b]]$graph[lower.tri(bootResults[[b]]$graph,diag=FALSE)] <- t(bootResults[[b]]$graph)[lower.tri(bootResults[[b]]$graph,diag=FALSE)] 
+  #     }
+  #     
+  #   }
   
   ### Compute the full parameter table!!
   if (verbose){

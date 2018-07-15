@@ -16,9 +16,9 @@ netSimulator(
       nCores = 1, 
       default,
       dataGenerator, 
+      ...,
       moreArgs = list(),
-      moreOutput = list()
-    ...)
+      moreOutput = list())
     
 replicationSimulator(
       input = genGGM(Nvar = 10), 
@@ -27,7 +27,8 @@ replicationSimulator(
       nCores = 1, 
       default,
       dataGenerator, 
-    ...)
+      ..., 
+      moreArgs = list())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -49,6 +50,7 @@ Default set used (see \code{\link{estimateNetwork}}). In most cases, this will s
   \item{dataGenerator}{
 A function that generates data. The first argument must be the sample size, the second argument must be the output of \code{input}. Can often be ignored if \code{default} is set.
 }
+\item{moreArgs}{A named list of arguments to be used when estimating the network, but which should not be interpreted as different conditions. Use this argument to assign arguments that require vectors.}
 \item{moreOutput}{List with functions that take the estimated weights matrix as first argument and the true weights matrix as second argument to produce some output.}
   \item{\dots}{
 Arguments used by \code{\link{estimateNetwork}} to estimate the network structure. Providing a vector for any argument will simulate under each value. This way, any argument in \code{\link{estimateNetwork}} can be used in a simulation study.
