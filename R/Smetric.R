@@ -20,6 +20,9 @@ corStability <- function(x,cor=0.7, statistics = c("strength","closeness","betwe
     x$bootTable$prop <- 1 - (x$bootTable$nPerson / x$sample$nPerson)
   }
   
+  # Change first letter of statistics to lowercase:
+  substr(statistics,0,1) <- tolower(substr(statistics,0,1))
+  
   sample <- x$sampleTable %>% 
     filter(type %in% statistics) %>%
     select(node1,node2,type,original = value)

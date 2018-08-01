@@ -8,8 +8,8 @@ Plots bootnet results
 This function can be used to plot bootnet results by plotting all bootstrapped statistics as line or by plotting confidence intervals.
 }
 \usage{
-\method{plot}{bootnet}(x, statistics, plot, graph, CIstyle = c("default",
-                 "SE", "quantiles"), rank = FALSE, sampleColor =
+\method{plot}{bootnet}(x, statistics, plot, graph, CIstyle = c(
+                 "quantiles", "SE"), rank = FALSE, sampleColor =
                  "darkred", samplelwd = 1, meanColor = "black", meanlwd
                  = 0.5, bootColor = "black", bootAlpha = 0.01, bootlwd
                  = 0.9, areaAlpha = 0.1, order = c("id", "sample",
