@@ -1,5 +1,6 @@
 Changes in Version 1.1.1
   - The corStability function now accepts statistics written with an upper case first letter
+  - Fixed a bug using default = "mgm" with only one binary variable
 
 Changes in Version 1.1
   - New supported default sets:

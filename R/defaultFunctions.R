@@ -940,7 +940,7 @@ bootnet_mgm <- function(
   if (missing(binarySign)){
     if (any(type == "c" & level == 2)){
       whichBinary <- which(type == "c" & level == 2)
-      enc <- apply(data[,whichBinary],2,function(x)all(x[!is.na(x)]%in%c(0L,1L)))
+      enc <- apply(data[,whichBinary,drop=FALSE],2,function(x)all(x[!is.na(x)]%in%c(0L,1L)))
       if (!all(enc)){
         binarySign <- FALSE
       } else {
