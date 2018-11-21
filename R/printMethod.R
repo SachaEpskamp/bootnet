@@ -125,6 +125,9 @@ print.bootnetResult <- function(x, ...){
     name <- deparse(substitute(x))[[1]]
     if (nchar(name) > 10) name <- "object"
     cat(paste0("\n=== Estimated network ==="))
+    if (isTRUE(x$thresholded)){
+      cat("\nNote: network has been thresholded using 'bootThreshold'")
+    }
     cat("\nNumber of nodes:",nrow(x[['graph']]),
         "\nNumber of non-zero edges:",sum(x[['graph']][ind]!=0),"/",sum(ind),
         "\nMean weight:",mean(x[['graph']][ind]) ,
