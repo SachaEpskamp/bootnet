@@ -111,6 +111,12 @@ bootnet <- function(
     manual <- FALSE
     
     if (is(data,"bootnetResult")){
+      
+      # Check if thresholded:
+      if (isTRUE(data$thresholded)){
+        stop("Network has already been thresholded using bootstraps.")
+      }
+      
       default <- data$default
       inputCheck <- data$.input
       datatype <- data$datatype

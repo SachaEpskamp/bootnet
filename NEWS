@@ -1,6 +1,7 @@
 Changes in Version 1.1.1
   - The corStability function now accepts statistics written with an upper case first letter
   - Fixed a bug using default = "mgm" with only one binary variable
+  - IsingFit and IsingSampler defaults now transform -1, 1 data to 0, 1 when computing network, then back when returning results
 
 Changes in Version 1.1
   - New supported default sets:

@@ -317,13 +317,13 @@ bootnet_ggmModSelect <- function(
   
   # Estimate network:
   Results <- qgraph::ggmModSelect(corMat,
-                                n =  sampleSize, 
-                                gamma = tuning,
-                                start = start,
-                                stepwise = stepwise,
-                                verbose = verbose,
-                                nCores = 1,
-                                ...)
+                                  n =  sampleSize, 
+                                  gamma = tuning,
+                                  start = start,
+                                  stepwise = stepwise,
+                                  verbose = verbose,
+                                  nCores = 1,
+                                  ...)
   # Return:
   return(list(graph=as.matrix(Results$graph),results=Results))
 }
@@ -365,7 +365,7 @@ bootnet_pcor <- function(
       } else {
         msg <- paste0(msg,"\n  - fdrtool for false discovery rate")        
       }
-
+      
     }
     # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
     message(msg)
@@ -626,7 +626,16 @@ bootnet_IsingFit <- function(
   Np <- nrow(data)
   
   # Binarize:
-  if (!all(data %in% c(0,1))){
+  transformIsing <- FALSE
+  originalEncoding <- c(0, 1)
+  if (!all(unlist(data) %in% c(0,1))){
+    if (length(unique(unlist(data))) == 2){
+      transformIsing <- TRUE
+      originalEncoding <- sort(unique(unlist(data)))
+      dataBU <- data
+      data[dataBU == originalEncoding[1]] <- 0
+      data[dataBU == originalEncoding[2]] <- 1
+    } 
     data <- bootnet::binarize(data, split = split, verbose = verbose)
   }
   
@@ -637,9 +646,17 @@ bootnet_IsingFit <- function(
   
   # Estimate network:
   Results <- IsingFit::IsingFit(data, AND = rule == "AND", gamma = tuning,progressbar = verbose,plot = FALSE)
- 
+  
+  
+  # Transform back:
+  if (transformIsing){
+    Trans <- IsingSampler::LinTransform(Results$weiadj, Results$thresholds, from = originalEncoding, to = c(0, 1))    
+  } else {
+    Trans <- list(graph = Results$weiadj, thresholds = Results$thresholds)
+  }
+  
   # Return:
-  return(list(graph = Results$weiadj, intercepts = Results$thresholds,
+  return(list(graph = Trans$graph, intercepts = Trans$thresholds,
               results = Results))
 }
 
@@ -704,7 +721,16 @@ bootnet_IsingSampler <- function(
   Np <- nrow(data)
   
   # Binarize:
-  if (!all(data %in% c(0,1))){
+  transformIsing <- FALSE
+  originalEncoding <- c(0, 1)
+  if (!all(unlist(data) %in% c(0,1))){
+    if (length(unique(unlist(data))) == 2){
+      transformIsing <- TRUE
+      originalEncoding <- sort(unique(unlist(data)))
+      dataBU <- data
+      data[dataBU == originalEncoding[1]] <- 0
+      data[dataBU == originalEncoding[2]] <- 1
+    } 
     data <- bootnet::binarize(data, split = split, verbose = verbose)
   }
   
@@ -716,8 +742,16 @@ bootnet_IsingSampler <- function(
   # Estimate network:
   Results <- IsingSampler::EstimateIsing(as.matrix(data), method = method)
   
+  
+  # Transform back:
+  if (transformIsing){
+    Trans <- IsingSampler::LinTransform(Results$graph, Results$thresholds, from = originalEncoding, to = c(0, 1))    
+  } else {
+    Trans <- list(graph = Results$graph, thresholds = Results$thresholds)
+  }
+  
   # Return:
-  return(list(graph = Results$graph, intercepts = Results$thresholds,
+  return(list(graph = Trans$graph, intercepts = Trans$thresholds,
               results = Results))
 }
 
@@ -891,7 +925,7 @@ bootnet_mgm <- function(
   # }
   # If is not a matrix coerce to matrix (because mgm is silly):
   # if (!is.matrix(data)){
-    data <- as.matrix(data)
+  data <- as.matrix(data)
   # }
   
   
@@ -951,26 +985,26 @@ bootnet_mgm <- function(
     }
   }
   
-    log <- capture.output(Results <- mgm::mgm(
-      data,verbatim = !verbose,  warnings = verbose, signInfo = FALSE,
-      type=type,
-      level=level,
-      lambdaSel = criterion,
-      lambdaFolds = nFolds,
-      lambdaGam = tuning,
-      k = order,
-      pbar = verbose,
-      ruleReg = rule, saveData = FALSE, binarySign = binarySign, ...))
-    
-    # Warn for unsigned:
-    if (any(Results$pairwise$signs==0,na.rm = TRUE)){
-      warning("Bootnet does not support unsigned edges and treats these as positive edges.")
-    }
-    Results$pairwise$signs[is.na(Results$pairwise$signs)] <- 0
-    
-    # Graph:
-    Graph <- Results$pairwise$wadj
-    Graph <- ifelse(Results$pairwise$signs==-1,-Graph,Graph)
+  log <- capture.output(Results <- mgm::mgm(
+    data,verbatim = !verbose,  warnings = verbose, signInfo = FALSE,
+    type=type,
+    level=level,
+    lambdaSel = criterion,
+    lambdaFolds = nFolds,
+    lambdaGam = tuning,
+    k = order,
+    pbar = verbose,
+    ruleReg = rule, saveData = FALSE, binarySign = binarySign, ...))
+  
+  # Warn for unsigned:
+  if (any(Results$pairwise$signs==0,na.rm = TRUE)){
+    warning("Bootnet does not support unsigned edges and treats these as positive edges.")
+  }
+  Results$pairwise$signs[is.na(Results$pairwise$signs)] <- 0
+  
+  # Graph:
+  Graph <- Results$pairwise$wadj
+  Graph <- ifelse(Results$pairwise$signs==-1,-Graph,Graph)
   #   
   # } else {
   #   log <- capture.output(Results <- do.call(mgmfun,list(
@@ -994,7 +1028,7 @@ bootnet_mgm <- function(
   #   Graph <- Results$wadj
   #   Graph <- ifelse(Results$signs==-1,-Graph,Graph)
   # }
-
+  
   # Return:
   return(list(
     graph=Graph,
@@ -1083,17 +1117,17 @@ bootnet_relimp <- function(
   
   # For every node, compute incomming relative importance:
   if (verbose){
-  
+    
     msg <- "Computing relative importance network. Using package::function:\n  - relaimpo::calc.relimp for edge weight estimation"
     message(msg)
-  
+    
     pb <- txtProgressBar(0,nVar,style=3)
   }
   for (i in 1:nVar){
     if (any(struc[-i,i])){
       formula <- as.formula(paste0(Vars[i]," ~ ",paste0(Vars[-i][struc[-i,i]],collapse=" + ")))
       if (sum(struc[-i,i])==1){
-
+        
         # Only one predictor
         if (normalized){
           relimp[-i,i][struc[-i,i]] <- 1
@@ -1107,7 +1141,7 @@ bootnet_relimp <- function(
         res <- calc.relimp(formula, data, rela = normalized)
         relimp[-i,i][struc[-i,i]] <- res@lmg              
       }
-
+      
     }
     if (verbose){
       setTxtProgressBar(pb, i)
@@ -1326,7 +1360,7 @@ bootnet_LoGo <- function(
     corMat <- principalDirection(corMat)
   }
   
-
+  
   # Estimate network:
   Results <- NetworkToolbox::LoGo(corMat,normal = FALSE,partial=TRUE,standardize = TRUE,...)
   
@@ -1385,7 +1419,7 @@ bootnet_graphicalVAR <- function(
     data <- principalDirection_noCor(data)
   }
   
-
+  
   # Estimate network:
   Results <- graphicalVAR::graphicalVAR(data,...,gamma = tuning, verbose = verbose)
   
@@ -1400,6 +1434,198 @@ bootnet_graphicalVAR <- function(
       type = "graphicalVAR"
     )))
 }
+
+
+
+# Piecewise Ising:
+### PIECEWISE ISING ESTIMATOR ###
+bootnet_piecewiseIsing <- function(
+  data, # Dataset used
+  cutoff, # May not be missing
+  missing = c("listwise","stop"),
+  verbose = TRUE,
+  # split = "median",
+  IsingDefault = c("IsingSampler","IsingFit","custom"),
+  zeroThreshold = 1, # Proportion of edges needed to be exactly 0 to set edge to zero
+  minimalN = ncol(data) + 1,
+  ... # Arguments sent to estimator:
+){
+  # Check arguments:
+  missing <- match.arg(missing)
+  IsingDefault <- match.arg(IsingDefault)
+  if (missing(cutoff)){
+    stop("'cutoff' argument may not be missing.")
+  }
+  
+  # Message:
+  if (verbose){
+    msg <- "Estimating Piecewise Ising Network. Using package::function:"  
+    if (IsingDefault == "IsingFit"){
+      msg <- paste0(msg,"\n  - IsingFit::IsingFit for network computation\n    - Using glmnet::glmnet")      
+    }
+    if (IsingDefault == "IsingSampler"){
+      msg <- paste0(msg,"\n  - IsingSampler::EstimateIsing for network computation")      
+    }
+    
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
+  
+  # First test if data is a data frame:
+  if (!(is.data.frame(data) || is.matrix(data))){
+    stop("'data' argument must be a data frame")
+  }
+  
+  # If matrix coerce to data frame:
+  if (is.matrix(data)){
+    data <- as.data.frame(data)
+  }
+  
+  
+  # Check missing:
+  if (missing == "stop"){
+    if (any(is.na(data))){
+      stop("Missing data detected and missing = 'stop'")
+    }
+  } else {
+    # listwise:
+    data <- na.omit(data)
+  }
+  
+  
+  # Binarize:
+  transformIsing <- FALSE
+  
+  originalEncoding <- c(0, 1)
+  if (!all(unlist(data) %in% c(0,1))){
+    stop("Piecewise Ising only supported for 0, 1 encoding")
+    # 
+    # if (length(unique(unlist(data))) == 2){
+    #   stop("Piecewise Ising only supported for 0, 1 encoding")
+    #   # transformIsing <- TRUE
+    #   # originalEncoding <- sort(unique(unlist(data)))
+    #   # dataBU <- data
+    #   # data[dataBU == originalEncoding[1]] <- 0
+    #   # data[dataBU == originalEncoding[2]] <- 1
+    # } 
+    # data <- bootnet::binarize(data, split = split, verbose = verbose)
+  }
+  
+  # Subset data according to cutoff:
+  data <- data[rowSums(data) >= cutoff,]
+  
+  # Check number of cases:
+  if (nrow(data) < minimalN){
+    stop("Number of cases after subsetting is smaller than 'minimalN' argument.")
+  }
+  
+  # Obtain info from data:
+  N <- ncol(data)
+  Np <- nrow(data)
+  
+  if (verbose){
+    message(paste0(Np," cases remain after subsetting."))
+  }
+  
+  # Compute pieces:
+  combs <- combn(seq_len(N),cutoff)
+  nCombs <- ncol(combs)
+  
+  # Setup progress bar:
+  if (verbose){
+    pb <- txtProgressBar(0,nCombs,initial = 1,style=3)
+  }
+  
+  # Empty array with results:
+  Graphs_piecewise <- array(dim=c(N,N,nCombs))
+  
+  # Number of subjects used in estimation:
+  nUsed <- numeric(nCombs)
+  
+  # Same but now in array form:
+  nUsed_array <- array(dim=c(N,N,nCombs))
+  
+  # Estimate pieces:
+  for (i in seq_len(nCombs)){
+    
+    # select subjects who endorse unique combination of items:
+    subjects <- which(rowSums(data[,combs[,i]]) == cutoff)
+    
+    # How many:
+    nUsed[i] <- length(subjects)
+    
+    # Subset data of remaining variables:
+    subData <- data[subjects,-combs[,i],drop=FALSE]
+    
+    # Skip if N is lower than minimalN:
+    if (nrow(subData) < minimalN){
+      next
+    }
+    
+    suppressMessages({
+      suppressWarnings({
+        
+        try({
+          # Compute piece of Ising model:
+          # Estimate network:
+          if (IsingDefault == "custom"){
+            Res_sub <- estimateNetwork(subData, ...)
+          } else {
+            Res_sub <- estimateNetwork(subData, default = IsingDefault, ..., verbose = FALSE)
+          }
+          
+          # Store in results:
+          Graphs_piecewise[-combs[,i],-combs[,i],i] <- Res_sub$graph
+          
+          # Store N:
+          nUsed_array[,,i] <- ifelse(!is.na(Graphs_piecewise[,,i]), nUsed[i], NA)
+        })
+      })
+    })
+    
+    
+    # Update progress bar:
+    if (verbose){
+      setTxtProgressBar(pb, i)
+    }
+    
+    
+  }
+  
+  # Close progress bar:
+  if (verbose){
+    close(pb)
+  }
+  
+  # Compute average network:
+  meanNet <- apply(Graphs_piecewise,1:2,weighted.mean,w = nUsed, na.rm=TRUE)
+
+  # Compute times exactly zero:
+  propZero <- apply(Graphs_piecewise==0,1:2,weighted.mean,w = nUsed, na.rm=TRUE)
+  
+  # Threshold:
+  meanNet <- meanNet * (propZero < zeroThreshold)
+  
+  # Minimal N per edge:
+  minN <- apply(nUsed_array,1:2, min, na.rm=TRUE)
+  diag(minN) <- NA
+  
+  if (!is.null(colnames(data))){
+    rownames(meanNet) <- colnames(meanNet) <- rownames(propZero) <- colnames(propZero) <- 
+      rownames(minN) <- colnames(minN) <- colnames(data)
+  }
+  
+  # Return:
+  return(list(graph = meanNet, intercepts = rep(NA, N),
+              results = list(
+                meanNet = meanNet,
+                propZero = propZero,
+                minN = minN
+              )))
+  
+}
+
 
 
 

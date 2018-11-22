@@ -17,6 +17,8 @@ export(bootnet_TMFG)
 export(bootnet_LoGo)
 export(bootnet_ggmModSelect)
 export(bootnet_graphicalVAR)
+export(bootnet_piecewiseIsing)
+export(bootThreshold)
 
 
 
