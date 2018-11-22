@@ -173,6 +173,7 @@ estimateNetwork <- function(
     outdata <- Result$specialData$data
     datatype <- Result$specialData$type
   }
+  
 
   sampleResult <- list(
     graph = sampleGraph,
