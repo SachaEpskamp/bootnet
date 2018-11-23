@@ -1598,8 +1598,8 @@ bootnet_piecewiseIsing <- function(
     close(pb)
   }
   
-  # Compute average network:
-  meanNet <- apply(Graphs_piecewise,1:2,weighted.mean,w = nUsed, na.rm=TRUE)
+  # Compute average network (over nonzero estimates only):
+  meanNet <- apply(ifelse(Graphs_piecewise==0,NA,Graphs_piecewise),1:2,weighted.mean,w = nUsed, na.rm=TRUE)
 
   # Compute times exactly zero:
   propZero <- apply(Graphs_piecewise==0,1:2,weighted.mean,w = nUsed, na.rm=TRUE)
