@@ -1,5 +1,6 @@
 import(pbapply)
 
+import(networktools)
 importFrom(NetworkToolbox,"TMFG")
 
 # Default functions:

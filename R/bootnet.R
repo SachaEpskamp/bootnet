@@ -57,6 +57,8 @@ bootnet <- function(
   weighted,
   signed,
   directed,
+  communities=NULL,
+  useCommunities="all",
   # datatype = c("normal","graphicalVAR"), # Extracted from object or given
   ... # Other arguments
   # edgeResample = FALSE # If true, only resample edges from original estimate
@@ -68,6 +70,14 @@ bootnet <- function(
   # Check default:
   if (default == "graphicalVAR" && !is(data,"bootnetResult")){
     stop("default = 'graphicalVAR' only supported for output of estimateNetwork()")
+  }
+  
+  # Check if statistics is all:
+  if (any(statistics=="all")){
+    statistics <- c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence",
+                    "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid",
+                    "bridgeStrength", "bridgeCloseness", "bridgeBetweenness",
+                    "bridgeExpectedInfluence")
   }
   
   
@@ -684,7 +694,7 @@ bootnet <- function(
   if (verbose){
     message("Computing statistics...")
   }
-  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality,statistics=statistics, directed=directed)
+  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality,statistics=statistics, directed=directed,  communities=communities, useCommunities=useCommunities)
   
   if (nCores == 1){
     if (verbose){
@@ -692,7 +702,7 @@ bootnet <- function(
     }
     statTableBoots <- vector("list", nBoots)
     for (b in seq_len(nBoots)){
-      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed)
+      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed,  communities=communities, useCommunities=useCommunities)
       if (verbose){
         setTxtProgressBar(pb, b)
       }
@@ -702,7 +712,7 @@ bootnet <- function(
     }
   }  else {
     statTableBoots <- pblapply(seq_len(nBoots),function(b){
-      statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed)
+      statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed, communities=communities, useCommunities=useCommunities)
     }, cl = cl)
     # Stop the cluster:
     stopCluster(cl)
