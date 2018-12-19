@@ -650,7 +650,7 @@ bootnet_IsingFit <- function(
   
   # Transform back:
   if (transformIsing){
-    Trans <- IsingSampler::LinTransform(Results$weiadj, Results$thresholds, from = originalEncoding, to = c(0, 1))    
+    Trans <- IsingSampler::LinTransform(Results$weiadj, Results$thresholds, from = c(0,1), to = originalEncoding)    
   } else {
     Trans <- list(graph = Results$weiadj, thresholds = Results$thresholds)
   }
@@ -745,7 +745,7 @@ bootnet_IsingSampler <- function(
   
   # Transform back:
   if (transformIsing){
-    Trans <- IsingSampler::LinTransform(Results$graph, Results$thresholds, from = originalEncoding, to = c(0, 1))    
+    Trans <- IsingSampler::LinTransform(Results$graph, Results$thresholds, from = c(0,1), to = originalEncoding)    
   } else {
     Trans <- list(graph = Results$graph, thresholds = Results$thresholds)
   }
@@ -1598,8 +1598,11 @@ bootnet_piecewiseIsing <- function(
     close(pb)
   }
   
-  # Compute average network:
-  meanNet <- apply(Graphs_piecewise,1:2,weighted.mean,w = nUsed, na.rm=TRUE)
+  # Compute average network (over nonzero estimates only):
+
+  meanNet <- apply(ifelse(Graphs_piecewise==0,NA,Graphs_piecewise),1:2,weighted.mean,w = nUsed, na.rm=TRUE)
+  diag(meanNet) <- 0
+  meanNet[is.na(meanNet) | is.nan(meanNet)] <- 0
 
   # Compute times exactly zero:
   propZero <- apply(Graphs_piecewise==0,1:2,weighted.mean,w = nUsed, na.rm=TRUE)

@@ -1,5 +1,5 @@
 # Function to threshold network based on bootstrap samples:
-bootThreshold <- function(bootobject, alpha = 0.05,verbose=TRUE){
+bootThreshold <- function(bootobject, alpha = 0.05,verbose=TRUE, thresholdIntercepts = FALSE){
   # Check if object is bootnet object:
   if (class(bootobject) != "bootnet"){
     stop("'bootobject' must be an object of class 'bootnet'")
@@ -40,6 +40,29 @@ bootThreshold <- function(bootobject, alpha = 0.05,verbose=TRUE){
     }
   } else {
     message("All edges indicated to be nonzero")
+  }
+  
+  # Threshold intercepts
+  if (thresholdIntercepts){
+    # Summary table of edge weights:
+    bootSummary <- bootobject$bootTable %>% 
+      dplyr::filter_(~type == "intercept") %>%
+      dplyr::group_by_(~node1) %>%
+      dplyr::summarize(
+        lower = quantile(value, alpha/2),
+        upper = quantile(value, 1 - alpha/2)
+      ) %>% 
+      dplyr::mutate(sig = upper < 0 | lower > 0) %>%
+      filter_(~!sig)
+    
+    # Threshold network:
+    if (nrow(bootSummary) > 0){
+      for (i in 1:nrow(bootSummary)){
+        Network$intercepts[Network$labels == bootSummary$node1[i]] <- 0
+      }
+    } else {
+      message("All intercepts indicated to be nonzero")
+    }
   }
   
   # Add indicator network is thresholded:
