@@ -25,7 +25,8 @@ plot.bootnetResult <- function(x, graph,
                                weighted, signed, directed, labels,
                                layout = "spring",
                                parallelEdge = TRUE, cut = 0,
-                               theme = "colorblind", ...){
+                               theme = "colorblind", 
+                               bootIncludeOverwrite = TRUE, ...){
 
   if (missing(weighted)){
     weighted <- x$weighted
@@ -61,8 +62,19 @@ plot.bootnetResult <- function(x, graph,
     labels <- x[['labels']]
   }
   
-  qgraph::qgraph(wMat,labels=labels,directed=directed,
-                 parallelEdge = parallelEdge,
-                 theme = theme,
-                 cut = cut, layout = layout,  ...)
+  if (bootIncludeOverwrite && isTRUE(x$bootInclude)){
+    qgraph::qgraph(wMat,labels=labels,directed=directed,
+                   parallelEdge = parallelEdge,
+                   theme = theme,
+                   cut = cut, layout = layout,  
+                   edge.color = "black", maximum = 1,
+                   diag = TRUE,...)  
+  } else {
+    
+    qgraph::qgraph(wMat,labels=labels,directed=directed,
+                   parallelEdge = parallelEdge,
+                   theme = theme,
+                   cut = cut, layout = layout,  ...)    
+  }
+
 }

@@ -24,7 +24,7 @@ noDiag <- function(x){
 bootnet <- function(
   data, # Dataset
   nBoots = 1000, # Number of bootstrap samples.
-  default = c("none", "EBICglasso", "ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp","cor","TMFG", "ggmModSelect", "LoGo"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
+  default = c("none", "EBICglasso", "ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp","cor","TMFG", "ggmModSelect", "LoGo","SVAR_lavaan"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
   type = c("nonparametric","parametric","node","person","jackknife","case"), # Bootstrap method to use
   nCores = 1,
   statistics = c("edge","strength","closeness","betweenness","outStrength","inStrength"),
@@ -126,6 +126,11 @@ bootnet <- function(
       # Check if thresholded:
       if (isTRUE(data$thresholded)){
         stop("Network has already been thresholded using bootstraps.")
+      }
+      
+      # Check if bootInclude:
+      if (isTRUE(data$bootInclude)){
+        stop("Network is based on bootstrap include probabilities.")
       }
       
       default <- data$default

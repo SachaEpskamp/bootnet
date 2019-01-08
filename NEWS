@@ -5,6 +5,8 @@ Changes in Version 1.1.1
   - Added support for statistics "bridgeStrength", "bridgeCloseness", "bridgeBetweenness", and "bridgeExpectedInfluence". Thanks to Payton Jones!
   - The statistics argument in bootnet can now be "all"
   - Included the 'includeDiagonal' argument to bootnet to include storing diagonal entries (self-loops) for directed networks only
+  - Added default set "SVAR_lavaan" for step-up structural VAR model selection using Lavaan
+  - Added bootInclude function to obtain a network of bootstrap inclusion probabilities
 
 Changes in Version 1.1
   - New supported default sets:

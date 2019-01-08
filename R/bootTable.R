@@ -148,7 +148,6 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
     }
     
     if ("outStrength" %in% statistics && directed){
-      
       tables$outStrength <- dplyr::tbl_df(data.frame(
         name = name,
         type = "outStrength",

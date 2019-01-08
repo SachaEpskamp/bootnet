@@ -2,7 +2,7 @@
 # Function that checks input and returns the functions:
 checkInput <- function(
   default = c("none", "EBICglasso","ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", 
-              "cor","TMFG","ggmModSelect","LoGo","graphicalVAR","piecewiseIsing"),
+              "cor","TMFG","ggmModSelect","LoGo","graphicalVAR","piecewiseIsing","SVAR_lavaan"),
   fun, # Estimator function
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
@@ -176,6 +176,8 @@ checkInput <- function(
       Function <- bootnet_graphicalVAR  
     } else if (default == "piecewiseIsing"){
       Function <- bootnet_piecewiseIsing
+    } else if (default == "SVAR_lavaan"){
+      Function <- bootnet_SVAR_lavaan  
     } else stop("Currently not supported.")
     
   } else {

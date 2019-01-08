@@ -2,7 +2,7 @@
 estimateNetwork <- function(
   data,
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", "cor","TMFG",
-              "ggmModSelect", "LoGo","graphicalVAR", "piecewiseIsing"),
+              "ggmModSelect", "LoGo","graphicalVAR", "piecewiseIsing","SVAR_lavaan"),
   fun, # A function that takes data and returns a network or list entitled "graph" and "thresholds". optional.
   prepFun, # Fun to produce the correlation or covariance matrix
   prepArgs, # list with arguments for the correlation function
@@ -64,6 +64,8 @@ estimateNetwork <- function(
   if (missing(directed)){
     if (default == "graphicalVAR"){
       directed <- list(contemporaneous = FALSE, temporal = TRUE)
+    } else  if (default == "SVAR_lavaan"){
+      directed <- list(contemporaneous = TRUE, temporal = TRUE)
     } else if (!default %in% c("relimp","DAG")){
       directed <- FALSE 
     } else {
@@ -196,7 +198,10 @@ estimateNetwork <- function(
   class(sampleResult) <- c("bootnetResult", "list")
   
   if (default == "graphicalVAR"){
-    sampleResult$labels <- output$data$vars
+       sampleResult$labels <- output$data$vars
+  }
+  if (default == "SVAR_lavaan"){
+    sampleResult$labels  <- outdata$vars
   }
   
   # Memory save:

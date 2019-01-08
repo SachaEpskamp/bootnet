@@ -1,9 +1,10 @@
 import(pbapply)
-
+import(lavaan)
 import(networktools)
 importFrom(NetworkToolbox,"TMFG")
 
 # Default functions:
+export(bootInclude)
 export(bootnet_IsingFit)
 export(bootnet_EBICglasso)
 export(bootnet_ggmModSelect)

@@ -16,38 +16,30 @@ bootThreshold <- function(bootobject, alpha = 0.05,verbose=TRUE, thresholdInterc
     message(paste0("Expected significance level given number of bootstrap samples is approximately: ",format(signif(exp,2),scientific = FALSE)))
   }
   
+  
   # Extract the network object:
   Network <- bootobject$sample
-  
-  # Summary table of edge weights:
-  bootSummary <- bootobject$bootTable %>% 
-    dplyr::filter_(~type == "edge") %>%
-    dplyr::group_by_(~node1,~node2) %>%
-    dplyr::summarize(
-      lower = quantile(value, alpha/2),
-      upper = quantile(value, 1 - alpha/2)
-    ) %>% 
-    dplyr::mutate(sig = upper < 0 | lower > 0) %>%
-    filter_(~!sig)
-  
-  # Threshold network:
-  if (nrow(bootSummary) > 0){
-    for (i in 1:nrow(bootSummary)){
-      Network$graph[Network$labels == bootSummary$node1[i],Network$labels == bootSummary$node2[i]] <- 0
-      if (!Network$directed){
-        Network$graph[Network$labels == bootSummary$node2[i],Network$labels == bootSummary$node1[i]] <- 0
-      }
-    }
+  # Dummy for multiple graphs:
+  if (!is.list(Network$graph)){
+    Graphs <- list(Network$graph)
+    Directed <- list(Network$directed)
+    Intercepts <- list(Network$intercepts)
+    names(Graphs) <- names(Directed) <- names(Intercepts) <-
+      unique(bootobject$bootTable$graph)
   } else {
-    message("All edges indicated to be nonzero")
+    Graphs <- Network$graph
+    Directed <- Network$directed
+    Intercepts <-  Network$intercepts
   }
   
-  # Threshold intercepts
-  if (thresholdIntercepts){
+  # For every graph:
+  for (g in seq_along(Graphs)){
+    graphName <- names(Graphs)[g]
+    
     # Summary table of edge weights:
     bootSummary <- bootobject$bootTable %>% 
-      dplyr::filter_(~type == "intercept") %>%
-      dplyr::group_by_(~node1) %>%
+      dplyr::filter_(~type == "edge", ~graph == graphName) %>%
+      dplyr::group_by_(~node1,~node2) %>%
       dplyr::summarize(
         lower = quantile(value, alpha/2),
         upper = quantile(value, 1 - alpha/2)
@@ -58,13 +50,49 @@ bootThreshold <- function(bootobject, alpha = 0.05,verbose=TRUE, thresholdInterc
     # Threshold network:
     if (nrow(bootSummary) > 0){
       for (i in 1:nrow(bootSummary)){
-        Network$intercepts[Network$labels == bootSummary$node1[i]] <- 0
+        Graphs[[graphName]][Network$labels == bootSummary$node1[i],Network$labels == bootSummary$node2[i]] <- 0
+        if (!Directed[[graphName]]){
+          Graphs[[graphName]][Network$labels == bootSummary$node2[i],Network$labels == bootSummary$node1[i]] <- 0
+        }
       }
     } else {
-      message("All intercepts indicated to be nonzero")
+      message("All edges indicated to be nonzero")
+    }
+    
+    # Threshold intercepts
+    if (thresholdIntercepts){
+      
+      # Summary table of edge weights:
+      bootSummary <- bootobject$bootTable %>% 
+        dplyr::filter_(~type == "intercept", ~graph == graphName) %>%
+        dplyr::group_by_(~node1) %>%
+        dplyr::summarize(
+          lower = quantile(value, alpha/2),
+          upper = quantile(value, 1 - alpha/2)
+        ) %>% 
+        dplyr::mutate(sig = upper < 0 | lower > 0) %>%
+        filter_(~!sig)
+      
+      # Threshold network:
+      if (nrow(bootSummary) > 0){
+        for (i in 1:nrow(bootSummary)){
+          Intercepts[[graphName]][Network$labels == bootSummary$node1[i]] <- 0
+        }
+      } else {
+        message("All intercepts indicated to be nonzero")
+      }
     }
   }
   
+  # Return to network object:
+  if (length(Graphs) == 1){
+    Network$graph <- Graphs[[1]]
+    Network$intercepts <- Intercepts[[1]]
+  } else {
+    Network$graph <- Graphs
+    Network$intercepts <- Intercepts
+  }
+
   # Add indicator network is thresholded:
   Network$thresholded <- TRUE
   

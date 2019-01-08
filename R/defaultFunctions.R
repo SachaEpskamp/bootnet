@@ -1437,6 +1437,220 @@ bootnet_graphicalVAR <- function(
 
 
 
+### stepwise SVAR ESTIMATOR ###
+bootnet_SVAR_lavaan <- function(
+  data, # Dataset used
+  verbose = TRUE,
+  principalDirection = FALSE,
+  missing =c("listwise","stop"),
+  criterion = "bic",
+  eqThreshold = 1e-4,
+  tempWhitelist,
+  tempBlacklist,
+  contWhitelist,
+  contBlacklist,
+  ...
+){
+  dots <- list(...)
+  missing <- match.arg(missing)
+  
+  
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"  
+    msg <- paste0(msg,"\n  - lavaan::lavaan for model estimation")
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+  
+  
+  # First test if data is a data frame:
+  if (!is(data,"tsData") && !(is.data.frame(data) || is.matrix(data))){
+    stop("'data' argument must be a data frame")
+  }
+  
+  # If matrix coerce to data frame:
+  if (!is(data,"tsData") && is.matrix(data)){
+    data <- as.data.frame(data)
+  }
+  
+  # Check missing:
+  if (missing == "stop"){
+    if (any(is.na(data))){
+      stop("Missing data detected and missing = 'stop'")
+    }
+  }
+  
+  
+  # Principal direction:
+  if (principalDirection){
+    data <- principalDirection_noCor(data)
+  }
+  
+  
+  # Dummy gvar call to get data:
+  if (is(data,"tsData")){
+    gvarData <- data
+  } else {
+    Results <- graphicalVAR::graphicalVAR(data,...,gamma = 0, lambda_beta = 0.1, lambda_kappa = 0.1,verbose = FALSE)    
+    gvarData <- Results$data
+  }
+  
+  # Setup data for lavaan:
+  lavData <- cbind(gvarData$data_c,gvarData$data_l)
+  vars <- gvarData$vars
+  
+  # All possible model terms:
+  lagVars <- paste0(vars,"_lag1")
+  temp <- expand.grid(dep=vars,indep=lagVars,type="temporal",stringsAsFactors = FALSE)
+  cont <- expand.grid(dep=vars,indep=vars,type="contemporaneous",stringsAsFactors = FALSE)
+  cont <- cont[cont$dep != cont$indep,]
+  allTerms <- rbind(temp,cont)
+  
+  # Blacklist (remove terms):
+  if (!missing(tempBlacklist)){
+    if (is.matrix(tempBlacklist)){
+      tempBlacklist <- as.data.frame(tempBlacklist)
+    }
+    names(tempBlacklist) <- c("indep","dep")
+    tempBlacklist$type <- "temporal"
+    tempBlacklist$indep <- paste0(tempBlacklist$indep,"_lag1")
+    allTerms <- suppressWarnings(anti_join(allTerms,tempBlacklist,by = c("dep", "indep", "type")))
+  }
+  
+  if (!missing(contBlacklist)){
+    if (is.matrix(contBlacklist)){
+      contBlacklist <- as.data.frame(contBlacklist)
+    }
+    names(contBlacklist) <- c("indep","dep")
+    contBlacklist$type <- "contemporaneous"
+    allTerms <- suppressWarnings(anti_join(allTerms,contBlacklist,by = c("dep", "indep", "type")))
+  }
+  
+  # Constrain residual cors to be zero (lavaan bug?):
+  constraints <- paste(apply(combn(vars,2),2,function(x)paste0(x[1]," ~~ 0*",x[2])),collapse="\n")
+  
+  # Indices of current model:
+  allModInd <- seq_len(nrow(allTerms))
+  curModInd <- which(allTerms$dep == gsub("_lag1","",allTerms$indep) & allTerms$type == "temporal")
+   
+  # Whitelist (include in start model):
+  if (!missing(tempWhitelist)){
+    if (is.matrix(tempWhitelist)){
+      tempWhitelist <- as.data.frame(tempWhitelist)
+    }
+    names(tempWhitelist) <- c("indep","dep")
+    tempWhitelist$type <- "temporal"
+    tempWhitelist$indep <- paste0(tempWhitelist$indep,"_lag1")
+    tempWhitelist$whitelist <- TRUE
+    temp <- suppressWarnings(left_join(allTerms,tempWhitelist,by = c("dep", "indep", "type")))
+    temp$whitelist[is.na(temp$whitelist)] <- FALSE
+    curModInd <- c(curModInd,which(temp$whitelist))
+  }
+ 
+  if (!missing(contWhitelist)){
+    if (is.matrix(contWhitelist)){
+      contWhitelist <- as.data.frame(contWhitelist)
+    }
+    names(contWhitelist) <- c("indep","dep")
+    contWhitelist$type <- "contemporaneous"
+    contWhitelist$whitelist <- TRUE
+    temp <- suppressWarnings(left_join(allTerms,contWhitelist,by = c("dep", "indep", "type")))
+    temp$whitelist[is.na(temp$whitelist)] <- FALSE
+    curModInd <- c(curModInd,which(temp$whitelist))
+  }
+  
+  curMod <- paste0(allTerms$dep[curModInd], " ~ ",allTerms$indep[curModInd],collapse = '\n')
+  curMod <- paste(curMod,"\n",constraints)
+  
+  # Fit model:
+  curFit <- lavaan::sem(curMod, lavData)
+  
+  # Criterion:
+  curCrit <- fitMeasures(curFit,criterion)
+  
+  # Test all options:
+  repeat{
+    testInds <- allModInd[!allModInd %in% curModInd]
+    tests <- lapply(testInds,function(i){
+      testModInds <- c(curModInd,i)
+      curMod <- paste0(allTerms$dep[testModInds], " ~ ",allTerms$indep[testModInds],collapse = '\n')
+      curMod <- paste(curMod,"\n",constraints)
+      
+      # Fit model:
+      testFit <- lavaan::sem(curMod, lavData)
+      
+      # Criterion:
+      testCrit <- fitMeasures(testFit,criterion)
+      
+      return(list(
+        fit = testFit,
+        crit = testCrit
+      ))
+    })
+    
+    # crits:
+    allCrits <- sapply(tests,"[[","crit")
+    
+    if (any(allCrits < curCrit)){
+      # Test for equivalent:
+      if (sum(allCrits < min(allCrits) + eqThreshold) > 1){
+        # Select one at random:
+        bestOptions <- which(allCrits < min(allCrits) + eqThreshold)
+        best <- sample(bestOptions,1)
+        
+        warning("Severeral nearly equivalent best models found. Selecting one at random.")
+        
+      } else {
+        best <- which.min(allCrits)        
+      }
+      
+      
+
+      curModInd <- c(curModInd,testInds[best])
+      curCrit <- tests[[best]]$crit
+      curFit <- tests[[best]]$fit
+    } else {
+      break
+    }
+  }
+  
+  # Construct networks:
+  pars <- parameterEstimates(curFit)
+  nVars <- length(vars)
+  tempNet <- matrix(0,nVars,nVars)
+  contNet <- matrix(0,nVars,nVars)
+  rownames(tempNet) <- colnames(tempNet) <- 
+    rownames(contNet) <- colnames(contNet) <- 
+    vars
+  
+  for (i in 1:nVars){
+    for (j in 1:nVars){
+     
+      # Temporal:
+      if (any(pars$rhs == lagVars[i] & pars$lhs == vars[j])){
+        tempNet[i,j] <- pars$est[pars$rhs == lagVars[i] & pars$lhs == vars[j]]
+      }
+      
+      # Contemporaneous:
+      if (any(pars$rhs == vars[i] & pars$lhs == vars[j] & pars$op == "~")){
+        contNet[i,j] <- pars$est[pars$rhs == vars[i] & pars$lhs == vars[j] & pars$op == "~"]
+      }
+    }
+  }
+  
+  
+  # Return:
+  return(list(graph=list(
+    contemporaneous = contNet,
+    temporal = tempNet),
+    results=curFit,
+    specialData = list(
+      data = gvarData,
+      type = "graphicalVAR"
+    )))
+}
+
 # Piecewise Ising:
 ### PIECEWISE ISING ESTIMATOR ###
 bootnet_piecewiseIsing <- function(
@@ -1599,11 +1813,11 @@ bootnet_piecewiseIsing <- function(
   }
   
   # Compute average network (over nonzero estimates only):
-
+  
   meanNet <- apply(ifelse(Graphs_piecewise==0,NA,Graphs_piecewise),1:2,weighted.mean,w = nUsed, na.rm=TRUE)
   diag(meanNet) <- 0
   meanNet[is.na(meanNet) | is.nan(meanNet)] <- 0
-
+  
   # Compute times exactly zero:
   propZero <- apply(Graphs_piecewise==0,1:2,weighted.mean,w = nUsed, na.rm=TRUE)
   
