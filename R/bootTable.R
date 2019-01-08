@@ -9,7 +9,7 @@
 
 statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = c("edge","strength","closeness","betweenness"), directed = FALSE,
                       communities=NULL,
-                      useCommunities="all", ...){
+                      useCommunities="all", includeDiagonal = FALSE,...){
   # If list, table for every graph!
   if (is.list(x$graph)){
     Tables <- list()
@@ -17,7 +17,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       dummyobject <- x
       dummyobject$graph <- x$graph[[i]]
       dummyobject$directed <- x$directed[[i]]
-      Tables[[i]] <- statTable(dummyobject,name=name,alpha=alpha,computeCentrality = computeCentrality,statistics=statistics,directed=dummyobject$directed)
+      Tables[[i]] <- statTable(dummyobject,name=name,alpha=alpha,computeCentrality = computeCentrality,statistics=statistics,directed=dummyobject$directed,includeDiagonal=includeDiagonal)
       Tables[[i]]$graph <- names(x$graph)[[i]]
     }
     return(dplyr::bind_rows(Tables))
@@ -50,7 +50,12 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
     index <- upper.tri(x[['graph']], diag=FALSE)
     ind <- which(index, arr.ind=TRUE)
   } else {
-    index <- diag(ncol(x[['graph']]))!=1
+    if (!includeDiagonal){
+      index <- diag(ncol(x[['graph']]))!=1      
+    } else {
+      index <- matrix(TRUE,ncol(x[['graph']]),ncol(x[['graph']]))
+    }
+
     ind <- which(index, arr.ind=TRUE)
   }
   

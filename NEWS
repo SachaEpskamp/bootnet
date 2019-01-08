@@ -4,6 +4,7 @@ Changes in Version 1.1.1
   - IsingFit and IsingSampler defaults now transform -1, 1 data to 0, 1 when computing network, then back when returning results
   - Added support for statistics "bridgeStrength", "bridgeCloseness", "bridgeBetweenness", and "bridgeExpectedInfluence". Thanks to Payton Jones!
   - The statistics argument in bootnet can now be "all"
+  - Included the 'includeDiagonal' argument to bootnet to include storing diagonal entries (self-loops) for directed networks only
 
 Changes in Version 1.1
   - New supported default sets:
