@@ -4,6 +4,7 @@ import(networktools)
 importFrom(NetworkToolbox,"TMFG")
 
 # Default functions:
+export(bootnet_SVAR_lavaan)
 export(bootInclude)
 export(bootnet_IsingFit)
 export(bootnet_EBICglasso)
