@@ -65,7 +65,7 @@ ggmGenerator <- function(
          if (is.list(input) && !is.null(input$thresholds)) {
         Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,input$thresholds[[i]],Inf))))
     } else {
-        Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,rnorm(5.000000-1),Inf))))
+        Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,rnorm(%f-1),Inf))))
     }  
   
     }',nLevels)
