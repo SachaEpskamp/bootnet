@@ -61,6 +61,7 @@ bootnet <- function(
   communities=NULL,
   useCommunities="all",
   library = .libPaths(),
+  memorysaver = TRUE,
   # datatype = c("normal","graphicalVAR"), # Extracted from object or given
   ... # Other arguments
   # edgeResample = FALSE # If true, only resample edges from original estimate
@@ -493,7 +494,7 @@ bootnet <- function(
                           weighted = weighted,
                           signed = signed,
                           .input = inputCheck,
-                          memorysaver = TRUE)
+                          memorysaver = memorysaver)
           
         }))
         if (is(res, "try-error")){
@@ -664,7 +665,7 @@ bootnet <- function(
                           weighted = weighted,
                           signed = signed,
                           .input = inputCheck,
-                          memorysaver = TRUE)
+                          memorysaver = memorysaver)
           
         }))
         if (is(res, "try-error")){
