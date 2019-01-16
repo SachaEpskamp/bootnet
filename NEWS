@@ -7,6 +7,7 @@ Changes in Version 1.1.1
   - Included the 'includeDiagonal' argument to bootnet to include storing diagonal entries (self-loops) for directed networks only
   - Added default set "SVAR_lavaan" for step-up structural VAR model selection using Lavaan
   - Added bootInclude function to obtain a network of bootstrap inclusion probabilities
+  - Bootnet now copies the library used by the user to the clusters when using nCores > 1. This is important for checkpoint and packrat compatability
 
 Changes in Version 1.1
   - New supported default sets:

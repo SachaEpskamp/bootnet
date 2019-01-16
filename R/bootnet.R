@@ -60,6 +60,7 @@ bootnet <- function(
   includeDiagonal = FALSE,
   communities=NULL,
   useCommunities="all",
+  library = .libPaths(),
   # datatype = c("normal","graphicalVAR"), # Extracted from object or given
   ... # Other arguments
   # edgeResample = FALSE # If true, only resample edges from original estimate
@@ -549,6 +550,8 @@ bootnet <- function(
     
     # Run loop:
     bootResults <- pblapply(seq_len(nBoots), function(b){
+      # Set library:
+      .libPaths(library)
       
       tryLimit <- 10
       tryCount <- 0
@@ -718,6 +721,9 @@ bootnet <- function(
     }
   }  else {
     statTableBoots <- pblapply(seq_len(nBoots),function(b){
+      # Set library:
+      .libPaths(library)
+      
       statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed, communities=communities, useCommunities=useCommunities,includeDiagonal=includeDiagonal)
     }, cl = cl)
     # Stop the cluster:
