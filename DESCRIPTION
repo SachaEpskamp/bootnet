@@ -2,7 +2,9 @@ Package: bootnet
 Type: Package
 Title: Bootstrap Methods for Various Network Estimation Routines
 Version: 1.1.2
-Author: Sacha Epskamp and Eiko I. Fried
+Authors@R: c(
+  person("Sacha", "Epskamp", email = "mail@sachaepskamp.com",role = c("aut", "cre")),
+  person("Eiko I.", "Fried", role = c("ctb")))
 Maintainer: Sacha Epskamp <mail@sachaepskamp.com>
 Depends: ggplot2, R (>= 3.0.0)
 Imports: methods, igraph, IsingFit, qgraph, dplyr (>= 0.3.0.2), tidyr, 
