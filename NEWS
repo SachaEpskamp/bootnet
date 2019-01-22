@@ -5,7 +5,9 @@ Changes in Version 1.1.1
   - Added support for statistics "bridgeStrength", "bridgeCloseness", "bridgeBetweenness", and "bridgeExpectedInfluence". Thanks to Payton Jones!
   - The statistics argument in bootnet can now be "all"
   - Included the 'includeDiagonal' argument to bootnet to include storing diagonal entries (self-loops) for directed networks only
-  - Added default set "SVAR_lavaan" for step-up structural VAR model selection using Lavaan
+  - Added default set "piecewiseIsing" for estimating Ising models while selecting participants on a sum-score (very experimental)
+  - Added default set "SVAR_lavaan" for step-up structural VAR model selection using Lavaan (experimental)
+  - Added bootThreshold function to threshold a network based on bootstraps (e.g., bootstrapped interval includes 0)
   - Added bootInclude function to obtain a network of bootstrap inclusion probabilities
   - Bootnet now copies the library used by the user to the clusters when using nCores > 1. This is important for checkpoint and packrat compatability
 

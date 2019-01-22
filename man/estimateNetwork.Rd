@@ -13,6 +13,8 @@
 \alias{bootnet_LoGo}
 \alias{bootnet_ggmModSelect}
 \alias{bootnet_graphicalVAR}
+\alias{bootnet_SVAR_lavaan}
+\alias{bootnet_piecewiseIsing}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Estimate a network structure
@@ -21,12 +23,16 @@ Estimate a network structure
 This function allows for flexible estimation of a network structure using various R packages and model frameworks. This is typically done by using one of the default sets. See details for manual specification. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-estimateNetwork(data, default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", 
-    "huge","adalasso","mgm","relimp", "cor","TMFG", "ggmModSelect", "LoGo",
-    "graphicalVAR"), fun, prepFun, prepArgs, estFun, estArgs, graphFun, graphArgs, 
-    intFun, intArgs, labels, verbose = TRUE, construct = c("default","function",
-    "arguments"), .dots = list(), weighted = TRUE,  signed = TRUE, directed, datatype, 
-    checkNumeric = FALSE, \dots, .input, memorysaver = FALSE)
+estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
+                 "IsingFit", "IsingSampler", "huge", "adalasso", "mgm",
+                 "relimp", "cor", "TMFG", "ggmModSelect", "LoGo",
+                 "graphicalVAR", "piecewiseIsing", "SVAR_lavaan"), fun,
+                 prepFun, prepArgs, estFun, estArgs, graphFun,
+                 graphArgs, intFun, intArgs, labels, verbose = TRUE,
+                 construct = c("default", "function", "arguments"),
+                 .dots = list(), weighted = TRUE, signed = TRUE,
+                 directed, datatype, checkNumeric = FALSE, ..., .input,
+                 memorysaver = FALSE)
                 
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn"), 
   missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimim"),
@@ -83,6 +89,14 @@ bootnet_ggmModSelect(data,tuning = 0, corMethod = c("cor_auto","cov","cor","npn"
   missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimim"), 
   verbose = TRUE, corArgs = list(), principalDirection = FALSE, start = c("glasso",
   "empty","full"), stepwise = TRUE, nCores = 1, ...)
+  
+bootnet_piecewiseIsing(data, cutoff, missing = c("listwise","stop"), verbose = TRUE,
+  IsingDefault = c("IsingSampler","IsingFit","custom"), zeroThreshold = 1, 
+  minimalN = ncol(data) + 1, ...)
+  
+bootnet_SVAR_lavaan(data, verbose = TRUE, principalDirection = FALSE, 
+  missing =c("listwise","stop"), criterion = "bic", eqThreshold = 1e-4, tempWhitelist,
+  tempBlacklist, contWhitelist, contBlacklist, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -199,6 +213,33 @@ A list of arguments used in the estimation function set by a default set or by t
 \item{.input}{Used internally in the bootnet function. Do not use.}
 \item{memorysaver}{
 Logical. If TRUE attempts to save memory (RAM) by removing some objects from the output. Used by bootnet by default for bootstraps.}
+\item{cutoff}{
+Cutoff score for sum-score to condition on when using \code{default = "piecewiseIsing"}. This is *experimental*!
+}
+\item{IsingDefault}{
+Default set for Ising model structure estimation in piecewise Ising estimation. This is *experimental*!
+}
+\item{zeroThreshold}{
+Used in piecewise Ising estimation. Proportion of edges needed to be exactly 0 in pieces to set edge to zero in final network. This is *experimental*!
+}
+\item{minimalN}{
+Used in piecewise Ising estimation. Minimal sample sizes needed in piece estimation. This is *experimental*!
+}
+\item{eqThreshold}{
+Used in SVAR_lavaan estimation (stepup SVAR estimation). This is *experimental*! Maximum difference in criterion to decide if two models are equivalent (and select one at random).
+}
+\item{tempWhitelist}{
+Used in SVAR_lavaan estimation (step up SVAR estimation). This is *experimental*! Matrix with edges to be whitelisted in the temporal model. The matrix should contain two columns and a row for each edge. The elements should be characters indicating the variable names of each edge (from, to).
+}
+\item{tempBlacklist}{
+Used in SVAR_lavaan estimation (step up SVAR estimation). This is *experimental*! Matrix with edges to be blacklisted in the temporal model. The matrix should contain two columns and a row for each edge. The elements should be characters indicating the variable names of each edge (from, to).
+}
+\item{contWhitelist}{
+Used in SVAR_lavaan estimation (step up SVAR estimation). This is *experimental*! Matrix with edges to be whitelisted in the contemporaneous model. The matrix should contain two columns and a row for each edge. The elements should be characters indicating the variable names of each edge (from, to).
+}
+\item{contBlacklist}{
+Used in SVAR_lavaan estimation (step up SVAR estimation). This is *experimental*! Matrix with edges to be blacklisted in the contemporaneous model. The matrix should contain two columns and a row for each edge. The elements should be characters indicating the variable names of each edge (from, to).
+}
 }
 \details{
 NEW FUNCTIONALTIY:

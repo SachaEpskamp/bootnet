@@ -1451,6 +1451,11 @@ bootnet_SVAR_lavaan <- function(
   contBlacklist,
   ...
 ){
+  # Warn user:
+  if (verbose){
+    warning("default = 'SVAR_lavaan' is *experimental*!")
+  }
+  
   dots <- list(...)
   missing <- match.arg(missing)
   
@@ -1528,7 +1533,7 @@ bootnet_SVAR_lavaan <- function(
   }
   
   # Constrain residual cors to be zero (lavaan bug?):
-  constraints <- paste(apply(combn(vars,2),2,function(x)paste0(x[1]," ~~ 0*",x[2])),collapse="\n")
+  constraints <- paste(apply(utils::combn(vars,2),2,function(x)paste0(x[1]," ~~ 0*",x[2])),collapse="\n")
   
   # Indices of current model:
   allModInd <- seq_len(nrow(allTerms))
@@ -1664,6 +1669,11 @@ bootnet_piecewiseIsing <- function(
   minimalN = ncol(data) + 1,
   ... # Arguments sent to estimator:
 ){
+  # Warn user:
+  if (verbose){
+    warning("default = 'piecewiseIsing' is *experimental*!")
+  }
+  
   # Check arguments:
   missing <- match.arg(missing)
   IsingDefault <- match.arg(IsingDefault)
@@ -1743,7 +1753,7 @@ bootnet_piecewiseIsing <- function(
   }
   
   # Compute pieces:
-  combs <- combn(seq_len(N),cutoff)
+  combs <- utils::combn(seq_len(N),cutoff)
   nCombs <- ncol(combs)
   
   # Setup progress bar:
@@ -1814,12 +1824,12 @@ bootnet_piecewiseIsing <- function(
   
   # Compute average network (over nonzero estimates only):
   
-  meanNet <- apply(ifelse(Graphs_piecewise==0,NA,Graphs_piecewise),1:2,weighted.mean,w = nUsed, na.rm=TRUE)
+  meanNet <- apply(ifelse(Graphs_piecewise==0,NA,Graphs_piecewise),1:2,stats::weighted.mean,w = nUsed, na.rm=TRUE)
   diag(meanNet) <- 0
   meanNet[is.na(meanNet) | is.nan(meanNet)] <- 0
   
   # Compute times exactly zero:
-  propZero <- apply(Graphs_piecewise==0,1:2,weighted.mean,w = nUsed, na.rm=TRUE)
+  propZero <- apply(Graphs_piecewise==0,1:2,stats::weighted.mean,w = nUsed, na.rm=TRUE)
   
   # Threshold:
   meanNet <- meanNet * (propZero < zeroThreshold)

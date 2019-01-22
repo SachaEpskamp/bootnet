@@ -1,5 +1,5 @@
 # Function to create include probability network
-bootInclude <- function(bootobject, alpha = 0.05,verbose=TRUE){
+bootInclude <- function(bootobject,verbose=TRUE){
   # Check if object is bootnet object:
   if (class(bootobject) != "bootnet"){
     stop("'bootobject' must be an object of class 'bootnet'")

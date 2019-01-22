@@ -7,8 +7,9 @@ Plot method for bootnetResult objects
 Plots the graph using the qgraph package and the \code{\link[qgraph]{qgraph}} function. Defined as \code{qgraph::qgraph(x[['graph']],labels=x[['labels']],...)}
 }
 \usage{
-\method{plot}{bootnetResult}(x, graph, weighted, signed, directed, labels, 
-      layout = "spring", parallelEdge = TRUE, cut = 0, theme = "colorblind", ...)
+\method{plot}{bootnetResult}(x, graph, weighted, signed, directed, labels, layout =
+                 "spring", parallelEdge = TRUE, cut = 0, theme =
+                 "colorblind", bootIncludeOverwrite = TRUE, ...)
 }
 \arguments{
   \item{x}{
@@ -23,6 +24,9 @@ A \code{bootnetResult} object
 \item{parallelEdge}{Should edges in directed networks be plotted parallel? See  \code{\link[qgraph]{qgraph}}. Defaults to \code{TRUE} instead of \code{FALSE} (as in qgraph).}
 \item{cut}{Should scaling in width and saturation of edges be split? See  \code{\link[qgraph]{qgraph}}. Defaults to \code{0} to disable cut (qgraph chooses a cutoff with at least 20 nodes).}
 \item{theme}{Theme of the edge and node colors. See  \code{\link[qgraph]{qgraph}}. Defaults to \code{"colorblind"} rather than the default used in qgraph (\code{"classic"}).}
+\item{bootIncludeOverwrite}{
+Logical. If \code{TRUE}, several plot defaults are overwritten when the input is the result of \code{\link{bootInclude}} (e.g., edge colors are set to black and white).
+}
   \item{\dots}{
 Arguments sent to \code{\link[qgraph]{qgraph}}.
 }

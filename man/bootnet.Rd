@@ -8,16 +8,25 @@ Bootstrapped network estimation
 This function can be used to bootstrap network estimation methods so that the spread of parameter and centrality estimates can be assessed. Most important methods are \code{type = 'nonparametric'} for the non-parametric bootstrap and \code{type = 'case'} for the case-dropping bootstrap. See also Epskamp, Borsboom and Fried (2016) for more details.
 }
 \usage{
-bootnet(data, nBoots = 1000,default = c("none", "EBICglasso", "ggmModSelect", "pcor",
-  "IsingFit","IsingSampler", "huge","adalasso","mgm","relimp","cor","TMFG", 
-  "ggmModSelect", "LoGo"), type = c("nonparametric","parametric","node","person",
-  "jackknife","case"), nCores = 1, statistics = c("edge","strength","closeness",
-  "betweenness","outStrength","inStrength"), model = c("detect","GGM","Ising",
-  "graphicalVAR"), fun, prepFun,prepArgs, estFun, estArgs, graphFun, graphArgs, 
-  intFun, intArgs, verbose = TRUE, construct = c("default","function","arguments"),
-  labels, alpha = 1, caseMin = 0.05, caseMax = 0.75, caseN = 10, subNodes, subCases,
-  computeCentrality = TRUE, propBoot = 1, replacement = TRUE, graph, sampleSize, 
-  intercepts, weighted, signed, directed, ...)
+bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
+                 "ggmModSelect", "pcor", "IsingFit", "IsingSampler",
+                 "huge", "adalasso", "mgm", "relimp", "cor", "TMFG",
+                 "ggmModSelect", "LoGo", "SVAR_lavaan"), type =
+                 c("nonparametric", "parametric", "node", "person",
+                 "jackknife", "case"), nCores = 1, statistics =
+                 c("edge", "strength", "closeness", "betweenness",
+                 "outStrength", "inStrength"), model = c("detect",
+                 "GGM", "Ising", "graphicalVAR"), fun, prepFun,
+                 prepArgs, estFun, estArgs, graphFun, graphArgs,
+                 intFun, intArgs, verbose = TRUE, construct =
+                 c("default", "function", "arguments"), labels, alpha =
+                 1, caseMin = 0.05, caseMax = 0.75, caseN = 10,
+                 subNodes, subCases, computeCentrality = TRUE, propBoot
+                 = 1, replacement = TRUE, graph, sampleSize,
+                 intercepts, weighted, signed, directed,
+                 includeDiagonal = FALSE, communities = NULL,
+                 useCommunities = "all", library = .libPaths(),
+                 memorysaver = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -103,9 +112,21 @@ A character vector containing the node labels. If omitted the column names of th
 \item{weighted}{Logical, should the analyzed network be weighted?}
 \item{signed}{Logical, should the analyzed network be signed?}
 \item{directed}{Logical, is the analyzed network directed? Usually does not have to be set and is detected automatically.}
-  \item{\dots}{
+\item{includeDiagonal}{Logical, should diagonal elements (self-loops) be included in the bootstrap? Only used when \code{directed = TRUE}.}
+\item{communities}{
+Used for bridge centrality measures (see \code{\link[networktools]{bridge}}).
+}
+\item{useCommunities}{
+Used for bridge centrality measures (see \code{\link[networktools]{bridge}}).
+}
+\item{library}{
+Library location to be used in parallel computing.
+}
+\item{memorysaver}{
+Logical. If TRUE (recommended) then raw bootstrapped data and results are not stored in the output object. This saves a lot of memory. Set this only to TRUE if you need the raw results or bootstrap data.}
+\item{\dots}{
   Additional arguments used in the estimator function.
-  }
+}
 }
 
 \value{
