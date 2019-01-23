@@ -1,18 +1,23 @@
 cor0 <- function(x,y,...){
-  if (sum(!is.na(x)) < 2 || sum(!is.na(y)) < 2 || sd(x,na.rm=TRUE)==0 | sd(y,na.rm=TRUE) == 0){
-    return(0)
+  if (any(!is.finite(na.omit(x))) || any(!is.finite(na.omit(y))) || sum(!is.na(x)) < 2 || sum(!is.na(y)) < 2 || sd(x,na.rm=TRUE)==0 | sd(y,na.rm=TRUE) == 0){
+    return(NA)
   } else {
     return(cor(x,y,...))
   }
 }
 
 # Smetric
-corStability <- function(x,cor=0.7, statistics = c("strength","closeness","betweenness"),
+corStability <- function(x,cor=0.7, statistics = "all",
                          verbose = TRUE){
 
+  # If statistics is missing, return all estimated statistics:
   if (!x$type %in% c("node","person")){
-    stop("S-metric only available for person or node drop bootstrap")
+    stop("CS-coefficient only available for person or node drop bootstrap")
   }
+  if (any(statistics=="all")){
+    statistics <- sort(unique(x$bootTable$type))
+  }
+  statistics <- statistics[statistics%in%unique(x$bootTable$type)]
   
   if (x$type == "node"){
     x$bootTable$prop <- 1 - (x$bootTable$nNode / x$sample$nNodes)
@@ -71,24 +76,40 @@ corStability <- function(x,cor=0.7, statistics = c("strength","closeness","betwe
     
     
     for (i in seq_along(Smetric)){
-      if (any(samplingLevels < Smetric[i])){
-        lower <- max(which(samplingLevels < Smetric[i]))
-      } else {
-        lower <- 1
-      }
-      
-      if (any(samplingLevels > Smetric[i])){
-        upper <- min(which(samplingLevels > Smetric[i]))
-      } else {
-        upper <- length(samplingLevels)
-      }
-        
-      
-      cat(paste0(names(Smetric)[i],": ",round(Smetric[i],3),
-          "\n  - For more accuracy, run bootnet(..., caseMin = ",round(samplingLevels,3)[lower],", caseMax = ",round(samplingLevels,3)[upper],")"),
+      if (is.na(Smetric[i])){
+        cat(paste0(names(Smetric)[i],": Could not be computed (likely due to non-finite values)"),
           "\n\n"
-      )
-      
+        )
+      } else {
+        
+        if (any(samplingLevels < Smetric[i])){
+          lower <- max(which(samplingLevels < Smetric[i]))
+        } else {
+          lower <- 1
+        }
+        
+        if (any(samplingLevels > Smetric[i])){
+          upper <- min(which(samplingLevels > Smetric[i]))
+        } else {
+          upper <- length(samplingLevels)
+        }
+        
+        # Note for lower or upper bound:
+        if (Smetric[i] == samplingLevels[2]){
+          note <- "(CS-coefficient is lowest level tested)"
+        } else if (Smetric[i] == samplingLevels[length(samplingLevels)-1]){
+          note <- "(CS-coefficient is highest level tested)"
+        } else {
+          note <- ""
+        }
+        
+        
+        cat(paste0(names(Smetric)[i],": ",round(Smetric[i],3)," ",note,
+                   "\n  - For more accuracy, run bootnet(..., caseMin = ",round(samplingLevels,3)[lower],", caseMax = ",round(samplingLevels,3)[upper],")"),
+            "\n\n"
+        )
+      }
+
     }
     cat("Accuracy can also be increased by increasing both 'nBoots' and 'caseN'.")
     

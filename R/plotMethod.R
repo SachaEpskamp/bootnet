@@ -66,10 +66,17 @@ plot.bootnet <- function(
     if (! x$type %in% c("person","node")){
       statistics <- "edge"
     } else {
-      statistics <- c("strength","outStrength","inStrength","closeness","betweenness") 
+      statistics <-  c("strength","outStrength","inStrength") #c("strength","outStrength","inStrength","closeness","betweenness") 
     }
     statistics <- statistics[statistics %in% x$sampleTable$type]
-    
+  }
+  if (any(statistics == "all")){
+    if (! x$type %in% c("person","node")){
+      statistics <- sort(unique(x$bootTable$type[x$bootTable$node2 != ""]))
+    } else {
+      statistics <-  sort(unique(x$bootTable$type[x$bootTable$node2 == ""]))
+    }
+    statistics <- statistics[statistics %in% x$sampleTable$type]
   }
   
   # Change first letter of statistics to lowercase:

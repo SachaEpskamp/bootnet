@@ -14,10 +14,9 @@ bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
                  "ggmModSelect", "LoGo", "SVAR_lavaan"), type =
                  c("nonparametric", "parametric", "node", "person",
                  "jackknife", "case"), nCores = 1, statistics =
-                 c("edge", "strength", "closeness", "betweenness",
-                 "outStrength", "inStrength"), model = c("detect",
-                 "GGM", "Ising", "graphicalVAR"), fun, prepFun,
-                 prepArgs, estFun, estArgs, graphFun, graphArgs,
+                 c("edge", "strength", "outStrength", "inStrength"), 
+                 model = c("detect", "GGM", "Ising", "graphicalVAR"), 
+                 fun, prepFun, prepArgs, estFun, estArgs, graphFun, graphArgs,
                  intFun, intArgs, verbose = TRUE, construct =
                  c("default", "function", "arguments"), labels, alpha =
                  1, caseMin = 0.05, caseMax = 0.75, caseN = 10,
@@ -46,7 +45,22 @@ A string indicating the method to use. See documentation at \code{\link[bootnet]
 Number of cores to use in computing results. Set to 1 to not use parallel computing.
 }
 \item{statistics}{
-Vector indicating which statistics to store. Can contain \code{"edge"}, \code{"strength"}, \code{"closeness"}, \code{"betweenness"}, \code{"length"}, \code{"distance"}, \code{"expectedInfluence"}, \code{"inExpectedInfluence"}, or \code{"outExpectedInfluence"}. By default, length and distance are not stored.
+Vector indicating which statistics to store. Options are:
+\describe{
+\item{\code{"edge"}}{Edge-weight}
+\item{\code{"strength"}}{Degree or node-strength}
+\item{\code{"outStrength"}}{Out-degree or Out-strength}
+\item{\code{"inStrength"}}{In-degree or In-strength}
+\item{\code{"expectedInfluence"}}{Expected Influence}
+\item{\code{"outExpectedInfluence"}}{Outgoing expected influence}
+\item{\code{"inExpectedInfluence"}}{Incoming expected influence}
+\item{\code{"bridgeStrength"}}{Bridge-strength (see \code{\link[networktools]{bridge}})}
+\item{\code{"bridgeCloseness"}}{Bridge-closeness (see \code{\link[networktools]{bridge}})}
+\item{\code{"bridgeBetweenness"}}{Bridge-betweenness (see \code{\link[networktools]{bridge}})}
+\item{\code{"rspbc"}}{Randomized shortest paths betweenness centrality (see \code{\link[NetworkToolbox]{rspbc}})}
+\item{\code{"hybrid"}}{Hybrid centrality (see \code{\link[NetworkToolbox]{hybrid}})}
+}
+Can contain \code{"edge"}, \code{"strength"}, \code{"closeness"}, \code{"betweenness"}, \code{"length"}, \code{"distance"}, \code{"expectedInfluence"}, \code{"inExpectedInfluence"}, \code{"outExpectedInfluence"}. By default, length and distance are not stored.
 }
 \item{model}{
  The modeling framework to use. Automatically detects if data is binary or not.

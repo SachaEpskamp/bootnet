@@ -28,7 +28,7 @@ This function can be used to plot bootnet results by plotting all bootstrapped s
 A \code{bootnet} object
 }
 \item{statistics}{
-The types of statistics to plot. \code{c("intercept", "strength", "closeness", "betweenness") } plots all nodewise statistics whereas \code{c("edge","distance")} plots all pairwise statistics. Defaults to \code{"edge"} for regular bootstrap and \code{c("strength", "closeness", "betweenness")} for node and person drop bootstrap.}
+The types of statistics to plot.Defaults to \code{"edge"} for regular bootstrap and \code{c("strength", "outStrength", "inStrength")} for node and person drop bootstrap. Use \code{"all"} to obtain all pairwise statistics tested for regular bootstraps and all nodewise statistics tested for person and node drop bootstarps.}
 \item{plot}{
 Character string indicating what to plot. Can be \code{"area"} to produce a graph with the area indicating the confidence region, or \code{"difference"} producing a plot showing significant differences. Other options are \code{"line"} and \code{"interval"}, which are currently unstable and not recommended to use.
 }

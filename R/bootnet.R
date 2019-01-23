@@ -27,7 +27,7 @@ bootnet <- function(
   default = c("none", "EBICglasso", "ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp","cor","TMFG", "ggmModSelect", "LoGo","SVAR_lavaan"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
   type = c("nonparametric","parametric","node","person","jackknife","case"), # Bootstrap method to use
   nCores = 1,
-  statistics = c("edge","strength","closeness","betweenness","outStrength","inStrength"),
+  statistics = c("edge","strength","outStrength","inStrength"),
   model = c("detect","GGM","Ising","graphicalVAR"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   fun,
   prepFun, # Fun to produce the correlation or covariance matrix
@@ -81,6 +81,8 @@ bootnet <- function(
                     "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid",
                     "bridgeStrength", "bridgeCloseness", "bridgeBetweenness",
                     "bridgeExpectedInfluence")
+  } else {
+    message(paste("Note: bootnet will store only the following statistics: ",paste0(statistics, collapse=", ")))
   }
   
   

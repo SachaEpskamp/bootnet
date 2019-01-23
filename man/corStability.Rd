@@ -20,7 +20,7 @@ Output of \code{\link{bootnet}}. Must be case-drop bootstrap.
 The correlation level tot est at.
 }
   \item{statistics}{
-The statistic(s) to test for.
+The statistic(s) to test for. Can also be \code{"all"}.
 }
 \item{verbose}{Logical, should information on the progress be printed to the console?}
 }

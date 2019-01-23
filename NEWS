@@ -10,6 +10,9 @@ Changes in Version 1.1.1
   - Added bootThreshold function to threshold a network based on bootstraps (e.g., bootstrapped interval includes 0)
   - Added bootInclude function to obtain a network of bootstrap inclusion probabilities
   - Bootnet now copies the library used by the user to the clusters when using nCores > 1. This is important for checkpoint and packrat compatability
+  - corStability will now use all tested statistics by default
+  - corStability now returns NA for incomputable correlations (e.g., due to infinite values)
+  - the 'statistics' argument in bootnet now defaults to c("edge","strength","outStrength","inStrength"). This means that closeness and betweenness are no longer stored by default!
 
 Changes in Version 1.1
   - New supported default sets:
