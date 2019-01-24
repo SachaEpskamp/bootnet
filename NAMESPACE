@@ -64,11 +64,14 @@ export(ggmGenerator)
 export(IsingGenerator)
 
 # Imports:
-import(dplyr)
+#import(dplyr)
 import(parallel)
 importFrom(IsingFit,"IsingFit")
 import(qgraph)
 import(ggplot2)
+importFrom("dplyr","anti_join","arrange","arrange_","bind_rows","filter","filter_","funs","group_by",
+           "group_by_","id","left_join","mutate","mutate_","rename","select","select_","summarize","summarize_",
+           "tally","ungroup")
 importFrom("igraph", "get.adjacency","watts.strogatz.game")
 import(tidyr)
 importFrom(gtools, "mixedorder")

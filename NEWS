@@ -1,18 +1,22 @@
-Changes in Version 1.1.1
-  - The corStability function now accepts statistics written with an upper case first letter
-  - Fixed a bug using default = "mgm" with only one binary variable
-  - IsingFit and IsingSampler defaults now transform -1, 1 data to 0, 1 when computing network, then back when returning results
-  - Added support for statistics "bridgeStrength", "bridgeCloseness", "bridgeBetweenness", and "bridgeExpectedInfluence". Thanks to Payton Jones!
-  - The statistics argument in bootnet can now be "all"
-  - Included the 'includeDiagonal' argument to bootnet to include storing diagonal entries (self-loops) for directed networks only
-  - Added default set "piecewiseIsing" for estimating Ising models while selecting participants on a sum-score (very experimental)
-  - Added default set "SVAR_lavaan" for step-up structural VAR model selection using Lavaan (experimental)
-  - Added bootThreshold function to threshold a network based on bootstraps (e.g., bootstrapped interval includes 0)
-  - Added bootInclude function to obtain a network of bootstrap inclusion probabilities
-  - Bootnet now copies the library used by the user to the clusters when using nCores > 1. This is important for checkpoint and packrat compatability
-  - corStability will now use all tested statistics by default
-  - corStability now returns NA for incomputable correlations (e.g., due to infinite values)
-  - the 'statistics' argument in bootnet now defaults to c("edge","strength","outStrength","inStrength"). This means that closeness and betweenness are no longer stored by default!
+Changes in Version 1.2
+  o New features:
+      - Added support for statistics "bridgeStrength", "bridgeCloseness", "bridgeBetweenness", and "bridgeExpectedInfluence". Thanks to Payton Jones!
+      - The statistics argument in bootnet can now be "all"
+      - Added bootThreshold function to threshold a network based on bootstraps (e.g., bootstrapped interval includes 0)
+      - Added bootInclude function to obtain a network of bootstrap inclusion probabilities
+      - the 'statistics' argument in bootnet now defaults to c("edge","strength","outStrength","inStrength"). This means that closeness and betweenness are no longer stored by default!
+      - corStability will now use all tested statistics by default  
+  o Updates:
+      - The corStability function now accepts statistics written with an upper case first letter
+      - Fixed a bug using default = "mgm" with only one binary variable
+      - IsingFit and IsingSampler defaults now transform -1, 1 data to 0, 1 when computing network, then back when returning results
+      - Included the 'includeDiagonal' argument to bootnet to include storing diagonal entries (self-loops) for directed networks only
+      - Bootnet now copies the library used by the user to the clusters when using nCores > 1. This is important for checkpoint and packrat compatability
+      - corStability now returns NA for incomputable correlations (e.g., due to infinite values)
+  o Experimental:
+      - Added default set "piecewiseIsing" for estimating Ising models while selecting participants on a sum-score (very experimental)
+      - Added default set "SVAR_lavaan" for step-up structural VAR model selection using Lavaan (experimental)
+
 
 Changes in Version 1.1
   - New supported default sets:
