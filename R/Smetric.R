@@ -35,7 +35,7 @@ corStability <- function(x,cor=0.7, statistics = "all",
   
   
   max0 <- function(x){
-    if (length(x)==0)return(0) else return(max(x))
+    if (length(x)==0 || all(is.na(x)))return(0) else return(max(x,na.rm=TRUE))
   }
 
   S <- x$bootTable %>%
