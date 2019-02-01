@@ -1,3 +1,6 @@
+Changes in Version 1.2.1
+  - corStability should now return the non-finite values warning less often
+
 Changes in Version 1.2
   o New features:
       - Added support for statistics "bridgeStrength", "bridgeCloseness", "bridgeBetweenness", and "bridgeExpectedInfluence". Thanks to Payton Jones!
