@@ -338,6 +338,7 @@ bootnet_pcor <- function(
   corArgs = list(), # Extra arguments to the correlation function
   threshold = 0,
   alpha = 0.05,
+  adjacency,
   principalDirection = FALSE
 ){
   # Check arguments:
@@ -445,7 +446,20 @@ bootnet_pcor <- function(
   }
   
   # Estimate network:
-  Results <- getWmat(qgraph::qgraph(corMat,graph = "pcor",DoNotPlot = TRUE,threshold=threshold,alpha=alpha, sampleSize = sampleSize))
+  if (missing(adjacency)){
+    Results <- getWmat(qgraph::qgraph(corMat,graph = "pcor",DoNotPlot = TRUE,threshold=threshold,alpha=alpha, sampleSize = sampleSize))    
+  } else {
+    if (is.character(threshold)){
+      stop("Significance thresholding not supported with fixed structure ('adjacency' is not missing). Obtain significance via bootstraps.")
+    }
+    diag(adjacency) <- 1
+    zeroes <- which(adjacency==0,arr.ind=TRUE)
+    glas <- suppressWarnings(glasso::glasso(corMat,rho = 0, zero = zeroes)$wi)
+  
+    Results <- as.matrix(qgraph::wi2net(glas))
+    Results <- 0.5*(Results + t(Results))
+  }
+
   
   # Return:
   return(list(graph=Results,results=Results))
