@@ -1,5 +1,6 @@
 Changes in Version 1.2.2
 - Added 'adjacency' argument to pcor default set, which allows for estimating a network with a fixed structure.
+- Fixed parametric bootstrapping
 
 Changes in Version 1.2.1
   - corStability should now return the non-finite values warning less often

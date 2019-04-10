@@ -46,7 +46,7 @@ bootThreshold <- function(bootobject, alpha = 0.05,verbose=TRUE, thresholdInterc
       ) %>% 
       dplyr::mutate(sig = upper < 0 | lower > 0) %>%
       filter_(~!sig)
-    
+
     # Threshold network:
     if (nrow(bootSummary) > 0){
       for (i in 1:nrow(bootSummary)){

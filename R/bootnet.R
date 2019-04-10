@@ -110,9 +110,10 @@ bootnet <- function(
     
     N <- ncol(graph)
     Np <-  sampleSize
+    datatype <- "normal"
     
     if (missing(intercepts)){
-      intercepts <- rep(0, Np)
+      intercepts <- rep(0, N)
     }
     
     if (!missing(data)){
@@ -218,7 +219,7 @@ bootnet <- function(
   # subNodes and subCases:
   if (missing(subNodes)){
     if (datatype == "normal"){
-      subNodes <- 2:(ncol(data)-1)
+      subNodes <- 2:(N-1)
     } else if (datatype == "graphicalVAR"){
       subNodes <- 2:(length(vars)-1)
     }
@@ -226,7 +227,7 @@ bootnet <- function(
   
   if (missing(subCases)){
     if (datatype == "normal"){
-      subCases <- round((1-seq(caseMin,caseMax,length=caseN)) * nrow(data))
+      subCases <- round((1-seq(caseMin,caseMax,length=caseN)) * Np)
     } else if (datatype == "graphicalVAR"){
       subCases <- round((1-seq(caseMin,caseMax,length=caseN)) * nrow(data$data_c))
     }
