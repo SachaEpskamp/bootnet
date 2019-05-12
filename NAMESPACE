@@ -2,6 +2,7 @@ import(pbapply)
 import(lavaan)
 import(networktools)
 importFrom(NetworkToolbox,"TMFG")
+import(glasso)
 
 # Default functions:
 export(bootnet_SVAR_lavaan)

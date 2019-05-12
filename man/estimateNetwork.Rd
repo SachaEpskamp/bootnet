@@ -41,7 +41,8 @@ bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn
   
 bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
   "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
-  corArgs = list(), threshold = 0, alpha = 0.05, principalDirection = FALSE)
+  corArgs = list(), threshold = 0, alpha = 0.05, adjacency,
+  principalDirection = FALSE)
   
 bootnet_cor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
   "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
@@ -96,7 +97,7 @@ bootnet_piecewiseIsing(data, cutoff, missing = c("listwise","stop"), verbose = T
   
 bootnet_SVAR_lavaan(data, verbose = TRUE, principalDirection = FALSE, 
   missing =c("listwise","stop"), criterion = "bic", eqThreshold = 1e-4, tempWhitelist,
-  tempBlacklist, contWhitelist, contBlacklist, ...)
+  tempBlacklist, contWhitelist, contBlacklist, minimalModInd = 10, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -240,11 +241,17 @@ Used in SVAR_lavaan estimation (step up SVAR estimation). This is *experimental*
 \item{contBlacklist}{
 Used in SVAR_lavaan estimation (step up SVAR estimation). This is *experimental*! Matrix with edges to be blacklisted in the contemporaneous model. The matrix should contain two columns and a row for each edge. The elements should be characters indicating the variable names of each edge (from, to).
 }
+\item{minimalModInd}{
+Minimal modification index to consider when adding parameters in SVAR search.
+}
+\item{adjacency}{
+  An 'adjacency' matrix indicating the graph structure (zeroes indicate a missing edge).
+}
 }
 \details{
 NEW FUNCTIONALTIY:
 
-The user can manually specify an estimation method by assigning a custom function to the \code{'fun'} argument. This function must take data as input and output an estimated network. Fhe functions \code{bootnet_} correspond to the functions used when using default sets. E.g, \code{default = "pcor"} sets \code{fun = bootnet_pcor}. As such, the arguments described above can be used depending on the default set used.
+The user can manually specify an estimation method by assigning a custom function to the \code{'fun'} argument. This function must take data as input and output an estimated network. Fhe functions \code{bootnet_} correspond to the functions used when using default sets. E.g, \code{default = "pcor"} sets \code{fun = bootnet_pcor}. As the \code{...} leads to any argument to \code{estimateNetwork} to be passed to the estimator function, the arguments described above in these estimator functions can be used for the appropriate default method. For example, if \code{default = "pcor"}, the arguments of \code{fun = bootnet_pcor} can be used in \code{estimateNetwork}. IMPORTANT NOTE: DO NOT USE THE ESTIMATOR FUNCTIONS (e.g., \code{fun = bootnet_pcor}) YOURSELF, THEY ARE ONLY INCLUDED HERE TO SHOW WHICH ARGUMENTS YOU CAN USE IN  \code{estimateNetwork}.
 
 
 DEPRECATED OLD FUNCTIONALITY:
