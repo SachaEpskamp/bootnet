@@ -79,6 +79,10 @@ plot.bootnet <- function(
     statistics <- statistics[statistics %in% x$sampleTable$type]
   }
   
+  if (length(statistics) == 0){
+    stop("No statistics to be plotted; use the 'statistics' argument.")
+  }
+  
   # Change first letter of statistics to lowercase:
   substr(statistics,0,1) <- tolower(substr(statistics,0,1))
   
