@@ -36,8 +36,8 @@ Sacha Epskamp <mail@sachaepskamp.com>
 
 \examples{
 \dontrun{
-# BFI Extraversion data from psych package:
-library("psych")
+# BFI Extraversion data from psychTools package:
+library("psychTools")
 data(bfi)
 bfiSub <- bfi[,1:25]
 

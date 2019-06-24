@@ -82,7 +82,7 @@ library("bootnet")
 
 # BFI example:
 # Load data:
-library("psych")
+library("psychTools")
 data(bfi)
 bfiData <- bfi[,1:25]
 

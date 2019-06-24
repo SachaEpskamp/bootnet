@@ -161,8 +161,8 @@ Sacha Epskamp <mail@sachaepskamp.com>
 \code{\link{estimateNetwork}}, \code{\link{differenceTest}}, \code{\link{corStability}}, \code{\link{plot.bootnet}}, \code{\link{summary.bootnet}}
 }
 \examples{
-# BFI Extraversion data from psych package:
-library("psych")
+# BFI Extraversion data from psychTools package:
+library("psychTools")
 data(bfi)
 bfiSub <- bfi[,1:25]
 
