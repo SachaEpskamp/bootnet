@@ -55,7 +55,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
     } else {
       index <- matrix(TRUE,ncol(x[['graph']]),ncol(x[['graph']]))
     }
-
+    
     ind <- which(index, arr.ind=TRUE)
   }
   
@@ -139,14 +139,14 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
     
     # strength:
     if ("strength" %in% statistics & !directed){
-    tables$strength <- dplyr::tbl_df(data.frame(
-      name = name,
-      type = "strength",
-      node1 = x[['labels']],
-      node2 = '',
-      value = cent[['OutDegree']],
-      stringsAsFactors = FALSE
-    ))
+      tables$strength <- dplyr::tbl_df(data.frame(
+        name = name,
+        type = "strength",
+        node1 = x[['labels']],
+        node2 = '',
+        value = cent[['OutDegree']],
+        stringsAsFactors = FALSE
+      ))
     }
     
     if ("outStrength" %in% statistics && directed){
@@ -172,39 +172,39 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
     }
     
     # closeness:
-      if ("closeness" %in% statistics){
-    tables$closeness <- dplyr::tbl_df(data.frame(
-      name = name,
-      type = "closeness",
-      node1 = x[['labels']],
-      node2 = '',
-      value = cent[['Closeness']],
-      stringsAsFactors = FALSE
-    ))
-      }
+    if ("closeness" %in% statistics){
+      tables$closeness <- dplyr::tbl_df(data.frame(
+        name = name,
+        type = "closeness",
+        node1 = x[['labels']],
+        node2 = '',
+        value = cent[['Closeness']],
+        stringsAsFactors = FALSE
+      ))
+    }
     
     
     # betweenness:
     if ("betweenness" %in% statistics){
-    tables$betweenness <- dplyr::tbl_df(data.frame(
-      name = name,
-      type = "betweenness",
-      node1 = x[['labels']],
-      node2 = '',
-      value = cent[['Betweenness']],
-      stringsAsFactors = FALSE
-    ))
+      tables$betweenness <- dplyr::tbl_df(data.frame(
+        name = name,
+        type = "betweenness",
+        node1 = x[['labels']],
+        node2 = '',
+        value = cent[['Betweenness']],
+        stringsAsFactors = FALSE
+      ))
     }
     
     if ("distance" %in% statistics){
-    tables$sp <- dplyr::tbl_df(data.frame(
-      name = name,
-      type = "distance",
-      node1 = x[['labels']][ind[,1]],
-      node2 = x[['labels']][ind[,2]],
-      value = cent[['ShortestPathLengths']][index],
-      stringsAsFactors = FALSE
-    ))
+      tables$sp <- dplyr::tbl_df(data.frame(
+        name = name,
+        type = "distance",
+        node1 = x[['labels']][ind[,1]],
+        node2 = x[['labels']][ind[,2]],
+        value = cent[['ShortestPathLengths']][index],
+        stringsAsFactors = FALSE
+      ))
     }
     
     if ("expectedInfluence" %in% statistics && !directed){
@@ -217,31 +217,59 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
         stringsAsFactors = FALSE
       ))
     }
-
+    
     # randomized shortest paths betweenness centrality:
     if ("rspbc" %in% statistics){
-    tables$rspbc <- dplyr::tbl_df(data.frame(
-      name = name,
-      type = "rspbc",
-      node1 = x[['labels']],
-      node2 = '',
-      value = as.vector(NetworkToolbox::rspbc(abs(Wmat))),
-      stringsAsFactors = FALSE
-    ))
+      tryrspbc <- try({
+        tables$rspbc <- dplyr::tbl_df(data.frame(
+          name = name,
+          type = "rspbc",
+          node1 = x[['labels']],
+          node2 = '',
+          value = as.vector(NetworkToolbox::rspbc(abs(Wmat))),
+          stringsAsFactors = FALSE
+        ))
+      })
+      
+      if (is(tryrspbc,"try-error")){
+        tables$rspbc <- dplyr::tbl_df(data.frame(
+          name = name,
+          type = "rspbc",
+          node1 = x[['labels']],
+          node2 = '',
+          value = NA,
+          stringsAsFactors = FALSE
+        ))
+      }
     }
     
     # hybrid:
     if ("hybrid" %in% statistics){
-    tables$hybrid <- dplyr::tbl_df(data.frame(
-      name = name,
-      type = "hybrid",
-      node1 = x[['labels']],
-      node2 = '',
-      value = as.vector(NetworkToolbox::hybrid(abs(Wmat), BC = "random")),
-      stringsAsFactors = FALSE
-    ))
+      
+      tryhybrid <- try({
+        tables$hybrid <- dplyr::tbl_df(data.frame(
+          name = name,
+          type = "hybrid",
+          node1 = x[['labels']],
+          node2 = '',
+          value = as.vector(NetworkToolbox::hybrid(abs(Wmat), BC = "random")),
+          stringsAsFactors = FALSE
+        ))
+      })
+      
+      if (is(tryhybrid,"try-error")){
+        tables$rspbc <- dplyr::tbl_df(data.frame(
+          name = name,
+          type = "hybrid",
+          node1 = x[['labels']],
+          node2 = '',
+          value = NA,
+          stringsAsFactors = FALSE
+        ))
+      }
+      
     }
-
+    
     if ("outExpectedInfluence" %in% statistics && directed){
       
       tables$outExpectedInfluence <- dplyr::tbl_df(data.frame(
@@ -313,7 +341,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
         stringsAsFactors = FALSE
       ))
     }
-        
+    
   }
   #   for (i in seq_along(tables)){
   #     tables[[i]]$id <- ifelse(tables[[i]]$node2=='',paste0("N: ",tables[[i]]$node1),paste0("E: ",tables[[i]]$node1, "--", tables[[i]]$node2))
