@@ -110,6 +110,8 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
         Hybrid = rep(0,ncol(x[['graph']])),
         step1 = rep(0,ncol(x[['graph']])),
         expectedInfluence = rep(0,ncol(x[['graph']])),
+        OutExpectedInfluence = rep(0,ncol(x[['graph']])),
+        InExpectedInfluence = rep(0,ncol(x[['graph']])),
         bridgeStrength= rep(0,ncol(x[['graph']])),
         bridgeCloseness= rep(0,ncol(x[['graph']])),
         bridgeBetweenness= rep(0,ncol(x[['graph']])),
@@ -206,7 +208,6 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
     }
     
     if ("expectedInfluence" %in% statistics && !directed){
-      
       tables$expectedInfluence <- dplyr::tbl_df(data.frame(
         name = name,
         type = "expectedInfluence",

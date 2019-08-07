@@ -1,3 +1,6 @@
+Changes in Version 1.2.4
+  - Resolved a bug with expected influence crashing bootnet when empty networks were estimated
+
 Changes in Version 1.2.3
   - More informative error when statistics are not included in the plot.
   - Updated psych to psychTools
