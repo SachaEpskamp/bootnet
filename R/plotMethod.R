@@ -801,7 +801,7 @@ plot.bootnet <- function(
           theme_bw() + 
           xlab("") +
           ylab("") + 
-          scale_y_continuous(breaks = seq(1:length(levels(sumTable$id))), labels = levels(sumTable$id))+ 
+          scale_y_continuous(breaks = seq(1:length(levels(sumTable$id))), labels = levels(sumTable$id), expand = par("pin")[1]/par("pin")[2] * 0.01 * c(1,1))+ 
           scale_color_manual("",values = c(meanColor,sampleColor), labels = c("Bootstrap mean","Sample")) + 
           theme(legend.position = "top")
         # 
