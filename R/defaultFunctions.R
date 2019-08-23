@@ -89,7 +89,7 @@ bootnet_EBICglasso <- function(
   tuning = 0.5, # tuning parameter
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
+  sampleSize = c("maximum","minimum"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   refit = FALSE,
@@ -219,7 +219,7 @@ bootnet_ggmModSelect <- function(
   tuning = 0, # tuning parameter
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
+  sampleSize = c("maximum","minimum"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,
@@ -343,7 +343,7 @@ bootnet_pcor <- function(
   data, # Dataset used
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
+  sampleSize = c("maximum","minimum"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   threshold = 0,
@@ -487,7 +487,7 @@ bootnet_cor <- function(
   data, # Dataset used
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("maximum","minimim"), # Sample size when using missing = "pairwise"
+  sampleSize = c("maximum","minimum"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   threshold = 0,

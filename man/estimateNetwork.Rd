@@ -35,17 +35,17 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
                  memorysaver = FALSE)
                 
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn"), 
-  missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimim"),
+  missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimum"),
   verbose = TRUE, corArgs = list(), refit = FALSE, principalDirection = FALSE, 
   lambda.min.ratio = 0.01, nlambda = 100, threshold = FALSE, ...)
   
 bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
-  "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
+  "listwise","fiml","stop"), sampleSize = c("maximum", "minimum"), verbose = TRUE, 
   corArgs = list(), threshold = 0, alpha = 0.05, adjacency,
   principalDirection = FALSE)
   
 bootnet_cor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
-  "listwise","fiml","stop"), sampleSize = c("maximum", "minimim"), verbose = TRUE, 
+  "listwise","fiml","stop"), sampleSize = c("maximum", "minimum"), verbose = TRUE, 
   corArgs = list(), threshold = 0, alpha = 0.05, principalDirection = FALSE)
   
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = TRUE,
@@ -87,7 +87,7 @@ bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection = FA
   missing = c("listwise","stop"), ...)
   
 bootnet_ggmModSelect(data,tuning = 0, corMethod = c("cor_auto","cov","cor","npn"),
-  missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimim"), 
+  missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimum"), 
   verbose = TRUE, corArgs = list(), principalDirection = FALSE, start = c("glasso",
   "empty","full"), stepwise = TRUE, nCores = 1, ...)
   
