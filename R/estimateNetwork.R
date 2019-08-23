@@ -135,6 +135,12 @@ estimateNetwork <- function(
   if ("verbose" %in% names(formals(.input$estimator))){
     .input$arguments$verbose <- verbose
   }
+  
+  # Unlock function:
+  # Every estimator must have argument verbose:
+  if ("unlock" %in% names(formals(.input$estimator))){
+    .input$arguments$unlock <- TRUE
+  }
 
   # Compute network:
   Result <- do.call(.input$estimator, c(list(data),.input$arguments))

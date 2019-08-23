@@ -1,5 +1,6 @@
 Changes in Version 1.2.5
   - The plot method now better scales a margin on the top and bottom of the plot
+  - All default functions are now by default locked unless used from within estimateNetwork
 
 Changes in Version 1.2.4
   - Resolved a bug with expected influence crashing bootnet when empty networks were estimated

@@ -20,7 +20,7 @@
 Estimate a network structure
 }
 \description{
-This function allows for flexible estimation of a network structure using various R packages and model frameworks. This is typically done by using one of the default sets. See details for manual specification. See also Epskamp, Borsboom and Fried (2016) for more details.
+This function allows for flexible estimation of a network structure using various R packages and model frameworks. This is typically done by using one of the default sets. See details for manual specification. See also Epskamp, Borsboom and Fried (2016) for more details. IMPORTANT: THE ESTIMATOR FUNCTIONS (e.g., \code{fun = bootnet_pcor}) ARE NOT INTENDED TO BE USED MANUALY (see details).
 }
 \usage{
 estimateNetwork(data, default = c("none", "EBICglasso", "pcor",

@@ -97,8 +97,13 @@ bootnet_EBICglasso <- function(
   lambda.min.ratio = 0.01,
   nlambda = 100,
   threshold = FALSE,
+  unlock = FALSE,
   ...
 ){
+  if (!unlock){
+  stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
@@ -221,8 +226,13 @@ bootnet_ggmModSelect <- function(
   start = c("glasso","empty","full"),
   stepwise = TRUE,
   nCores = 1,
+  unlock = FALSE,
   ...
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
@@ -339,8 +349,14 @@ bootnet_pcor <- function(
   threshold = 0,
   alpha = 0.05,
   adjacency,
-  principalDirection = FALSE
+  principalDirection = FALSE,
+  unlock = FALSE
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
@@ -476,8 +492,14 @@ bootnet_cor <- function(
   corArgs = list(), # Extra arguments to the correlation function
   threshold = 0,
   alpha = 0.05,
-  principalDirection = FALSE
+  principalDirection = FALSE,
+  unlock = FALSE
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
@@ -598,8 +620,14 @@ bootnet_IsingFit <- function(
   verbose = TRUE,
   rule = c("AND","OR"),
   split = "median",
-  principalDirection = FALSE
+  principalDirection = FALSE,
+  unlock = FALSE
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Check arguments:
   missing <- match.arg(missing)
   rule <- match.arg(rule)
@@ -681,8 +709,14 @@ bootnet_IsingSampler <- function(
   verbose = TRUE,
   split = "median",
   method = c("default","ll","pl","uni","bi"),
-  principalDirection = FALSE
+  principalDirection = FALSE,
+  unlock = FALSE
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Check arguments:
   missing <- match.arg(missing)
   method <- match.arg(method)
@@ -776,8 +810,14 @@ bootnet_adalasso <- function(
   missing = c("listwise","stop"),
   verbose = TRUE,
   nFolds = 10, # Number of folds
-  principalDirection = FALSE
+  principalDirection = FALSE,
+  unlock = FALSE
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Check arguments:
   missing <- match.arg(missing)
   
@@ -837,9 +877,15 @@ bootnet_huge <- function(
   criterion = c("ebic","ric","stars"),
   principalDirection = FALSE,
   lambda.min.ratio = 0.01,
-  nlambda = 100
+  nlambda = 100,
+  unlock = FALSE
   # method = c("glasso","mb","ct")
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Check arguments:
   missing <- match.arg(missing)
   criterion <- match.arg(criterion)
@@ -911,9 +957,15 @@ bootnet_mgm <- function(
   order = 2,
   rule = c("AND","OR"),
   binarySign, # Detected by default
+  unlock = FALSE,
   ... # mgm functions
   # method = c("glasso","mb","ct")
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Check arguments:
   missing <- match.arg(missing)
   criterion <- match.arg(criterion)
@@ -1061,8 +1113,14 @@ bootnet_relimp <- function(
   missing = c("listwise","stop"),
   ..., # Arguments sent to the structure function
   verbose = TRUE,
-  threshold = 0
+  threshold = 0,
+  unlock = FALSE
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   nVar <- ncol(data)
   structureDefault <- match.arg(structureDefault)
   
@@ -1182,8 +1240,14 @@ bootnet_TMFG <- function(
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,
+  unlock = FALSE,
   ...
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
@@ -1292,8 +1356,14 @@ bootnet_LoGo <- function(
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,
+  unlock = FALSE,
   ...
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
@@ -1391,8 +1461,13 @@ bootnet_graphicalVAR <- function(
   verbose = TRUE,
   principalDirection = FALSE,
   missing =c("listwise","stop"),
+  unlock = FALSE,
   ...
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
   dots <- list(...)
   missing <- match.arg(missing)
   
@@ -1464,8 +1539,14 @@ bootnet_SVAR_lavaan <- function(
   contWhitelist,
   contBlacklist,
   minimalModInd = 10,
+  unlock = FALSE,
   ...
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Warn user:
   if (verbose){
     warning("default = 'SVAR_lavaan' is *experimental*!")
@@ -1700,8 +1781,14 @@ bootnet_piecewiseIsing <- function(
   IsingDefault = c("IsingSampler","IsingFit","custom"),
   zeroThreshold = 1, # Proportion of edges needed to be exactly 0 to set edge to zero
   minimalN = ncol(data) + 1,
+  unlock = FALSE,
   ... # Arguments sent to estimator:
 ){
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  }
+  
+  
   # Warn user:
   if (verbose){
     warning("default = 'piecewiseIsing' is *experimental*!")
