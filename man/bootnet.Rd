@@ -16,9 +16,7 @@ bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
                  "jackknife", "case"), nCores = 1, statistics =
                  c("edge", "strength", "outStrength", "inStrength"), 
                  model = c("detect", "GGM", "Ising", "graphicalVAR"), 
-                 fun, prepFun, prepArgs, estFun, estArgs, graphFun, graphArgs,
-                 intFun, intArgs, verbose = TRUE, construct =
-                 c("default", "function", "arguments"), labels, alpha =
+                 fun, verbose = TRUE, labels, alpha =
                  1, caseMin = 0.05, caseMax = 0.75, caseN = 10,
                  subNodes, subCases, computeCentrality = TRUE, propBoot
                  = 1, replacement = TRUE, graph, sampleSize,
@@ -68,30 +66,6 @@ Can contain \code{"edge"}, \code{"strength"}, \code{"closeness"}, \code{"between
 \item{fun}{
 A custom estimation function, when no default set is used. This must be a function that takes the data as input (first argument) and returns either a weights matrix or a list containing the elements \code{"graph"} for the weights matrix, \code{"intercepts"} for the intercepts (optional) and \code{"results"} for the full estimation results (optional).
 }
-  \item{prepFun}{
-See documentation at \code{\link[bootnet]{estimateNetwork}}.
-}
-  \item{prepArgs}{
-See documentation at \code{\link[bootnet]{estimateNetwork}}.
-}
-  \item{estFun}{
-See documentation at \code{\link[bootnet]{estimateNetwork}}.
-}
-  \item{estArgs}{
-See documentation at \code{\link[bootnet]{estimateNetwork}}.
-}
-  \item{graphFun}{
-See documentation at \code{\link[bootnet]{estimateNetwork}}.
-}
-  \item{graphArgs}{
-See documentation at \code{\link[bootnet]{estimateNetwork}}.
-}
-  \item{intFun}{
-See documentation at \code{\link[bootnet]{estimateNetwork}}.
-}
-  \item{intArgs}{
-See documentation at \code{\link[bootnet]{estimateNetwork}}.
-}
   \item{verbose}{
 Logical. Should progress of the function be printed to the console?
 }
@@ -122,7 +96,6 @@ A character vector containing the node labels. If omitted the column names of th
   \item{graph}{A given network structure to use in parametric bootstrap.}
   \item{sampleSize}{The samplesize to use in parametric bootstrap.}
   \item{intercepts}{Intercepts to use in parametric bootstrap.}
-  \item{construct}{How to construct the estimator? Set to \code{"arguments"} to use old functionality (not recommended).}
 \item{weighted}{Logical, should the analyzed network be weighted?}
 \item{signed}{Logical, should the analyzed network be signed?}
 \item{directed}{Logical, is the analyzed network directed? Usually does not have to be set and is detected automatically.}

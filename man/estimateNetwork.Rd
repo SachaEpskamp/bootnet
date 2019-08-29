@@ -27,9 +27,7 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
                  "IsingFit", "IsingSampler", "huge", "adalasso", "mgm",
                  "relimp", "cor", "TMFG", "ggmModSelect", "LoGo",
                  "graphicalVAR", "piecewiseIsing", "SVAR_lavaan"), fun,
-                 prepFun, prepArgs, estFun, estArgs, graphFun,
-                 graphArgs, intFun, intArgs, labels, verbose = TRUE,
-                 construct = c("default", "function", "arguments"),
+                labels, verbose = TRUE,
                  .dots = list(), weighted = TRUE, signed = TRUE,
                  directed, datatype, checkNumeric = FALSE, ..., .input,
                  memorysaver = FALSE)
@@ -109,10 +107,10 @@ A string indicating the method to use. Specifying a \code{default} sets default 
 \describe{
 \item{\code{"EBICglasso"}}{Gaussian Markov random field estimation using graphical LASSO and extended Bayesian information criterion to select optimal regularization parameter. Using \code{\link[qgraph]{EBICglasso}} from the qgraph package. Calls \code{bootnet_EBICglasso}.}
 \item{\code{"IsingFit"}}{Ising model estimation using LASSO regularized nodewise logistic regression and extended Bayesian information criterion to select optimal regularization parameter. Using \code{\link[IsingFit]{IsingFit}} from the IsingFit package.  Calls \code{bootnet_IsingFit}.}
-\item{\code{"IsingSampler""}}{Calls the \code{\link[IsingSampler]{EstimateIsing}} function from the IsingSampler package. }
+\item{\code{"IsingSampler"}}{Calls the \code{\link[IsingSampler]{EstimateIsing}} function from the IsingSampler package. }
 \item{\code{"pcor"}}{Partial correlation network (non-regularized Gaussian Markov random field), using \code{\link[corpcor]{cor2pcor}} from the corpcor package.  Calls \code{bootnet_pcor}.}
 \item{\code{"cor"}}{Correlation network.}
-\item{\code{"adalasso""}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
+\item{\code{"adalasso"}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
 \item{\code{"huge"}}{Uses EBIC model selection of GGM networks estimated via the glasso algorithm as implemented in the huge package (as opposed to glasso and qgraph packages used in \code{default = "EBICglasso"}). Uses nonparanormal transformation in preparing the data and does not use polychoric correlations. Calls \code{bootnet_huge}.}
 \item{\code{"mgm"}}{Estimates a Mixed graphical model by using the the mgm (or mgmfit in older versions) function of the mgm package. Calls \code{bootnet_mgm}.}
 \item{\code{"TMFG"}}{Estimates a Triangulated Maximally Filtered Graph, using the function \code{TMFG} of the NetworkToolbox package.  Calls \code{bootnet_TMFG}. Note that this estimates a *correlation network* by default (use the 'graphType' argument to estimate a partial correlation network instead).}
@@ -154,30 +152,6 @@ Rescales variables according to the sign of the first eigen-vector. This will le
 }
 \item{stepwise}{Logical indicating if 'ggmModSelect' should use stepwise estimation.}
 \item{start}{See \code{\link[qgraph]{ggmModSelect}}}
-  \item{prepFun}{
-A function that takes as input the raw data and returns whatever the estimation function needs (as first argument). Typically this function is used to correlate or binarize the data. Defaults to \code{\link{identity}} if omitted and \code{default} is not set. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
-}
-  \item{prepArgs}{
-A list with arguments for \code{prepFun}. Defaults to \code{list()} if omitted and \code{default} is not set. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
-}
-  \item{estFun}{
-A function that takes as input the prepared raw data and estimates a network. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
-}
-  \item{estArgs}{
-A list with arguments for \code{estArgs}.  ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
-}
-  \item{graphFun}{
-A function that takes the result of \code{estFun} and extracts the estimated weights matrix. Defaults to \code{\link{identity}} if omitted and \code{default} is not set. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
-}
-  \item{graphArgs}{
-A list with arguments for \code{graphFun}. Defaults to \code{list()} if omitted and \code{default} is not set. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
-}
-  \item{intFun}{
-A function that takes the result of \code{estFun} and extracts the estimated intercepts. Defaults to \code{\link{null}} if omitted and \code{default} is not set. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
-}
-  \item{intArgs}{
-A list with arguments for \code{intFun}. Defaults to \code{list()} if omitted and \code{default} is not set. ARGUMENT IS DEPRECATED AND WILL BE REMOVED.
-}
   \item{labels}{
 A character vector containing the node labels. If omitted the column names of the data are used.
 }
@@ -188,9 +162,6 @@ Logical, currently only used when \code{default = "EBICglasso"} in the \code{cor
 \item{weighted}{Logical, should the analyzed network be weighted?}
 \item{signed}{Logical, should the analyzed network be signed?}
 \item{directed}{Logical, is the analyzed network directed? Usually does not have to be set and is detected automatically.}
-\item{construct}{
-Should the estimator function be constructed using new bootnet functionality (\code{function}) or old bootnet functionality (\code{arguments})? Will default to \code{function} unless arguments such as \code{estFun} are used.
-}
 \item{datatype}{
 \code{"normal"} if the data argument is a data frame, or \code{"graphicalVAR"} if the data argument is a data list that can be used as input to the graphicalVAR package.}
 \item{checkNumeric}{
@@ -249,106 +220,10 @@ Minimal modification index to consider when adding parameters in SVAR search.
 }
 }
 \details{
-NEW FUNCTIONALTIY:
 
 The user can manually specify an estimation method by assigning a custom function to the \code{'fun'} argument. This function must take data as input and output an estimated network. Fhe functions \code{bootnet_} correspond to the functions used when using default sets. E.g, \code{default = "pcor"} sets \code{fun = bootnet_pcor}. As the \code{...} leads to any argument to \code{estimateNetwork} to be passed to the estimator function, the arguments described above in these estimator functions can be used for the appropriate default method. For example, if \code{default = "pcor"}, the arguments of \code{fun = bootnet_pcor} can be used in \code{estimateNetwork}. IMPORTANT NOTE: DO NOT USE THE ESTIMATOR FUNCTIONS (e.g., \code{fun = bootnet_pcor}) YOURSELF, THEY ARE ONLY INCLUDED HERE TO SHOW WHICH ARGUMENTS YOU CAN USE IN  \code{estimateNetwork}.
 
 
-DEPRECATED OLD FUNCTIONALITY:
-
-The user can manually set the estimation method of the PMRF in bootnet using a set of arguments to the bootnet function. First, the method of preprocessing the data must be defined via the \code{prepFun} argument, which must be assigned a function that takes a dataset as input and returns the viable input for the network estimator. The argument \code{prepArgs} can be specified a list of arguments to the \code{prepFun} function. Data preprocessing typically means correlating the data for the GGM or binarizing it for the Ising model (to this end bootnet provides a \code{binarize} function). Next, we estimate the network. To do so, we assign the \code{estFun} argument, a function that takes whatever the output of \code{prepFun} was and estimates a network. The \code{estArgs} argument can be used to assign a list of additional arguments to the function used in \code{estFun}. Finally, we need to extract the weights matrix and intercepts. Assigning functions to the \code{graphFun} and \code{intFun} arguments respectively can do this. An example of how these commands work together to estimate a network using \code{default = "EBICglasso"} is shown below:
-	
-\code{estimateNetwork(Data, 
-	prepFun = cor_auto, 
-	prepArgs =  list(verbose = FALSE), 
-	estFun = qgraph::EBICglasso, 
-	estArgs = list(n = nrow(bfi)), 
-	graphFun = identity, 
-	intFun= null)}
-	
-	The following defaults can be used:
-\describe{
-\item{\code{default = "EBICglasso"}}{
-\describe{
-\item{prepFun}{\code{\link[qgraph]{cor_auto}} from the qgraph package}
-\item{prepArgs}{\code{list(verbose=TRUE)} for estimating a network and \code{list(verbose=FALSE)} for bootstrap samples.}
-\item{estFun}{\code{\link[qgraph]{EBICglasso}} from the qgraph package}
-\item{estArgs}{\code{list(n = nrow(data), returnAllResults = TRUE)}}
-\item{graphFun}{\code{function(x)x[['optnet']]}}
-\item{graphArgs}{\code{list()}}
-\item{intFun}{\code{\link[bootnet]{null}}}
-\item{intArgs}{\code{list()}}
-}
-}
-\item{\code{default = "IsingFit"}}{
-\describe{
-\item{prepFun}{\code{\link[bootnet]{binarize}}}
-\item{prepArgs}{\code{list()}}
-\item{estFun}{\code{\link[IsingFit]{IsingFit}} from the IsingFit package}
-\item{estArgs}{\code{list(plot = FALSE, progress = FALSE)}}
-\item{graphFun}{\code{function(x)x[['weiadj']]}}
-\item{graphArgs}{\code{list()}}
-\item{intFun}{\code{function(x)x[['thresholds']]}}
-\item{intArgs}{\code{list()}}
-}
-}
-
-\item{\code{default = "pcor"}}{
-\describe{
-\item{prepFun}{\code{\link[qgraph]{cor_auto}} from the qgraph package}
-\item{prepArgs}{\code{list()}}
-\item{estFun}{\code{\link[corpcor]{cor2pcor}} from the corpcor package}
-\item{estArgs}{\code{list()}}
-\item{graphFun}{\code{\link{identity}}}
-\item{graphArgs}{\code{list()}}
-\item{intFun}{null}
-\item{intArgs}{\code{list()}}
-}
-}
-
-\item{\code{default = "adalasso"}}{
-\describe{
-\item{prepFun}{\code{identity}}
-\item{prepArgs}{\code{list()}}
-\item{estFun}{\code{\link[parcor]{adalasso.net}} from the parcor package}
-\item{estArgs}{\code{list()}}
-\item{graphFun}{\code{function(x)as.matrix(Matrix::forceSymmetric(x$pcor.adalasso)}}
-\item{graphArgs}{\code{list()}}
-\item{intFun}{null}
-\item{intArgs}{\code{list()}}
-}
-}
-
-\item{\code{default = "huge"}}{
-\describe{
-\item{prepFun}{\code{function(x)huge.npn(na.omit(as.matrix(x)),verbose = FALSE)}, using \code{\link[huge]{huge.npn}} from the huge package}
-\item{prepArgs}{\code{list()}}
-\item{estFun}{\code{function(x)huge::huge.select(huge::huge(x,method = "glasso",verbose=FALSE), criterion = "ebic",verbose = FALSE)}, using the huge package}
-\item{estArgs}{\code{list()}}
-\item{graphFun}{\code{as.matrix(qgraph::wi2net(as.matrix(x$opt.icov)))}, using the huge package}
-\item{graphArgs}{\code{list()}}
-\item{intFun}{null}
-\item{intArgs}{\code{list()}}
-}
-}
-
-}
-}
-\value{
-A \code{bootnetResult} object with the following elements:
-\item{graph}{The weights matrix of the network}
-\item{intercepts}{The intercepts}
-\item{results}{The results of the estimation procedure}
-\item{labels}{A vector with node labels}
-\item{nNodes}{Number of nodes in the network}
-\item{nPerson}{Number of persons in the network}
-\item{input}{Input used, including the result of the default set used}
-
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 }
 \references{
 Epskamp, S., Borsboom, D., & Fried, E. I. (2016). Estimating psychological networks and their accuracy: a tutorial paper. arXiv preprint, arXiv:1604.08462.

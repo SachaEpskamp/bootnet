@@ -103,7 +103,7 @@ bootnet_EBICglasso <- function(
   if (!unlock){
   stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
-  
+
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)

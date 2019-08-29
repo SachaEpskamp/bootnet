@@ -4,17 +4,17 @@ estimateNetwork <- function(
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", "cor","TMFG",
               "ggmModSelect", "LoGo","graphicalVAR", "piecewiseIsing","SVAR_lavaan"),
   fun, # A function that takes data and returns a network or list entitled "graph" and "thresholds". optional.
-  prepFun, # Fun to produce the correlation or covariance matrix
-  prepArgs, # list with arguments for the correlation function
-  estFun, # function that results in a network
-  estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-  graphFun, # set to identity if missing
-  graphArgs, # Set to null if missing
-  intFun, # Set to null if missing
-  intArgs, # Set to null if missing
+  # prepFun, # Fun to produce the correlation or covariance matrix
+  # prepArgs, # list with arguments for the correlation function
+  # estFun, # function that results in a network
+  # estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+  # graphFun, # set to identity if missing
+  # graphArgs, # Set to null if missing
+  # intFun, # Set to null if missing
+  # intArgs, # Set to null if missing
   labels, # if missing taken from colnames
   verbose = TRUE, # Dummy used in cor_auto and in the future in other functions. Set to FALSE in bootnet
-  construct = c("default","function","arguments"),
+  # construct = c("default","function","arguments"),
   .dots = list(),
   weighted = TRUE,
   signed = TRUE,
@@ -26,6 +26,7 @@ estimateNetwork <- function(
   .input, # Skips most of first steps if supplied
   memorysaver = FALSE # If set to FALSE data, estimator and results are not stored.
 ){
+  construct <- "function"
   # Borsboom easter egg:
   if (default[1] == "Borsboom") return(42)
   
@@ -101,10 +102,7 @@ estimateNetwork <- function(
    }
   }
 
-  
-  
  
-  
   
   
   
@@ -113,16 +111,16 @@ estimateNetwork <- function(
     .input <- checkInput(
       default = default,
       fun = fun,
-      prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-      prepArgs = prepArgs, # list with arguments for the correlation function
-      estFun=estFun, # function that results in a network
-      estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-      graphFun=graphFun, # set to identity if missing
-      graphArgs=graphArgs, # Set to null if missing
-      intFun=intFun, # Set to null if missing
-      intArgs=intArgs, # Set to null if missing
-      sampleSize = Np,
-      construct=construct,
+      # prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+      # prepArgs = prepArgs, # list with arguments for the correlation function
+      # estFun=estFun, # function that results in a network
+      # estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+      # graphFun=graphFun, # set to identity if missing
+      # graphArgs=graphArgs, # Set to null if missing
+      # intFun=intFun, # Set to null if missing
+      # intArgs=intArgs, # Set to null if missing
+      # sampleSize = Np,
+      # construct=construct,
       verbose=verbose,
       .dots=.dots,
       ...

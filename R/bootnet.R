@@ -30,16 +30,16 @@ bootnet <- function(
   statistics = c("edge","strength","outStrength","inStrength"),
   model = c("detect","GGM","Ising","graphicalVAR"), # Models to use for bootstrap method = parametric. Detect will use the default set and estimation function.
   fun,
-  prepFun, # Fun to produce the correlation or covariance matrix
-  prepArgs, # list with arguments for the correlation function
-  estFun, # function that results in a network
-  estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-  graphFun, # set to identity if missing
-  graphArgs, # Set to null if missing
-  intFun, # Set to null if missing
-  intArgs, # Set to null if missing
+  # prepFun, # Fun to produce the correlation or covariance matrix
+  # prepArgs, # list with arguments for the correlation function
+  # estFun, # function that results in a network
+  # estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+  # graphFun, # set to identity if missing
+  # graphArgs, # Set to null if missing
+  # intFun, # Set to null if missing
+  # intArgs, # Set to null if missing
   verbose = TRUE, # messages on what is being done?
-  construct = c("default","function","arguments"),
+  # construct = c("default","function","arguments"),
   labels, # if missing taken from colnames
   alpha = 1, # centrality alpha
   caseMin = 0.05, # minimum proportion to DROP
@@ -67,6 +67,7 @@ bootnet <- function(
   # edgeResample = FALSE # If true, only resample edges from original estimate
   # scaleAdjust = FALSE
 ){
+  construct <- "function"
   if (default[[1]]=="glasso") default <- "EBICglasso"
   default <- match.arg(default)
   
@@ -237,16 +238,16 @@ bootnet <- function(
   inputCheck <- checkInput(
     default = default,
     fun = fun,
-    prepFun = prepFun, # Fun to produce the correlation or covariance matrix
-    prepArgs = prepArgs, # list with arguments for the correlation function
-    estFun=estFun, # function that results in a network
-    estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
-    graphFun=graphFun, # set to identity if missing
-    graphArgs=graphArgs, # Set to null if missing
-    intFun=intFun, # Set to null if missing
-    intArgs=intArgs, # Set to null if missing
-    sampleSize = Np,
-    construct = construct,
+    # prepFun = prepFun, # Fun to produce the correlation or covariance matrix
+    # prepArgs = prepArgs, # list with arguments for the correlation function
+    # estFun=estFun, # function that results in a network
+    # estArgs=estArgs, # arguments sent to the graph estimation function (if missing automatically sample size is included)
+    # graphFun=graphFun, # set to identity if missing
+    # graphArgs=graphArgs, # Set to null if missing
+    # intFun=intFun, # Set to null if missing
+    # intArgs=intArgs, # Set to null if missing
+    # sampleSize = Np,
+    # construct = construct,
     .dots = dots
   )
   
@@ -464,13 +465,13 @@ bootnet <- function(
         }
         
         # Some checks to remove progress bars:
-        if (!missing(prepFun)){
-          # EBICglasso:
-          if (!missing(prepArgs) & is.list(prepArgs) & identical(prepFun,qgraph::cor_auto)){
-            prepArgs$verbose <- FALSE
-          }
-        }
-        
+        # if (!missing(prepFun)){
+        #   # EBICglasso:
+        #   if (!missing(prepArgs) & is.list(prepArgs) & identical(prepFun,qgraph::cor_auto)){
+        #     prepArgs$verbose <- FALSE
+        #   }
+        # }
+        # 
         res <- suppressWarnings(try({
           # estimateNetwork(bootData, 
           #                 default = default,
