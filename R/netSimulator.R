@@ -4,11 +4,14 @@
 # Generator functions:
 ggmGenerator <- function(
   ordinal = FALSE,
-  nLevels = 4
+  nLevels = 4,
+  skewFactor = 1,
+  type = c("uniform", "random"),
+  missing = 0
 ){
   ORDINALDUMMY <- NULL
   # Generate a function with nCase as first and input as second argument
-  
+  type <- match.arg(type)
   # Wrapper:
   Estimator <- function(n, input){
     if (is.list(input)){
@@ -50,6 +53,13 @@ ggmGenerator <- function(
     
     ORDINALDUMMY
     
+    # Add missing:
+    if (missing > 0){
+      for (i in 1:ncol(Data)){
+        Data[runif(nrow(Data)) < missing,i] <- NA
+      }
+    }
+    
     return(Data)
   }
   
@@ -65,7 +75,18 @@ ggmGenerator <- function(
          if (is.list(input) && !is.null(input$thresholds)) {
         Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,input$thresholds[[i]],Inf))))
     } else {
-        Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,rnorm(%f-1),Inf))))
+
+# Generate thresholds:
+nLevels <- %f
+            if (type == "random"){
+              thresholds <- sort(rnorm(nLevels-1))
+            } else {
+              thresholds <- qnorm(seq(0,1,length=nLevels + 1)[-c(1,nLevels+1)]^(1/skewFactor))
+            }
+
+          Data[,i] <- as.numeric(cut(Data[,i],sort(c(-Inf,thresholds,Inf))))
+
+        
     }  
   
     }',nLevels)
