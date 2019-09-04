@@ -3,6 +3,7 @@ Changes in Version 1.3
   - All default functions are now by default locked unless used from within estimateNetwork
   - Old functionality in estimateNetwork and bootnet has been removed! This includes graphFun, estFun etcetera.
   - Added the options pairwise_maximum, pairwise_minimum and pairwise_average to the sampleSize argument of several default functions
+  - The sampleSize argument now defaults to "pairwise_average"!
 
 Changes in Version 1.2.4
   - Resolved a bug with expected influence crashing bootnet when empty networks were estimated
