@@ -16,7 +16,43 @@ principalDirection_noCor <- function(data){
   return(data)
 }
 
-# Folling R:
+
+# Function for sampleSize:
+sampleSize_pairwise <- function(data, type = c( "pairwise_average","maximum","minimum","pairwise_maximum",
+                                               "pairwise_minimum")){
+  type <- match.arg(type)
+  
+  if (type == "maximum"){
+    
+    sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
+    
+  } else if (type == "minimum"){
+    
+    sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
+    
+  } else {
+    # Matrix with NAs:
+    xmat <- as.matrix(!is.na(data))
+    # product:
+    misMatrix <- t(xmat) %*% xmat
+    
+    if (type == "pairwise_maximum"){
+      sampleSize <- max(misMatrix)
+    } else  if (type == "pairwise_minimum"){
+      sampleSize <- min(misMatrix)
+    } else  if (type == "pairwise_average"){
+      sampleSize <- mean(misMatrix)
+    }
+    
+    
+  }
+  
+  
+  return(sampleSize)
+}
+
+
+# Fooling R:
 mgm <- NULL
 mgmfit <- NULL
 
@@ -89,7 +125,8 @@ bootnet_EBICglasso <- function(
   tuning = 0.5, # tuning parameter
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("maximum","minimum"), # Sample size when using missing = "pairwise"
+  sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
+                 "pairwise_minimum"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   refit = FALSE,
@@ -107,7 +144,7 @@ bootnet_EBICglasso <- function(
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
-  sampleSize <- match.arg(sampleSize)
+  # sampleSize <- match.arg(sampleSize)
   
   # Message:
   if (verbose){
@@ -184,11 +221,7 @@ bootnet_EBICglasso <- function(
   if (missing == "listwise"){
     sampleSize <- nrow(na.omit(data))
   } else{
-    if (sampleSize == "maximum"){
-      sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
-    } else {
-      sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
-    }
+    sampleSize <- sampleSize_pairwise(data, sampleSize)
   } 
   
   # Principal direction:
@@ -219,7 +252,8 @@ bootnet_ggmModSelect <- function(
   tuning = 0, # tuning parameter
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("maximum","minimum"), # Sample size when using missing = "pairwise"
+  sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
+                 "pairwise_minimum"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,
@@ -236,7 +270,7 @@ bootnet_ggmModSelect <- function(
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
-  sampleSize <- match.arg(sampleSize)
+  # sampleSize <- match.arg(sampleSize)
   
   # Message:
   if (verbose){
@@ -313,11 +347,12 @@ bootnet_ggmModSelect <- function(
   if (missing == "listwise"){
     sampleSize <- nrow(na.omit(data))
   } else{
-    if (sampleSize == "maximum"){
-      sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
-    } else {
-      sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
-    }
+    sampleSize <- sampleSize_pairwise(data, sampleSize)
+    # if (sampleSize == "maximum"){
+    #   sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
+    # } else {
+    #   sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
+    # }
   } 
   
   # Principal direction:
@@ -343,7 +378,8 @@ bootnet_pcor <- function(
   data, # Dataset used
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("maximum","minimum"), # Sample size when using missing = "pairwise"
+  sampleSize = c("pairwise_average", "maximum","minimum","pairwise_maximum",
+                 "pairwise_minimum"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   threshold = 0,
@@ -360,7 +396,7 @@ bootnet_pcor <- function(
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
-  sampleSize <- match.arg(sampleSize)
+  # sampleSize <- match.arg(sampleSize)
   
   if (identical(threshold,"none")){
     threshold <- 0
@@ -449,11 +485,12 @@ bootnet_pcor <- function(
   if (missing == "listwise"){
     sampleSize <- nrow(na.omit(data))
   } else{
-    if (sampleSize == "maximum"){
-      sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
-    } else {
-      sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
-    }
+    sampleSize <- sampleSize_pairwise(data, sampleSize)
+    # if (sampleSize == "maximum"){
+    #   sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
+    # } else {
+    #   sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
+    # }
   } 
   
   # Principal direction:
@@ -487,7 +524,8 @@ bootnet_cor <- function(
   data, # Dataset used
   corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("maximum","minimum"), # Sample size when using missing = "pairwise"
+  sampleSize = c("pairwise_average", "maximum","minimum","pairwise_maximum",
+                 "pairwise_minimum"), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   threshold = 0,
@@ -503,7 +541,7 @@ bootnet_cor <- function(
   # Check arguments:
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
-  sampleSize <- match.arg(sampleSize)
+  # sampleSize <- match.arg(sampleSize)
   
   if (identical(threshold,"none")){
     threshold <- 0
@@ -592,11 +630,12 @@ bootnet_cor <- function(
   if (missing == "listwise"){
     sampleSize <- nrow(na.omit(data))
   } else{
-    if (sampleSize == "maximum"){
-      sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
-    } else {
-      sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
-    }
+    sampleSize <- sampleSize_pairwise(data, sampleSize)
+    # if (sampleSize == "maximum"){
+    #   sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
+    # } else {
+    #   sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
+    # }
   } 
   
   # Principal direction:
