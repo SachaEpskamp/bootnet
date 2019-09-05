@@ -6,6 +6,7 @@ Changes in Version 1.3
   - The sampleSize argument now defaults to "pairwise_average"!
   - ggmGenerator now generates thresholds more consistently, leading to unfiform data by default or skewed data if the 'skewFactor' argument is used
   - ggmGenerator can now simulate missing data using the 'missing' argument
+  - corMethod = "spearman" is now supported in several default sets
 
 Changes in Version 1.2.4
   - Resolved a bug with expected influence crashing bootnet when empty networks were estimated

@@ -51,6 +51,55 @@ sampleSize_pairwise <- function(data, type = c( "pairwise_average","maximum","mi
   return(sampleSize)
 }
 
+# Function for correlation/covariance:
+bootnet_correlate <- function(data, corMethod =  c("cor_auto","cov","cor","npn","spearman"), 
+                              corArgs = list(), missing = c("pairwise","listwise","fiml","stop"),
+                              verbose = TRUE){
+  corMethod <- match.arg(corMethod)
+  missing <- match.arg(missing)
+  
+  # Correlate data:
+  # npn:
+  if (corMethod == "npn"){
+    data <- huge::huge.npn(data)
+    corMethod <- "cor"
+  }
+  
+  # cor_auto:
+  if (corMethod == "cor_auto"){
+    args <- list(data=data,missing=missing,verbose=verbose)
+    if (length(corArgs) > 0){
+      for (i in seq_along(corArgs)){
+        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
+      }
+    }
+    corMat <- do.call(qgraph::cor_auto,args)
+  } else if (corMethod%in%c("cor","cov","spearman")){
+    # Normal correlations
+    if (missing == "fiml"){
+      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
+    }
+    use <- switch(missing,
+                  pairwise = "pairwise.complete.obs",
+                  listwise = "complete.obs")
+    
+    args <- list(x=data,use=use)
+    if (length(corArgs) > 0){
+      for (i in seq_along(corArgs)){
+        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
+      }
+    }
+    if (corMethod == "spearman"){
+      args[["method"]] <- "spearman"
+      corMethod <- "cor"
+    }
+    
+    corMat <- do.call(corMethod,args)
+  } else stop ("Correlation method is not supported.")
+  
+  return(corMat)
+}
+
 
 # Fooling R:
 mgm <- NULL
@@ -123,7 +172,7 @@ bootnet_argEstimator <- function(data, prepFun, prepArgs, estFun, estArgs, graph
 bootnet_EBICglasso <- function(
   data, # Dataset used
   tuning = 0.5, # tuning parameter
-  corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
+  corMethod = c("cor_auto","cov","cor","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
                  "pairwise_minimum"), # Sample size when using missing = "pairwise"
@@ -183,39 +232,9 @@ bootnet_EBICglasso <- function(
   }
   
   # Correlate data:
-  # npn:
-  if (corMethod == "npn"){
-    data <- huge::huge.npn(data)
-    corMethod <- "cor"
-  }
-  
-  # cor_auto:
-  if (corMethod == "cor_auto"){
-    args <- list(data=data,missing=missing,verbose=verbose)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    corMat <- do.call(qgraph::cor_auto,args)
-  } else if (corMethod%in%c("cor","cov")){
-    # Normal correlations
-    if (missing == "fiml"){
-      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
-    }
-    use <- switch(missing,
-                  pairwise = "pairwise.complete.obs",
-                  listwise = "complete.obs")
-    
-    args <- list(x=data,use=use)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    
-    corMat <- do.call(corMethod,args)
-  } else stop ("Correlation method is not supported.")
+  corMat <- bootnet_correlate(data = data, corMethod =  corMethod, 
+                                corArgs = corArgs, missing = missing,
+                                verbose = verbose)
   
   # Sample size:
   if (missing == "listwise"){
@@ -250,7 +269,7 @@ bootnet_EBICglasso <- function(
 bootnet_ggmModSelect <- function(
   data, # Dataset used
   tuning = 0, # tuning parameter
-  corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
+  corMethod = c("cor_auto","cov","cor","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
                  "pairwise_minimum"), # Sample size when using missing = "pairwise"
@@ -309,39 +328,9 @@ bootnet_ggmModSelect <- function(
   }
   
   # Correlate data:
-  # npn:
-  if (corMethod == "npn"){
-    data <- huge::huge.npn(data)
-    corMethod <- "cor"
-  }
-  
-  # cor_auto:
-  if (corMethod == "cor_auto"){
-    args <- list(data=data,missing=missing,verbose=verbose)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    corMat <- do.call(qgraph::cor_auto,args)
-  } else if (corMethod%in%c("cor","cov")){
-    # Normal correlations
-    if (missing == "fiml"){
-      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
-    }
-    use <- switch(missing,
-                  pairwise = "pairwise.complete.obs",
-                  listwise = "complete.obs")
-    
-    args <- list(x=data,use=use)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    
-    corMat <- do.call(corMethod,args)
-  } else stop ("Correlation method is not supported.")
+  corMat <- bootnet_correlate(data = data, corMethod =  corMethod, 
+                              corArgs = corArgs, missing = missing,
+                              verbose = verbose)
   
   # Sample size:
   if (missing == "listwise"){
@@ -376,7 +365,7 @@ bootnet_ggmModSelect <- function(
 ### PCOR ESTIMATOR ###
 bootnet_pcor <- function(
   data, # Dataset used
-  corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
+  corMethod = c("cor_auto","cov","cor","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("pairwise_average", "maximum","minimum","pairwise_maximum",
                  "pairwise_minimum"), # Sample size when using missing = "pairwise"
@@ -447,39 +436,9 @@ bootnet_pcor <- function(
   }
   
   # Correlate data:
-  # npn:
-  if (corMethod == "npn"){
-    data <- huge::huge.npn(data)
-    corMethod <- "cor"
-  }
-  
-  # cor_auto:
-  if (corMethod == "cor_auto"){
-    args <- list(data=data,missing=missing,verbose=verbose)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    corMat <- do.call(qgraph::cor_auto,args)
-  } else if (corMethod%in%c("cor","cov")){
-    # Normal correlations
-    if (missing == "fiml"){
-      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
-    }
-    use <- switch(missing,
-                  pairwise = "pairwise.complete.obs",
-                  listwise = "complete.obs")
-    
-    args <- list(x=data,use=use)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    
-    corMat <- do.call(corMethod,args)
-  } else stop ("Correlation method is not supported.")
+  corMat <- bootnet_correlate(data = data, corMethod =  corMethod, 
+                              corArgs = corArgs, missing = missing,
+                              verbose = verbose)
   
   # Sample size:
   if (missing == "listwise"){
@@ -522,7 +481,7 @@ bootnet_pcor <- function(
 ### COR ESTIMATOR ###
 bootnet_cor <- function(
   data, # Dataset used
-  corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
+  corMethod = c("cor_auto","cov","cor","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("pairwise_average", "maximum","minimum","pairwise_maximum",
                  "pairwise_minimum"), # Sample size when using missing = "pairwise"
@@ -591,40 +550,9 @@ bootnet_cor <- function(
     }
   }
   
-  # Correlate data:
-  # npn:
-  if (corMethod == "npn"){
-    data <- huge::huge.npn(data)
-    corMethod <- "cor"
-  }
-  
-  # cor_auto:
-  if (corMethod == "cor_auto"){
-    args <- list(data=data,missing=missing,verbose=verbose)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    corMat <- do.call(qgraph::cor_auto,args)
-  } else if (corMethod%in%c("cor","cov")){
-    # Normal correlations
-    if (missing == "fiml"){
-      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
-    }
-    use <- switch(missing,
-                  pairwise = "pairwise.complete.obs",
-                  listwise = "complete.obs")
-    
-    args <- list(x=data,use=use)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    
-    corMat <- do.call(corMethod,args)
-  } else stop ("Correlation method is not supported.")
+  corMat <- bootnet_correlate(data = data, corMethod =  corMethod, 
+                              corArgs = corArgs, missing = missing,
+                              verbose = verbose)
   
   # Sample size:
   if (missing == "listwise"){
