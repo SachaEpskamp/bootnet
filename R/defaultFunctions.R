@@ -54,7 +54,8 @@ sampleSize_pairwise <- function(data, type = c( "pairwise_average","maximum","mi
 # Function for correlation/covariance:
 bootnet_correlate <- function(data, corMethod =  c("cor_auto","cov","cor","npn","spearman"), 
                               corArgs = list(), missing = c("pairwise","listwise","fiml","stop"),
-                              verbose = TRUE){
+                              verbose = TRUE, nonPositiveDefinite = c("stop","continue")){
+  nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
   
@@ -96,6 +97,12 @@ bootnet_correlate <- function(data, corMethod =  c("cor_auto","cov","cor","npn",
     
     corMat <- do.call(corMethod,args)
   } else stop ("Correlation method is not supported.")
+  
+  if (nonPositiveDefinite == "stop"){
+    if (!all(eigen(corMat)$values > 0)){
+      stop("Correlation matrix is not positive definite.")
+    }    
+  }
   
   return(corMat)
 }
@@ -184,8 +191,10 @@ bootnet_EBICglasso <- function(
   nlambda = 100,
   threshold = FALSE,
   unlock = FALSE,
+  nonPositiveDefinite = c("stop","continue"),
   ...
 ){
+  nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   if (!unlock){
   stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -234,7 +243,10 @@ bootnet_EBICglasso <- function(
   # Correlate data:
   corMat <- bootnet_correlate(data = data, corMethod =  corMethod, 
                                 corArgs = corArgs, missing = missing,
-                                verbose = verbose)
+                                verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+  
+
+
   
   # Sample size:
   if (missing == "listwise"){
@@ -280,8 +292,10 @@ bootnet_ggmModSelect <- function(
   stepwise = TRUE,
   nCores = 1,
   unlock = FALSE,
+  nonPositiveDefinite = c("stop","continue"),
   ...
 ){
+  nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -330,7 +344,7 @@ bootnet_ggmModSelect <- function(
   # Correlate data:
   corMat <- bootnet_correlate(data = data, corMethod =  corMethod, 
                               corArgs = corArgs, missing = missing,
-                              verbose = verbose)
+                              verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
   
   # Sample size:
   if (missing == "listwise"){
@@ -375,8 +389,10 @@ bootnet_pcor <- function(
   alpha = 0.05,
   adjacency,
   principalDirection = FALSE,
-  unlock = FALSE
+  unlock = FALSE,
+  nonPositiveDefinite = c("stop","continue")
 ){
+  nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -438,7 +454,7 @@ bootnet_pcor <- function(
   # Correlate data:
   corMat <- bootnet_correlate(data = data, corMethod =  corMethod, 
                               corArgs = corArgs, missing = missing,
-                              verbose = verbose)
+                              verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
   
   # Sample size:
   if (missing == "listwise"){
@@ -552,7 +568,7 @@ bootnet_cor <- function(
   
   corMat <- bootnet_correlate(data = data, corMethod =  corMethod, 
                               corArgs = corArgs, missing = missing,
-                              verbose = verbose)
+                              verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
   
   # Sample size:
   if (missing == "listwise"){
