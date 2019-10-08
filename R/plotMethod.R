@@ -254,7 +254,7 @@ plot.bootnet <- function(
         return(g)
         
       } else {
-        browser()
+
         Sum <- Sum %>% filter(!is.na(mean))
         if (x$type == "node"){
           g <- ggplot(Sum, aes_string(x = 'nNode', y = meanVar, group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))         
