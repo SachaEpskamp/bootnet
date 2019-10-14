@@ -1,6 +1,8 @@
 cor0 <- function(x,y,...){
-  if (any(!is.finite(na.omit(x))) || any(!is.finite(na.omit(y))) || sum(!is.na(x)) < 2 || sum(!is.na(y)) < 2 || sd(x,na.rm=TRUE)==0 | sd(y,na.rm=TRUE) == 0){
+  if (any(!is.finite(na.omit(x))) || any(!is.finite(na.omit(y))) || sum(!is.na(x)) < 2 || sum(!is.na(y)) < 2){
     return(NA)
+  } else if (sd(x,na.rm=TRUE)==0 | sd(y,na.rm=TRUE) == 0){
+    return(0)
   } else {
     return(cor(x,y,...))
   }
@@ -9,7 +11,7 @@ cor0 <- function(x,y,...){
 # Smetric
 corStability <- function(x,cor=0.7, statistics = "all",
                          verbose = TRUE){
-
+  
   # If statistics is missing, return all estimated statistics:
   if (!x$type %in% c("node","person")){
     stop("CS-coefficient only available for person or node drop bootstrap")
@@ -31,12 +33,13 @@ corStability <- function(x,cor=0.7, statistics = "all",
   sample <- x$sampleTable %>% 
     filter(type %in% statistics) %>%
     select(node1,node2,type,original = value)
-    
+  
   
   
   max0 <- function(x){
     if (length(x)==0 || all(is.na(x)))return(0) else return(max(x,na.rm=TRUE))
   }
+  
 
   S <- x$bootTable %>%
     filter(type %in% statistics) %>%
@@ -44,7 +47,7 @@ corStability <- function(x,cor=0.7, statistics = "all",
     group_by(name,type,prop) %>% 
     summarize(stability = cor0(value,original)) %>% 
     group_by(prop,type) %>% 
-    summarize(P = mean(stability > cor)) %>% 
+    summarize(P = mean(stability > cor,na.rm=TRUE)) %>% 
     group_by(type) %>%
     summarize(Smetric = max0(prop[P > 0.95]))
   
@@ -78,7 +81,7 @@ corStability <- function(x,cor=0.7, statistics = "all",
     for (i in seq_along(Smetric)){
       if (is.na(Smetric[i])){
         cat(paste0(names(Smetric)[i],": Could not be computed (likely due to non-finite values)"),
-          "\n\n"
+            "\n\n"
         )
       } else {
         
@@ -109,7 +112,7 @@ corStability <- function(x,cor=0.7, statistics = "all",
             "\n\n"
         )
       }
-
+      
     }
     cat("Accuracy can also be increased by increasing both 'nBoots' and 'caseN'.")
     
