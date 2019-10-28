@@ -25,8 +25,10 @@ genGGM <- function(
     trueKappa <- BDgraph::bdgraph.sim(p = Nvar, graph = "scale-free")$G
   } else if (graph == "hub") {
     trueKappa <- BDgraph::bdgraph.sim(p = Nvar, graph = "hub")$G
+    class(trueKappa) <- "matrix"
   } else if (graph == "cluster") {
     trueKappa <-  BDgraph::bdgraph.sim(p = Nvar, graph = "cluster", prob = p, class = clusters)$G #can be 
+    class(trueKappa) <- "matrix"
   }
   
   # Make edges negative and add weights:
