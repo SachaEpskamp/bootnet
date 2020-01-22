@@ -312,7 +312,8 @@ bootnet <- function(
     } else if (default != "none"){
       model <- ifelse(grepl("ising",default,ignore.case=TRUE),"Ising","GGM")
     } else {
-      model <- ifelse(any(grepl("ising",deparse(estFun),ignore.case=TRUE)),"Ising","GGM")
+      stop("'none' default set not supported for graphicalVAR data.")
+      # model <- ifelse(any(grepl("ising",deparse(estFun),ignore.case=TRUE)),"Ising","GGM")
     }
     message(paste0("model set to '",model,"'"))
   }

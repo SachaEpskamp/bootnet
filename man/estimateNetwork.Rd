@@ -32,70 +32,99 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
                  directed, datatype, checkNumeric = FALSE, ..., .input,
                  memorysaver = FALSE)
                 
-bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto","cov","cor","npn"), 
-  missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimum"),
-  verbose = TRUE, corArgs = list(), refit = FALSE, principalDirection = FALSE, 
-  lambda.min.ratio = 0.01, nlambda = 100, threshold = FALSE, ...)
+bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto", "cov",
+                    "cor", "npn", "spearman"), missing = c("pairwise",
+                    "listwise", "fiml", "stop"), sampleSize =
+                    c("pairwise_average", "maximum", "minimum",
+                    "pairwise_maximum", "pairwise_minimum"), verbose =
+                    TRUE, corArgs = list(), refit = FALSE,
+                    principalDirection = FALSE, lambda.min.ratio = 0.01,
+                    nlambda = 100, threshold = FALSE, unlock = FALSE,
+                    nonPositiveDefinite = c("stop", "continue"), ...)
   
-bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
-  "listwise","fiml","stop"), sampleSize = c("maximum", "minimum"), verbose = TRUE, 
-  corArgs = list(), threshold = 0, alpha = 0.05, adjacency,
-  principalDirection = FALSE)
+bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn",
+                    "spearman"), missing = c("pairwise", "listwise",
+                    "fiml", "stop"), sampleSize = c("pairwise_average",
+                    "maximum", "minimum", "pairwise_maximum",
+                    "pairwise_minimum"), verbose = TRUE, corArgs = list(),
+                    threshold = 0, alpha = 0.05, adjacency,
+                    principalDirection = FALSE, unlock = FALSE,
+                    nonPositiveDefinite = c("stop", "continue"))
   
-bootnet_cor(data, corMethod = c("cor_auto", "cov", "cor", "npn"), missing = c("pairwise",
-  "listwise","fiml","stop"), sampleSize = c("maximum", "minimum"), verbose = TRUE, 
-  corArgs = list(), threshold = 0, alpha = 0.05, principalDirection = FALSE)
+bootnet_cor(data, corMethod = c("cor_auto", "cov", "cor", "npn",
+                    "spearman"), missing = c("pairwise", "listwise",
+                    "fiml", "stop"), sampleSize = c("pairwise_average",
+                    "maximum", "minimum", "pairwise_maximum",
+                    "pairwise_minimum"), verbose = TRUE, corArgs = list(),
+                    threshold = 0, alpha = 0.05, principalDirection =
+                    FALSE, unlock = FALSE,   nonPositiveDefinite = c("stop","continue"))
   
-bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise","stop"), verbose = TRUE,
-  rule = c("AND","OR"), split = "median", principalDirection = FALSE)
+bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise", "stop"),
+                    verbose = TRUE, rule = c("AND", "OR"), split =
+                    "median", principalDirection = FALSE, unlock = FALSE)
   
-bootnet_IsingSampler(data, missing = c("listwise","stop"), verbose = TRUE,
-  split = "median", method = c("default","ll","pl","uni","bi"), 
-  principalDirection = FALSE)
+bootnet_IsingSampler(data, missing = c("listwise", "stop"), verbose = TRUE,
+                    split = "median", method = c("default", "ll", "pl",
+                    "uni", "bi"), principalDirection = FALSE, unlock =
+                    FALSE)
   
-bootnet_adalasso(data,missing = c("listwise","stop"), verbose = TRUE, nFolds = 10, 
-              principalDirection = FALSE)
+bootnet_adalasso(data, missing = c("listwise", "stop"), verbose = TRUE,
+                    nFolds = 10, principalDirection = FALSE, unlock =
+                    FALSE)
   
-bootnet_huge(data, tuning = 0.5, missing = c("listwise","stop"), verbose = TRUE,
-  npn = TRUE, criterion = c("ebic","ric","stars"), principalDirection = FALSE,
-                 lambda.min.ratio = 0.01, nlambda = 100)
+bootnet_huge(data, tuning = 0.5, missing = c("listwise", "stop"),
+                    verbose = TRUE, npn = TRUE, criterion = c("ebic",
+                    "ric", "stars"), principalDirection = FALSE,
+                    lambda.min.ratio = 0.01, nlambda = 100, unlock =
+                    FALSE)
   
-bootnet_mgm(data, type, level, tuning = 0.5, missing = c("listwise","stop"), 
-  verbose = TRUE, criterion = c("EBIC","CV"), nFolds = 10, order = 2,
-  rule = c("AND","OR"), binarySign, ...)
+bootnet_mgm(data, type, level, tuning = 0.5, missing =
+                    c("listwise", "stop"), verbose = TRUE, criterion =
+                    c("EBIC", "CV"), nFolds = 10, order = 2, rule =
+                    c("AND", "OR"), binarySign, unlock = FALSE, ...)
   
 bootnet_relimp(data, normalized = TRUE, type = "lmg",
-                 structureDefault = c("none", "custom", "EBICglasso",
-                 "pcor", "IsingFit", "IsingSampler", "huge",
-                 "adalasso", "mgm", "cor", "TMFG", "ggmModSelect",
-                 "LoGo"), missing = c("listwise", "stop"), ..., verbose
-                 = TRUE, threshold = 0)
+                    structureDefault = c("none", "custom", "EBICglasso",
+                    "pcor", "IsingFit", "IsingSampler", "huge",
+                    "adalasso", "mgm", "cor", "TMFG", "ggmModSelect",
+                    "LoGo"), missing = c("listwise", "stop"), ..., verbose
+                    = TRUE, threshold = 0, unlock = FALSE)
   
 bootnet_TMFG(data, graphType = c("cor", "pcor"), corMethod =
-                 c("cor_auto", "cov", "cor", "npn"), missing =
-                 c("pairwise", "listwise", "fiml", "stop"), verbose =
-                 TRUE, corArgs = list(), principalDirection = FALSE,
-                 ...)
+                    c("cor_auto", "cov", "cor", "npn"), missing =
+                    c("pairwise", "listwise", "fiml", "stop"), verbose =
+                    TRUE, corArgs = list(), principalDirection = FALSE,
+                    unlock = FALSE, ...)
     
-bootnet_LoGo(data, corMethod = c("cor_auto","cov","cor","npn"), missing = c("pairwise",
-  "listwise","fiml","stop"), verbose = TRUE, corArgs = list(), principalDirection = FALSE,
-  ...)
+bootnet_LoGo(data, corMethod = c("cor_auto", "cov", "cor", "npn"),
+                    missing = c("pairwise", "listwise", "fiml", "stop"),
+                    verbose = TRUE, corArgs = list(), principalDirection =
+                    FALSE, unlock = FALSE, ...)
   
-bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection = FALSE,
-  missing = c("listwise","stop"), ...)
+bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection
+                    = FALSE, missing = c("listwise", "stop"), unlock =
+                    FALSE, ...)
   
-bootnet_ggmModSelect(data,tuning = 0, corMethod = c("cor_auto","cov","cor","npn"),
-  missing = c("pairwise","listwise","fiml","stop"), sampleSize = c("maximum","minimum"), 
-  verbose = TRUE, corArgs = list(), principalDirection = FALSE, start = c("glasso",
-  "empty","full"), stepwise = TRUE, nCores = 1, ...)
+bootnet_ggmModSelect(data, tuning = 0, corMethod = c("cor_auto", "cov",
+                    "cor", "npn", "spearman"), missing = c("pairwise",
+                    "listwise", "fiml", "stop"), sampleSize =
+                    c("pairwise_average", "maximum", "minimum",
+                    "pairwise_maximum", "pairwise_minimum"), verbose =
+                    TRUE, corArgs = list(), principalDirection = FALSE,
+                    start = c("glasso", "empty", "full"), stepwise = TRUE,
+                    nCores = 1, unlock = FALSE, nonPositiveDefinite =
+                    c("stop", "continue"), ...)
   
-bootnet_piecewiseIsing(data, cutoff, missing = c("listwise","stop"), verbose = TRUE,
-  IsingDefault = c("IsingSampler","IsingFit","custom"), zeroThreshold = 1, 
-  minimalN = ncol(data) + 1, ...)
+bootnet_piecewiseIsing(data, cutoff, missing = c("listwise", "stop"), verbose
+                    = TRUE, IsingDefault = c("IsingSampler", "IsingFit",
+                    "custom"), zeroThreshold = 1, minimalN = ncol(data) +
+                    1, unlock = FALSE, ...)
   
-bootnet_SVAR_lavaan(data, verbose = TRUE, principalDirection = FALSE, 
-  missing =c("listwise","stop"), criterion = "bic", eqThreshold = 1e-4, tempWhitelist,
-  tempBlacklist, contWhitelist, contBlacklist, minimalModInd = 10, ...)
+bootnet_SVAR_lavaan(data, verbose = TRUE, principalDirection = FALSE,
+                    missing = c("listwise", "stop"), criterion = "bic",
+                    eqThreshold = 1e-04, tempWhitelist, tempBlacklist,
+                    contWhitelist, contBlacklist, minimalModInd = 10,
+                    unlock = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -127,7 +156,7 @@ A custom estimation function, when no default set is used. This must be a functi
 \item{tuning}{EBIC tuning parameter, used in 'EBICglasso', 'IsingFit', 'huge', 'mgm' and 'ggmModSelect' default sets. Note that the default value differs: 'EBICglasso', 'huge' and 'mgm' use 0.5, 'IsingFit' uses 0.25 and 'ggmModSelect uses 0.}
 \item{corMethod}{Correlation method, used in 'EBICglasso' and 'pcor' default sets. \code{"cor_auto"} uses \code{\link[qgraph]{cor_auto}} for polychoric and polyserial correlations, \code{"cov"} uses the \code{\link{cov}} function for covariances, \code{"cor"} will use the \code{\link{cor}} function for correlations and \code{"npn"} will apply the nonparanormal transformation (via \code{\link[huge]{huge.npn}}) and then compute correlations.}
 \item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion, \code{"fiml"} for full-information maximum likelihood and \code{"stop"} to stop with an error.}
-\item{sampleSize}{How will sample size be computed in EBICglasso default set? \code{"maximum"} takes total number of rows including rows with NA, and \code{"minimum"} takes total number of rows that contain no NA.}
+\item{sampleSize}{How will sample size be computed in EBICglasso default set? The default \code{"pairwise_average"} will set the sample size to the average of sample sizes used for each individual correlation. Other options are \code{"pairwise_maximum"} (largest sample sized used for each individual correlation), \code{"pairwise_minimum"} (smallest sample sized used for each individual correlation), \code{"maximum"} (takes total number of rows including rows with NA), and \code{"minimum"} (takes total number of rows that contain no NA).}
 \item{corArgs}{A list with arguments for the function used defined by \code{corMethod}.}
 \item{threshold}{
 Thresholding to use in partial correlation networks. Can be a fixed number to threshold all absolute edges below this value, \code{'locfdr'} for local FDR, or any option corresponding to adjustments in \code{\link[psych]{corr.p}} (\code{'none'}, \code{'sig'}, \code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'} or \code{'fdr'})). 
@@ -217,6 +246,12 @@ Minimal modification index to consider when adding parameters in SVAR search.
 }
 \item{adjacency}{
   An 'adjacency' matrix indicating the graph structure (zeroes indicate a missing edge).
+}
+\item{nonPositiveDefinite}{
+Set to \code{"stop"} to stop with an error when the input matrix is not positive definite, and to \code{"continue"} (old behavior) to continue anyway.
+}
+\item{unlock}{
+Set to \code{TRUE} to not result in a standard error. This is to prevent using the inner functions seperatly (see details below). 
 }
 }
 \details{

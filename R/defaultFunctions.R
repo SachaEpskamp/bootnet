@@ -506,7 +506,8 @@ bootnet_cor <- function(
   threshold = 0,
   alpha = 0.05,
   principalDirection = FALSE,
-  unlock = FALSE
+  unlock = FALSE,
+  nonPositiveDefinite = c("stop","continue")
 ){
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
