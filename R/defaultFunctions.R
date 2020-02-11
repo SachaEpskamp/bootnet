@@ -54,7 +54,15 @@ sampleSize_pairwise <- function(data, type = c( "pairwise_average","maximum","mi
 # Function for correlation/covariance:
 bootnet_correlate <- function(data, corMethod =  c("cor_auto","cov","cor","npn","spearman"), 
                               corArgs = list(), missing = c("pairwise","listwise","fiml","stop"),
-                              verbose = TRUE, nonPositiveDefinite = c("stop","continue")){
+                              verbose = TRUE, nonPositiveDefinite = c("stop","continue"),
+                              transform = c("none","rank","quantile")){
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
   nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
@@ -192,8 +200,16 @@ bootnet_EBICglasso <- function(
   threshold = FALSE,
   unlock = FALSE,
   nonPositiveDefinite = c("stop","continue"),
-  ...
-){
+  transform = c("none","rank","quantile"),
+  ...){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
   nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   if (!unlock){
   stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
@@ -293,8 +309,16 @@ bootnet_ggmModSelect <- function(
   nCores = 1,
   unlock = FALSE,
   nonPositiveDefinite = c("stop","continue"),
-  ...
-){
+  transform = c("none","rank","quantile"),
+  ...){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
   nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
@@ -390,8 +414,17 @@ bootnet_pcor <- function(
   adjacency,
   principalDirection = FALSE,
   unlock = FALSE,
-  nonPositiveDefinite = c("stop","continue")
-){
+  nonPositiveDefinite = c("stop","continue"),
+  transform = c("none","rank","quantile")){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
+  
   nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
@@ -507,8 +540,17 @@ bootnet_cor <- function(
   alpha = 0.05,
   principalDirection = FALSE,
   unlock = FALSE,
-  nonPositiveDefinite = c("stop","continue")
-){
+  nonPositiveDefinite = c("stop","continue"),
+  transform = c("none","rank","quantile")){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
+  
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -795,8 +837,17 @@ bootnet_adalasso <- function(
   verbose = TRUE,
   nFolds = 10, # Number of folds
   principalDirection = FALSE,
-  unlock = FALSE
-){
+  unlock = FALSE,
+  transform = c("none","rank","quantile"),
+  ...){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -862,9 +913,17 @@ bootnet_huge <- function(
   principalDirection = FALSE,
   lambda.min.ratio = 0.01,
   nlambda = 100,
-  unlock = FALSE
-  # method = c("glasso","mb","ct")
-){
+  unlock = FALSE,
+  transform = c("none","rank","quantile"),
+  ...){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -942,9 +1001,11 @@ bootnet_mgm <- function(
   rule = c("AND","OR"),
   binarySign, # Detected by default
   unlock = FALSE,
-  ... # mgm functions
-  # method = c("glasso","mb","ct")
-){
+  transform = c("none","rank","quantile"),
+  ...){
+  
+
+  
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -1004,6 +1065,14 @@ bootnet_mgm <- function(
   if (length(type) != ncol(data)){
     type <- rep(type, ncol(data))
   }
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data[,type == 'g'] <- rank_transformation(data[,type == 'g'])
+  } else if (transform == "quantile"){
+    data[,type == 'g'] <- quantile_transformation(data[,type == 'g'])
+  }
+  
   
   # Set level automatically:
   if (missing(level)){
@@ -1098,8 +1167,18 @@ bootnet_relimp <- function(
   ..., # Arguments sent to the structure function
   verbose = TRUE,
   threshold = 0,
-  unlock = FALSE
-){
+  unlock = FALSE,
+  transform = c("none","rank","quantile")){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
+  
+  
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -1225,8 +1304,17 @@ bootnet_TMFG <- function(
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,
   unlock = FALSE,
-  ...
-){
+  transform = c("none","rank","quantile"),
+  ...){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
+  
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -1341,8 +1429,17 @@ bootnet_LoGo <- function(
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,
   unlock = FALSE,
-  ...
-){
+  transform = c("none","rank","quantile"),
+  ...){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
+  
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -1446,8 +1543,17 @@ bootnet_graphicalVAR <- function(
   principalDirection = FALSE,
   missing =c("listwise","stop"),
   unlock = FALSE,
-  ...
-){
+  transform = c("none","rank","quantile"),
+  ...){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
+  
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
@@ -1524,8 +1630,17 @@ bootnet_SVAR_lavaan <- function(
   contBlacklist,
   minimalModInd = 10,
   unlock = FALSE,
-  ...
-){
+  transform = c("none","rank","quantile"),
+  ...){
+  
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+  
+  
   if (!unlock){
     stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
   }
