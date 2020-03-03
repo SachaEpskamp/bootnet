@@ -52,7 +52,7 @@ sampleSize_pairwise <- function(data, type = c( "pairwise_average","maximum","mi
 }
 
 # Function for correlation/covariance:
-bootnet_correlate <- function(data, corMethod =  c("cor_auto","cov","cor","npn","spearman"), 
+bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","npn","spearman"), 
                               corArgs = list(), missing = c("pairwise","listwise","fiml","stop"),
                               verbose = TRUE, nonPositiveDefinite = c("stop","continue"),
                               transform = c("none","rank","quantile")){
@@ -187,7 +187,7 @@ bootnet_argEstimator <- function(data, prepFun, prepArgs, estFun, estArgs, graph
 bootnet_EBICglasso <- function(
   data, # Dataset used
   tuning = 0.5, # tuning parameter
-  corMethod = c("cor_auto","cov","cor","npn","spearman"), # Correlation method
+  corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
                  "pairwise_minimum"), # Sample size when using missing = "pairwise"
@@ -297,7 +297,7 @@ bootnet_EBICglasso <- function(
 bootnet_ggmModSelect <- function(
   data, # Dataset used
   tuning = 0, # tuning parameter
-  corMethod = c("cor_auto","cov","cor","npn","spearman"), # Correlation method
+  corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
                  "pairwise_minimum"), # Sample size when using missing = "pairwise"
@@ -403,7 +403,7 @@ bootnet_ggmModSelect <- function(
 ### PCOR ESTIMATOR ###
 bootnet_pcor <- function(
   data, # Dataset used
-  corMethod = c("cor_auto","cov","cor","npn","spearman"), # Correlation method
+  corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("pairwise_average", "maximum","minimum","pairwise_maximum",
                  "pairwise_minimum"), # Sample size when using missing = "pairwise"
@@ -530,7 +530,7 @@ bootnet_pcor <- function(
 ### COR ESTIMATOR ###
 bootnet_cor <- function(
   data, # Dataset used
-  corMethod = c("cor_auto","cov","cor","npn","spearman"), # Correlation method
+  corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("pairwise_average", "maximum","minimum","pairwise_maximum",
                  "pairwise_minimum"), # Sample size when using missing = "pairwise"
@@ -1298,7 +1298,7 @@ bootnet_relimp <- function(
 bootnet_TMFG <- function(
   data, # Dataset used
   graphType = c("cor","pcor"),
-  corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
+  corMethod = c("cor","cov","cor","npn","cor_auto"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
@@ -1423,7 +1423,7 @@ bootnet_TMFG <- function(
 ### Local/Global Sparse Inverse Covariance Matrix ###
 bootnet_LoGo <- function(
   data, # Dataset used
-  corMethod = c("cor_auto","cov","cor","npn"), # Correlation method
+  corMethod = c("cor","cov","cor","npn","cor_auto"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
