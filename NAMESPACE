@@ -2,6 +2,8 @@
 export(quantile_transformation)
 export(rank_transformation)
 
+export(multiverse)
+
 import(pbapply)
 import(lavaan)
 import(networktools)
