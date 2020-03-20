@@ -235,9 +235,10 @@ plot.bootnet <- function(
             g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
           }
           
+          
           g <- g + 
             geom_line( lwd = samplelwd) + geom_point() +theme_bw() + 
-            xlab("Sampled people") + ylab("") + 
+            xlab("Sampled cases") + ylab("") + 
             guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")))
           
@@ -279,11 +280,12 @@ plot.bootnet <- function(
           g <- g + 
             geom_line( lwd = samplelwd) + geom_point() +
             theme_bw() + 
-            xlab("Sampled people") + ylab("Average correlation with original sample")+ 
+            xlab("Sampled cases") + ylab("Average correlation with original sample")+ 
             ylim(-1,1) + geom_hline(yintercept = 0) + 
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) *  x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")),
-                            limits = c(0.9,0.1) *  x$sample$nPerson)
-          
+                            limits = rev(range( Sum$nPerson))) + # c(0.9,0.1) *  x$sample$nPerson)
+          scale_colour_discrete("") + scale_fill_discrete("") +
+            theme(legend.position = "top")
         }
         
         
@@ -321,7 +323,7 @@ plot.bootnet <- function(
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
             theme_bw() + 
-            xlab("Sampled people") + ylab("") + 
+            xlab("Sampled cases") + ylab("") + 
             guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) + 
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) *  x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")),
                             limits = c( ncol(x$sample$graph)-1, 1))
@@ -362,7 +364,7 @@ plot.bootnet <- function(
             geom_line(position =  position_dodge(width = 0.4)) +
             theme_bw() + 
             geom_hline(yintercept = 0) +
-            xlab("Sampled people") + ylab("Average correlation with original sample") + 
+            xlab("Sampled cases") + ylab("Average correlation with original sample") + 
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
                             limits = c( ncol(x$sample$graph)-1, 1)) +
             ylim(-1,1)

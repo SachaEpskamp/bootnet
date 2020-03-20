@@ -1,6 +1,8 @@
 Changes in Version 1.4
   - Added the transformation functions 'quantile_transformation' and 'rank_transformation'
   - Several default sets now use corMethod = "cor" rather than corMethod = "cor_auto" by default!
+  - Fixed a bug in case-drop bootstrap plotting method
+  - "Sampled people" is now "Sampled cases"
 
 Changes in Version 1.3
   - Added the options pairwise_maximum, pairwise_minimum and pairwise_average to the sampleSize argument of several default functions
