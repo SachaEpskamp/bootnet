@@ -13,7 +13,7 @@ Imports: methods, igraph, IsingFit, qgraph, dplyr (>= 0.3.0.2), tidyr,
         huge, parcor, mgm (>= 1.2), relaimpo, NetworkToolbox (>= 1.1.0),
         pbapply, graphicalVAR, BDgraph, psychTools, networktools, lavaan, glasso
 Description: Bootstrap methods to assess accuracy and stability of estimated network structures
-              and centrality indices. Allows for flexible specification of any undirected network 
-              estimation procedure in R, and offers default sets for 'qgraph', 'IsingFit', 'IsingSampler',
-              'glasso', 'huge' and 'parcor' packages.
+              and centrality indices <doi:10.3758/s13428-017-0862-1>. Allows for flexible 
+              specification of any undirected network estimation procedure in R, and offers 
+              default sets for various estimation routines.
 License: GPL-2

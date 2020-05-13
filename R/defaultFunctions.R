@@ -840,65 +840,66 @@ bootnet_adalasso <- function(
   unlock = FALSE,
   transform = c("none","rank","quantile"),
   ...){
-  
-  transform <- match.arg(transform)
-  if (transform == "rank"){
-    data <- rank_transformation(data)
-  } else if (transform == "quantile"){
-    data <- quantile_transformation(data)
-  }
-  
-  if (!unlock){
-    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
-  }
-  
-  
-  # Check arguments:
-  missing <- match.arg(missing)
-  
-  # Message:
-  if (verbose){
-    msg <- "Estimating Network. Using package::function:"  
-    msg <- paste0(msg,"\n  - parcor::adalasso.net for network computation")
-    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
-    message(msg)
-  }
-  
-  # First test if data is a data frame:
-  if (!(is.data.frame(data) || is.matrix(data))){
-    stop("'data' argument must be a data frame")
-  }
-  
-  # If matrix coerce to data frame:
-  if (is.matrix(data)){
-    data <- as.data.frame(data)
-  }
-  
-  # Obtain info from data:
-  N <- ncol(data)
-  Np <- nrow(data)
-  
-  
-  # Check missing:
-  if (missing == "stop"){
-    if (any(is.na(data))){
-      stop("Missing data detected and missing = 'stop'")
-    }
-  } else {
-    # listwise:
-    data <- na.omit(data)
-  }
-  
-  # Principal direction:
-  if (principalDirection){
-    data <- principalDirection_noCor(data)
-  }
-  
-  # Estimate network:
-  Results <- parcor::adalasso.net(data, k = nFolds)
-  
-  # Return:
-  return(list(graph=as.matrix(Matrix::forceSymmetric(Results$pcor.adalasso)),results=Results))
+  stop("Adaptive LASSO default set is currently not supported due to CRAN removal of 'parcor' package.")
+  # 
+  # transform <- match.arg(transform)
+  # if (transform == "rank"){
+  #   data <- rank_transformation(data)
+  # } else if (transform == "quantile"){
+  #   data <- quantile_transformation(data)
+  # }
+  # 
+  # if (!unlock){
+  #   stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")  
+  # }
+  # 
+  # 
+  # # Check arguments:
+  # missing <- match.arg(missing)
+  # 
+  # # Message:
+  # if (verbose){
+  #   msg <- "Estimating Network. Using package::function:"  
+  #   msg <- paste0(msg,"\n  - parcor::adalasso.net for network computation")
+  #   # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+  #   message(msg)
+  # }
+  # 
+  # # First test if data is a data frame:
+  # if (!(is.data.frame(data) || is.matrix(data))){
+  #   stop("'data' argument must be a data frame")
+  # }
+  # 
+  # # If matrix coerce to data frame:
+  # if (is.matrix(data)){
+  #   data <- as.data.frame(data)
+  # }
+  # 
+  # # Obtain info from data:
+  # N <- ncol(data)
+  # Np <- nrow(data)
+  # 
+  # 
+  # # Check missing:
+  # if (missing == "stop"){
+  #   if (any(is.na(data))){
+  #     stop("Missing data detected and missing = 'stop'")
+  #   }
+  # } else {
+  #   # listwise:
+  #   data <- na.omit(data)
+  # }
+  # 
+  # # Principal direction:
+  # if (principalDirection){
+  #   data <- principalDirection_noCor(data)
+  # }
+  # 
+  # # Estimate network:
+  # Results <- parcor::adalasso.net(data, k = nFolds)
+  # 
+  # # Return:
+  # return(list(graph=as.matrix(Matrix::forceSymmetric(Results$pcor.adalasso)),results=Results))
 }
 
 

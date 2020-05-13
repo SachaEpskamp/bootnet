@@ -125,7 +125,7 @@ A \code{bootnet} object with the following elements:
 }
 
 \references{
-Epskamp, S., Borsboom, D., & Fried, E. I. (2016). Estimating psychological networks and their accuracy: a tutorial paper. arXiv preprint, arXiv:1604.08462.
+Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating psychological networks and their accuracy: A tutorial paper. Behavior Research Methods, 50(1), 195-212.
 }
 \author{
 Sacha Epskamp <mail@sachaepskamp.com>

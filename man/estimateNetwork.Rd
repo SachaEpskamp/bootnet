@@ -32,32 +32,36 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
                  directed, datatype, checkNumeric = FALSE, ..., .input,
                  memorysaver = FALSE)
                 
-bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor_auto", "cov",
-                    "cor", "npn", "spearman"), missing = c("pairwise",
-                    "listwise", "fiml", "stop"), sampleSize =
-                    c("pairwise_average", "maximum", "minimum",
-                    "pairwise_maximum", "pairwise_minimum"), verbose =
-                    TRUE, corArgs = list(), refit = FALSE,
-                    principalDirection = FALSE, lambda.min.ratio = 0.01,
-                    nlambda = 100, threshold = FALSE, unlock = FALSE,
-                    nonPositiveDefinite = c("stop", "continue"), ...)
+bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor", "cov",
+                   "cor_auto", "npn", "spearman"), missing =
+                   c("pairwise", "listwise", "fiml", "stop"), sampleSize
+                   = c("pairwise_average", "maximum", "minimum",
+                   "pairwise_maximum", "pairwise_minimum"), verbose =
+                   TRUE, corArgs = list(), refit = FALSE,
+                   principalDirection = FALSE, lambda.min.ratio = 0.01,
+                   nlambda = 100, threshold = FALSE, unlock = FALSE,
+                   nonPositiveDefinite = c("stop", "continue"), transform
+                   = c("none", "rank", "quantile"), ...)
   
-bootnet_pcor(data, corMethod = c("cor_auto", "cov", "cor", "npn",
-                    "spearman"), missing = c("pairwise", "listwise",
-                    "fiml", "stop"), sampleSize = c("pairwise_average",
-                    "maximum", "minimum", "pairwise_maximum",
-                    "pairwise_minimum"), verbose = TRUE, corArgs = list(),
-                    threshold = 0, alpha = 0.05, adjacency,
-                    principalDirection = FALSE, unlock = FALSE,
-                    nonPositiveDefinite = c("stop", "continue"))
+bootnet_pcor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
+                   "spearman"), missing = c("pairwise", "listwise",
+                   "fiml", "stop"), sampleSize = c("pairwise_average",
+                   "maximum", "minimum", "pairwise_maximum",
+                   "pairwise_minimum"), verbose = TRUE, corArgs = list(),
+                   threshold = 0, alpha = 0.05, adjacency,
+                   principalDirection = FALSE, unlock = FALSE,
+                   nonPositiveDefinite = c("stop", "continue"), transform
+                   = c("none", "rank", "quantile"))
   
-bootnet_cor(data, corMethod = c("cor_auto", "cov", "cor", "npn",
-                    "spearman"), missing = c("pairwise", "listwise",
-                    "fiml", "stop"), sampleSize = c("pairwise_average",
-                    "maximum", "minimum", "pairwise_maximum",
-                    "pairwise_minimum"), verbose = TRUE, corArgs = list(),
-                    threshold = 0, alpha = 0.05, principalDirection =
-                    FALSE, unlock = FALSE,   nonPositiveDefinite = c("stop","continue"))
+bootnet_cor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
+                   "spearman"), missing = c("pairwise", "listwise",
+                   "fiml", "stop"), sampleSize = c("pairwise_average",
+                   "maximum", "minimum", "pairwise_maximum",
+                   "pairwise_minimum"), verbose = TRUE, corArgs = list(),
+                   threshold = 0, alpha = 0.05, principalDirection =
+                   FALSE, unlock = FALSE, nonPositiveDefinite = c("stop",
+                   "continue"), transform = c("none", "rank",
+                   "quantile"))
   
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise", "stop"),
                     verbose = TRUE, rule = c("AND", "OR"), split =
@@ -69,51 +73,56 @@ bootnet_IsingSampler(data, missing = c("listwise", "stop"), verbose = TRUE,
                     FALSE)
   
 bootnet_adalasso(data, missing = c("listwise", "stop"), verbose = TRUE,
-                    nFolds = 10, principalDirection = FALSE, unlock =
-                    FALSE)
+                   nFolds = 10, principalDirection = FALSE, unlock =
+                   FALSE, transform = c("none", "rank", "quantile"), ...)
   
 bootnet_huge(data, tuning = 0.5, missing = c("listwise", "stop"),
-                    verbose = TRUE, npn = TRUE, criterion = c("ebic",
-                    "ric", "stars"), principalDirection = FALSE,
-                    lambda.min.ratio = 0.01, nlambda = 100, unlock =
-                    FALSE)
+                   verbose = TRUE, npn = TRUE, criterion = c("ebic",
+                   "ric", "stars"), principalDirection = FALSE,
+                   lambda.min.ratio = 0.01, nlambda = 100, unlock =
+                   FALSE, transform = c("none", "rank", "quantile"), ...)
   
 bootnet_mgm(data, type, level, tuning = 0.5, missing =
-                    c("listwise", "stop"), verbose = TRUE, criterion =
-                    c("EBIC", "CV"), nFolds = 10, order = 2, rule =
-                    c("AND", "OR"), binarySign, unlock = FALSE, ...)
+                   c("listwise", "stop"), verbose = TRUE, criterion =
+                   c("EBIC", "CV"), nFolds = 10, order = 2, rule =
+                   c("AND", "OR"), binarySign, unlock = FALSE, transform
+                   = c("none", "rank", "quantile"), ...)
   
 bootnet_relimp(data, normalized = TRUE, type = "lmg",
-                    structureDefault = c("none", "custom", "EBICglasso",
-                    "pcor", "IsingFit", "IsingSampler", "huge",
-                    "adalasso", "mgm", "cor", "TMFG", "ggmModSelect",
-                    "LoGo"), missing = c("listwise", "stop"), ..., verbose
-                    = TRUE, threshold = 0, unlock = FALSE)
+                   structureDefault = c("none", "custom", "EBICglasso",
+                   "pcor", "IsingFit", "IsingSampler", "huge",
+                   "adalasso", "mgm", "cor", "TMFG", "ggmModSelect",
+                   "LoGo"), missing = c("listwise", "stop"), ..., verbose
+                   = TRUE, threshold = 0, unlock = FALSE, transform =
+                   c("none", "rank", "quantile"))
   
 bootnet_TMFG(data, graphType = c("cor", "pcor"), corMethod =
-                    c("cor_auto", "cov", "cor", "npn"), missing =
-                    c("pairwise", "listwise", "fiml", "stop"), verbose =
-                    TRUE, corArgs = list(), principalDirection = FALSE,
-                    unlock = FALSE, ...)
+                   c("cor", "cov", "cor", "npn", "cor_auto"), missing =
+                   c("pairwise", "listwise", "fiml", "stop"), verbose =
+                   TRUE, corArgs = list(), principalDirection = FALSE,
+                   unlock = FALSE, transform = c("none", "rank",
+                   "quantile"), ...)
     
-bootnet_LoGo(data, corMethod = c("cor_auto", "cov", "cor", "npn"),
-                    missing = c("pairwise", "listwise", "fiml", "stop"),
-                    verbose = TRUE, corArgs = list(), principalDirection =
-                    FALSE, unlock = FALSE, ...)
+bootnet_LoGo(data, corMethod = c("cor", "cov", "cor", "npn",
+                   "cor_auto"), missing = c("pairwise", "listwise",
+                   "fiml", "stop"), verbose = TRUE, corArgs = list(),
+                   principalDirection = FALSE, unlock = FALSE, transform
+                   = c("none", "rank", "quantile"), ...)
   
 bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection
-                    = FALSE, missing = c("listwise", "stop"), unlock =
-                    FALSE, ...)
+                   = FALSE, missing = c("listwise", "stop"), unlock =
+                   FALSE, transform = c("none", "rank", "quantile"), ...)
   
-bootnet_ggmModSelect(data, tuning = 0, corMethod = c("cor_auto", "cov",
-                    "cor", "npn", "spearman"), missing = c("pairwise",
-                    "listwise", "fiml", "stop"), sampleSize =
-                    c("pairwise_average", "maximum", "minimum",
-                    "pairwise_maximum", "pairwise_minimum"), verbose =
-                    TRUE, corArgs = list(), principalDirection = FALSE,
-                    start = c("glasso", "empty", "full"), stepwise = TRUE,
-                    nCores = 1, unlock = FALSE, nonPositiveDefinite =
-                    c("stop", "continue"), ...)
+bootnet_ggmModSelect(data, tuning = 0, corMethod = c("cor", "cov",
+                   "cor_auto", "npn", "spearman"), missing =
+                   c("pairwise", "listwise", "fiml", "stop"), sampleSize
+                   = c("pairwise_average", "maximum", "minimum",
+                   "pairwise_maximum", "pairwise_minimum"), verbose =
+                   TRUE, corArgs = list(), principalDirection = FALSE,
+                   start = c("glasso", "empty", "full"), stepwise = TRUE,
+                   nCores = 1, unlock = FALSE, nonPositiveDefinite =
+                   c("stop", "continue"), transform = c("none", "rank",
+                   "quantile"), ...)
   
 bootnet_piecewiseIsing(data, cutoff, missing = c("listwise", "stop"), verbose
                     = TRUE, IsingDefault = c("IsingSampler", "IsingFit",
@@ -121,10 +130,11 @@ bootnet_piecewiseIsing(data, cutoff, missing = c("listwise", "stop"), verbose
                     1, unlock = FALSE, ...)
   
 bootnet_SVAR_lavaan(data, verbose = TRUE, principalDirection = FALSE,
-                    missing = c("listwise", "stop"), criterion = "bic",
-                    eqThreshold = 1e-04, tempWhitelist, tempBlacklist,
-                    contWhitelist, contBlacklist, minimalModInd = 10,
-                    unlock = FALSE, ...)
+                   missing = c("listwise", "stop"), criterion = "bic",
+                   eqThreshold = 1e-04, tempWhitelist, tempBlacklist,
+                   contWhitelist, contBlacklist, minimalModInd = 10,
+                   unlock = FALSE, transform = c("none", "rank",
+                   "quantile"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -253,6 +263,7 @@ Set to \code{"stop"} to stop with an error when the input matrix is not positive
 \item{unlock}{
 Set to \code{TRUE} to not result in a standard error. This is to prevent using the inner functions seperatly (see details below). 
 }
+\item{transform}{Should data be transformed before estimate the network? \code{"rank"} will call \code{\link{rank_transformation}} and \code{"quantile"}" will call \code{\link{quantile_transformation}}.}
 }
 \details{
 

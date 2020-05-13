@@ -33,8 +33,9 @@ export(bootThreshold)
 
 
 # Defaults:
+importFrom("stats", "qnorm")
 importFrom(huge,"huge","huge.npn","huge.select")
-importFrom(parcor,"adalasso.net")
+# importFrom(parcor,"adalasso.net")
 import(mgm)
 importFrom(relaimpo, "calc.relimp")
 
