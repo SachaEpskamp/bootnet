@@ -1,3 +1,5 @@
+  importFrom("snow","setDefaultClusterOptions")
+  
 # Transformations:
 export(quantile_transformation)
 export(rank_transformation)
@@ -73,7 +75,7 @@ export(IsingGenerator)
 
 # Imports:
 #import(dplyr)
-import(parallel)
+import(snow)
 importFrom(IsingFit,"IsingFit")
 import(qgraph)
 import(ggplot2)

@@ -1,3 +1,6 @@
+Changes in Version 1.4.4
+  - Fixed a critical error when using multiple cores in R 4.0 on Mac
+
 Changes in Version 1.4
   - Added the transformation functions 'quantile_transformation' and 'rank_transformation'
   - Several default sets now use corMethod = "cor" rather than corMethod = "cor_auto" by default!

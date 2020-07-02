@@ -529,8 +529,14 @@ bootnet <- function(
     if (verbose){
       message("Bootstrapping...")
     }
+
+    if (Sys.getenv("RSTUDIO") == "1" && !nzchar(Sys.getenv("RSTUDIO_TERM")) && 
+        Sys.info()["sysname"] == "Darwin" && gsub("\\..*","",getRversion()) == "4") {
+      snow::setDefaultClusterOptions(setup_strategy = "sequential")
+    }
+    
     nClust <- nCores - 1
-    cl <- makePSOCKcluster(nClust)
+    cl <- snow::makeSOCKcluster(nClust)
     
     # IF graph or data is missing, dummy graph:
     if (missing(graph)){
