@@ -134,6 +134,13 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       } else {
         b <- NULL
       }
+      b$communities <- NULL
+      if(useCommunities[1] != "all"){
+        b <- lapply(b, function(cen){cen[communities %in% useCommunities]})
+        bridgeCentralityNames <- x[['labels']][communities %in% useCommunities]
+      } else {
+        bridgeCentralityNames <- x[['labels']]
+      }
       cent <- c(cent, b)
     }
     
@@ -299,7 +306,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       tables$bridgeStrength <- dplyr::tbl_df(data.frame(
         name = name,
         type = "bridgeStrength",
-        node1 = x[['labels']],
+        node1 = bridgeCentralityNames,
         node2 = '',
         value = cent[['bridgeStrength']],
         stringsAsFactors = FALSE
@@ -311,7 +318,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       tables$bridgeCloseness <- dplyr::tbl_df(data.frame(
         name = name,
         type = "bridgeCloseness",
-        node1 = x[['labels']],
+        node1 = bridgeCentralityNames,
         node2 = '',
         value = cent[['bridgeCloseness']],
         stringsAsFactors = FALSE
@@ -323,7 +330,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       tables$bridgeBetweenness <- dplyr::tbl_df(data.frame(
         name = name,
         type = "bridgeBetweenness",
-        node1 = x[['labels']],
+        node1 = bridgeCentralityNames,
         node2 = '',
         value = cent[['bridgeBetweenness']],
         stringsAsFactors = FALSE
@@ -335,7 +342,7 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       tables$bridgeExpectedInfluence <- dplyr::tbl_df(data.frame(
         name = name,
         type = "bridgeExpectedInfluence",
-        node1 = x[['labels']],
+        node1 = bridgeCentralityNames,
         node2 = '',
         value = cent[['bridgeExpectedInfluence']],
         stringsAsFactors = FALSE
