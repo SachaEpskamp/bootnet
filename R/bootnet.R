@@ -58,8 +58,9 @@ bootnet <- function(
   signed,
   directed,
   includeDiagonal = FALSE,
-  communities=NULL,
-  useCommunities="all",
+  communities,
+  useCommunities,
+  bridgeArgs=list(),
   library = .libPaths(),
   memorysaver = TRUE,
   # datatype = c("normal","graphicalVAR"), # Extracted from object or given
@@ -86,6 +87,13 @@ bootnet <- function(
     message(paste("Note: bootnet will store only the following statistics: ",paste0(statistics, collapse=", ")))
   }
   
+  # Check bridgeArgs:
+  if (!missing(communities)){
+    bridgeArgs$communities <- communities
+  }
+  if (!missing(useCommunities)){
+    bridgeArgs$useCommunities <- useCommunities
+  }
   
   type <- match.arg(type)
   # datatype <- match.arg(datatype)
@@ -715,7 +723,7 @@ bootnet <- function(
   if (verbose){
     message("Computing statistics...")
   }
-  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality,statistics=statistics, directed=directed, includeDiagonal=includeDiagonal, communities=communities, useCommunities=useCommunities)
+  statTableOrig <- statTable(sampleResult,  name = "sample", alpha = alpha, computeCentrality = computeCentrality,statistics=statistics, directed=directed, includeDiagonal=includeDiagonal, bridgeArgs=bridgeArgs)
   
   if (nCores == 1){
     if (verbose){
@@ -723,7 +731,7 @@ bootnet <- function(
     }
     statTableBoots <- vector("list", nBoots)
     for (b in seq_len(nBoots)){
-      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed,  communities=communities, useCommunities=useCommunities,includeDiagonal=includeDiagonal)
+      statTableBoots[[b]] <- statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed,  bridgeArgs=bridgeArgs, includeDiagonal=includeDiagonal)
       if (verbose){
         setTxtProgressBar(pb, b)
       }
@@ -736,7 +744,7 @@ bootnet <- function(
       # Set library:
       .libPaths(library)
       
-      statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed, communities=communities, useCommunities=useCommunities,includeDiagonal=includeDiagonal)
+      statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed, bridgeArgs=bridgeArgs, includeDiagonal=includeDiagonal)
     }, cl = cl)
     # Stop the cluster:
     stopCluster(cl)

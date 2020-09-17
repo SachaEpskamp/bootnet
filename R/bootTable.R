@@ -7,9 +7,14 @@
 # node2
 # value
 
-statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = c("edge","strength","closeness","betweenness"), directed = FALSE,
-                      communities=NULL,
-                      useCommunities="all", includeDiagonal = FALSE,...){
+statTable <- function(x, 
+                      name, 
+                      alpha = 1, 
+                      computeCentrality = TRUE,
+                      statistics = c("edge","strength","closeness","betweenness"), 
+                      directed = FALSE,
+                      bridgeArgs = list(),
+                      includeDiagonal = FALSE,...){
   # If list, table for every graph!
   if (is.list(x$graph)){
     Tables <- list()
@@ -123,21 +128,19 @@ statTable <- function(x, name, alpha = 1, computeCentrality = TRUE,statistics = 
       # names(EI) <- "expectedInfluence"
       bridgecen <- c("bridgeStrength", "bridgeCloseness", "bridgeBetweenness", "bridgeExpectedInfluence")
       if(any(bridgecen %in% statistics)){
-        if(is.null(communities)){
+        bridgeArgs <- c(list(network=Wmat), bridgeArgs)
+        if(is.null(bridgeArgs$communities)){
           warning("If bridge statistics are to be bootstrapped, the communities argument should be provided")
-          b <-  networktools::bridge(Wmat,...)
-          names(b) <- c(bridgecen, "bridgeExpectedInfluence2step","communities")
-        } else {
-          b <- networktools::bridge(Wmat, communities=communities, useCommunities=useCommunities)
-          names(b) <- c(bridgecen, "bridgeExpectedInfluence2step","communities")
-        }
+        } 
+        b <- do.call(networktools::bridge, args=bridgeArgs)
+        names(b) <- c(bridgecen, "bridgeExpectedInfluence2step","communities")
+        b$communities <- NULL
       } else {
         b <- NULL
       }
-      b$communities <- NULL
-      if(useCommunities[1] != "all"){
-        b <- lapply(b, function(cen){cen[communities %in% useCommunities]})
-        bridgeCentralityNames <- x[['labels']][communities %in% useCommunities]
+      if(!is.null(bridgeArgs$useCommunities) && bridgeArgs$useCommunities[1] != "all"){
+        b <- lapply(b, function(cen){cen[bridgeArgs$communities %in% bridgeArgs$useCommunities]})
+        bridgeCentralityNames <- x[['labels']][bridgeArgs$communities %in% bridgeArgs$useCommunities]
       } else {
         bridgeCentralityNames <- x[['labels']]
       }
