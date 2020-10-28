@@ -90,10 +90,16 @@ bootnet <- function(
   # Check bridgeArgs:
   if (!missing(communities)){
     bridgeArgs$communities <- communities
+  } else {
+    bridgeArgs$communities <- communities <- NULL
   }
   if (!missing(useCommunities)){
     bridgeArgs$useCommunities <- useCommunities
+  } else {
+    bridgeArgs$useCommunities <- useCommunities <- "all"
   }
+  
+  
   
   type <- match.arg(type)
   # datatype <- match.arg(datatype)

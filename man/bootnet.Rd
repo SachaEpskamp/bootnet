@@ -146,7 +146,7 @@ Network <- estimateNetwork(bfiSub, default = "EBICglasso")
 library("qgraph")
 centralityPlot(Network)
 
-\dontrun{
+\donttest{
 # Estimated network:
 plot(Network, layout = 'spring') 
 

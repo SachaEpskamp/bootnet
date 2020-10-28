@@ -12,7 +12,7 @@ Imports: methods, igraph, IsingFit, qgraph, dplyr (>= 0.3.0.2), tidyr,
         gtools, corpcor, IsingSampler, mvtnorm, abind, Matrix, snow, 
         huge, mgm (>= 1.2), relaimpo, NetworkToolbox (>= 1.1.0),
         pbapply, graphicalVAR, BDgraph, psychTools, networktools, 
-        lavaan, glasso, snow
+        lavaan, glasso
 Description: Bootstrap methods to assess accuracy and stability of estimated network structures
               and centrality indices <doi:10.3758/s13428-017-0862-1>. Allows for flexible 
               specification of any undirected network estimation procedure in R, and offers 
