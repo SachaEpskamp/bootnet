@@ -28,6 +28,7 @@ statTable <- function(x,
     return(dplyr::bind_rows(Tables))
   }
   
+  bridgeCentralityNames <- x[['labels']]
   
   # Statistics can be:
   # Change first letter of statistics to lowercase:
@@ -122,6 +123,7 @@ statTable <- function(x,
         bridgeBetweenness= rep(0,ncol(x[['graph']])),
         bridgeExpectedInfluence= rep(0,ncol(x[['graph']]))
       )
+      bridgeCentralityNames <- x[['labels']]
     } else {
       cent <- qgraph::centrality(Wmat, alpha = alpha, all.shortest.paths = FALSE)
       # EI <- expectedInf(Wmat, step="1")
