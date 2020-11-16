@@ -2,7 +2,8 @@
 # Function that checks input and returns the functions:
 checkInput <- function(
   default = c("none", "EBICglasso","ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", 
-              "cor","TMFG","ggmModSelect","LoGo","graphicalVAR","piecewiseIsing","SVAR_lavaan"),
+              "cor","TMFG","ggmModSelect","LoGo","graphicalVAR","piecewiseIsing","SVAR_lavaan",
+              "GGMncv"),
   fun, # Estimator function
   # prepFun, # Fun to produce the correlation or covariance matrix
   # prepArgs, # list with arguments for the correlation function
@@ -179,7 +180,11 @@ checkInput <- function(
         Function <- bootnet_piecewiseIsing
       } else if (default == "SVAR_lavaan"){
         Function <- bootnet_SVAR_lavaan  
+      } else if (default == "GGMncv"){
+        Function <- bootnet_GGMncv 
       } else stop("Currently not supported.")
+      
+      
       
       # } else {
       #   warning("Arguments (prepFun, estFun, etcetera) used to construct estimator. This functionality is deprecated and will no longer be supported in a future version of bootnet. Please consult the manual or contact the authors.")

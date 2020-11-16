@@ -2,7 +2,8 @@
 estimateNetwork <- function(
   data,
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", "cor","TMFG",
-              "ggmModSelect", "LoGo","graphicalVAR", "piecewiseIsing","SVAR_lavaan"),
+              "ggmModSelect", "LoGo","graphicalVAR", "piecewiseIsing","SVAR_lavaan",
+              "GGMncv"),
   fun, # A function that takes data and returns a network or list entitled "graph" and "thresholds". optional.
   # prepFun, # Fun to produce the correlation or covariance matrix
   # prepArgs, # list with arguments for the correlation function

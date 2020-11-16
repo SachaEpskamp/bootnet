@@ -28,7 +28,10 @@ getRefs <- function(x){
                        "Epskamp, S., Waldorp, L. J., Mottus, R., & Borsboom, D. (2018). The Gaussian Graphical Model in Cross-sectional and Time-series Data. Multivariate Behavioral Research",
                        "Rothman, A. J., Levina, E., & Zhu, J. (2010). Sparse multivariate regression with covariance estimation. Journal of Computational and Graphical Statistics, 19(4), 947???962.",
                        "Wild, B., Eichler, M., Friederich, H.-C., Hartmann, M., Zipfel, S., & Herzog, W. (2010). A graphical vector autoregressive modeling approach to the analysis of electronic diary data. BMC Medical Research Methodology, 10(1), 28. doi: 10.1186/1471-2288-10-28."
-                       )
+                       ),
+    "GGMncv" = c(
+      "Williams, D. (2020). Beyond Lasso: A Survey of Nonconvex Regularization in Gaussian Graphical Models. PsyArXiv pre-print. https://doi.org/10.31234/osf.io/ad57p"
+    )
   )
   
   citation <- c(citation,"Epskamp, S., Borsboom, D., & Fried, E. I. (2016). Estimating psychological networks and their accuracy: a tutorial paper. arXiv preprint, arXiv:1604.08462.")

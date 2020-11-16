@@ -1,3 +1,6 @@
+
+importFrom("GGMncv","ggmncv")
+
   importFrom("snow","setDefaultClusterOptions")
   
 # Transformations:
