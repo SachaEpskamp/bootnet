@@ -57,6 +57,7 @@ Vector indicating which statistics to store. Options are:
 \item{\code{"bridgeBetweenness"}}{Bridge-betweenness (see \code{\link[networktools]{bridge}})}
 \item{\code{"rspbc"}}{Randomized shortest paths betweenness centrality (see \code{\link[NetworkToolbox]{rspbc}})}
 \item{\code{"hybrid"}}{Hybrid centrality (see \code{\link[NetworkToolbox]{hybrid}})}
+\item{\code{"eigenvector"}}{Eigenvector centrality (see \code{\link[NetworkToolbox]{eigenvector}})}
 }
 Can contain \code{"edge"}, \code{"strength"}, \code{"closeness"}, \code{"betweenness"}, \code{"length"}, \code{"distance"}, \code{"expectedInfluence"}, \code{"inExpectedInfluence"}, \code{"outExpectedInfluence"}. By default, length and distance are not stored.
 }
