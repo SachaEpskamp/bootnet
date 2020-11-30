@@ -80,7 +80,7 @@ bootnet <- function(
   # Check if statistics is all:
   if (any(statistics=="all")){
     statistics <- c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence",
-                    "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid",
+                    "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid", "eigenvector",
                     "bridgeStrength", "bridgeCloseness", "bridgeBetweenness",
                     "bridgeExpectedInfluence")
   } else {

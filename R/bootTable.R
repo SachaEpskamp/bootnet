@@ -34,7 +34,7 @@ statTable <- function(x,
   # Change first letter of statistics to lowercase:
   substr(statistics,0,1) <- tolower(substr(statistics,0,1))
   validStatistics <-  c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence",
-                        "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid",
+                        "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid", "eigenvector",
                         "bridgeStrength", "bridgeCloseness", "bridgeBetweenness",
                         "bridgeExpectedInfluence")
   if (!all(statistics %in% validStatistics)){
@@ -273,6 +273,33 @@ statTable <- function(x,
         tables$rspbc <- dplyr::tbl_df(data.frame(
           name = name,
           type = "hybrid",
+          node1 = x[['labels']],
+          node2 = '',
+          value = NA,
+          stringsAsFactors = FALSE
+        ))
+      }
+      
+    }
+    
+    # eigenvector:
+    if ("eigenvector" %in% statistics){
+      
+      tryeigenvector <- try({
+        tables$eigenvector <- dplyr::tbl_df(data.frame(
+          name = name,
+          type = "eigenvector",
+          node1 = x[['labels']],
+          node2 = '',
+          value = as.vector(NetworkToolbox::eigenvector(Wmat)),
+          stringsAsFactors = FALSE
+        ))
+      })
+      
+      if (is(tryeigenvector,"try-error")){
+        tables$eigenvector <- dplyr::tbl_df(data.frame(
+          name = name,
+          type = "eigenvector",
           node1 = x[['labels']],
           node2 = '',
           value = NA,
