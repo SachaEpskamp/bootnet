@@ -467,7 +467,12 @@ bootnet <- function(
           
         } else {
           # Personwise:
-          nPerson <- sample(subCases,1)
+          if (length(subCases) == 1){
+            nPerson <- subCases
+          } else {
+            nPerson <- sample(subCases,1)  
+          }
+          
           inSample <- 1:N
           persSample <- sort(sample(seq_len(Np),nPerson))
           if (datatype == "normal"){
