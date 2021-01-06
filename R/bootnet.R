@@ -99,6 +99,8 @@ bootnet <- function(
     bridgeArgs$useCommunities <- useCommunities <- "all"
   }
   
+  # Set a NULL sampleResult:
+  sampleResult <- NULL
   
   
   type <- match.arg(type)
@@ -152,6 +154,8 @@ bootnet <- function(
       if (isTRUE(data$bootInclude)){
         stop("Network is based on bootstrap include probabilities.")
       }
+      
+      sampleResult <- data
       
       default <- data$default
       inputCheck <- data$.input
@@ -338,20 +342,25 @@ bootnet <- function(
   
   if (!manual)
   {
-    if (verbose){
-      message("Estimating sample network...")
+
+    
+    if (is.null(sampleResult)){
+      if (verbose){
+        message("Estimating sample network...")
+      }
+      
+      sampleResult <- estimateNetwork(data, 
+                                      default = default,
+                                      fun = inputCheck$estimator,
+                                      .dots = inputCheck$arguments,
+                                      labels = labels,
+                                      verbose = verbose,
+                                      weighted = weighted,
+                                      signed = signed,
+                                      .input = inputCheck,
+                                      datatype = datatype)
     }
     
-    sampleResult <- estimateNetwork(data, 
-                                    default = default,
-                                    fun = inputCheck$estimator,
-                                    .dots = inputCheck$arguments,
-                                    labels = labels,
-                                    verbose = verbose,
-                                    weighted = weighted,
-                                    signed = signed,
-                                    .input = inputCheck,
-                                    datatype = datatype)
     
     
   } else {

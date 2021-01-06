@@ -1,3 +1,6 @@
+Changes in Version 1.4.6
+  - bootnet() now no longer re-estimates the network if the input is a bootnetResult
+
 Changes in Version 1.4.4
   - Fixed a critical error when using multiple cores in R 4.0 on Mac
 
