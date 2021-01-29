@@ -1,5 +1,5 @@
 
-importFrom("GGMncv","ggmncv")
+#importFrom("GGMncv","ggmncv")
 
   importFrom("snow","setDefaultClusterOptions")
   
@@ -10,10 +10,10 @@ export(rank_transformation)
 export(multiverse)
 
 import(pbapply)
-import(lavaan)
+# import(lavaan)
 import(networktools)
 importFrom(NetworkToolbox,"TMFG")
-import(glasso)
+# import(glasso)
 
 # Default functions:
 export(bootnet_SVAR_lavaan)
@@ -39,10 +39,10 @@ export(bootThreshold)
 
 # Defaults:
 importFrom("stats", "qnorm")
-importFrom(huge,"huge","huge.npn","huge.select")
+# importFrom(huge,"huge","huge.npn","huge.select")
 # importFrom(parcor,"adalasso.net")
 import(mgm)
-importFrom(relaimpo, "calc.relimp")
+#importFrom(relaimpo, "calc.relimp")
 
 # exportPattern("^[[:alpha:]]+")
 # Exports:
@@ -95,7 +95,7 @@ importFrom(mvtnorm, "rmvnorm")
 importFrom(IsingSampler, "EstimateIsing")
 importFrom(abind,"abind")
 importFrom(Matrix,"forceSymmetric")
-importFrom(BDgraph, "bdgraph.sim")
+# importFrom(BDgraph, "bdgraph.sim")
 
 #export(centrality)
 

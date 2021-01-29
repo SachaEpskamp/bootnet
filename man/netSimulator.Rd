@@ -74,11 +74,10 @@ Res <- netSimulator(trueNetwork, nReps = 10)
 # Results:
 Res
 
+
+\donttest{
 # Plot:
 plot(Res)
-
-\dontrun{
-library("bootnet")
 
 # BFI example:
 # Load data:

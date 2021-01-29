@@ -515,6 +515,8 @@ bootnet_pcor <- function(
     }
     diag(adjacency) <- 1
     zeroes <- which(adjacency==0,arr.ind=TRUE)
+    
+    if(!requireNamespace("glasso")) stop("'glasso' package needs to be installed.")
     glas <- suppressWarnings(glasso::glasso(corMat,rho = 0, zero = zeroes)$wi)
   
     Results <- as.matrix(qgraph::wi2net(glas))
@@ -918,6 +920,8 @@ bootnet_huge <- function(
   transform = c("none","rank","quantile"),
   ...){
   
+  if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
+  
   transform <- match.arg(transform)
   if (transform == "rank"){
     data <- rank_transformation(data)
@@ -1171,6 +1175,9 @@ bootnet_relimp <- function(
   unlock = FALSE,
   transform = c("none","rank","quantile")){
   
+  if(!requireNamespace("relaimpo")) stop("'relaimpo' package needs to be installed.")
+  
+  
   transform <- match.arg(transform)
   if (transform == "rank"){
     data <- rank_transformation(data)
@@ -1274,7 +1281,7 @@ bootnet_relimp <- function(
         }
         
       } else {
-        res <- calc.relimp(formula, data, rela = normalized)
+        res <- relaimpo::calc.relimp(formula, data, rela = normalized)
         relimp[-i,i][struc[-i,i]] <- res@lmg              
       }
       
@@ -1368,6 +1375,7 @@ bootnet_TMFG <- function(
   # Correlate data:
   # npn:
   if (corMethod == "npn"){
+    if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
     data <- huge::huge.npn(data)
     corMethod <- "cor"
   }
@@ -1547,6 +1555,8 @@ bootnet_graphicalVAR <- function(
   transform = c("none","rank","quantile"),
   ...){
   
+  if(!requireNamespace("graphicalVAR")) stop("'graphicalVAR' package needs to be installed.")
+  
   transform <- match.arg(transform)
   if (transform == "rank"){
     data <- rank_transformation(data)
@@ -1633,6 +1643,8 @@ bootnet_SVAR_lavaan <- function(
   unlock = FALSE,
   transform = c("none","rank","quantile"),
   ...){
+  
+  if(!requireNamespace("lavaan")) stop("'lavaan' package needs to be installed.")
   
   transform <- match.arg(transform)
   if (transform == "rank"){
@@ -1768,10 +1780,10 @@ bootnet_SVAR_lavaan <- function(
   curFit <- lavaan::sem(curMod, lavData)
   
   # Criterion:
-  curCrit <- fitMeasures(curFit,criterion)
+  curCrit <- lavaan::fitMeasures(curFit,criterion)
   
   # Mod indices:
-  modInds <- modificationindices(curFit)
+  modInds <- lavaan::modificationindices(curFit)
   modInds <- modInds[modInds$op == "~",]
   modInds <- modInds[order(modInds$mi,decreasing = TRUE),]
   modInds <- modInds[modInds$mi > minimalModInd,]
@@ -1789,7 +1801,7 @@ bootnet_SVAR_lavaan <- function(
         testFit <- lavaan::sem(curMod, lavData)
         
         # Criterion:
-        testCrit <- fitMeasures(testFit,criterion)
+        testCrit <- lavaan::fitMeasures(testFit,criterion)
         
         return(list(
           fit = testFit,
@@ -1819,7 +1831,7 @@ bootnet_SVAR_lavaan <- function(
         curCrit <- tests[[best]]$crit
         curFit <- tests[[best]]$fit
         
-        modInds <- modificationindices(curFit)
+        modInds <- lavaan::modificationindices(curFit)
         modInds <- modInds[modInds$op == "~",]
         modInds <- modInds[order(modInds$mi,decreasing = TRUE),]
         modInds <- modInds[modInds$mi > minimalModInd,]
@@ -1835,7 +1847,7 @@ bootnet_SVAR_lavaan <- function(
   }
 
   # Construct networks:
-  pars <- parameterEstimates(curFit)
+  pars <- lavaan::parameterEstimates(curFit)
   nVars <- length(vars)
   tempNet <- matrix(0,nVars,nVars)
   contNet <- matrix(0,nVars,nVars)
@@ -2088,6 +2100,8 @@ bootnet_GGMncv <- function(
   nonPositiveDefinite = c("stop","continue"),
   transform = c("none","rank","quantile"),
   ...){
+  
+  if(!requireNamespace("GGMncv")) stop("'GGMncv' package needs to be installed.")
   
   penalty <- match.arg(penalty)
   

@@ -45,9 +45,9 @@ parSim <- function(
     ######################
     ## use Socket clusters
     if (!debug){
-      cl <- makePSOCKcluster(nClust)  
+      cl <- snow::makeSOCKcluster(nClust)  
     } else {
-      cl <- makePSOCKcluster(nClust, outfile = "clusterLOG.txt")
+      cl <- snow::makeSOCKcluster(nClust, outfile = "clusterLOG.txt")
     }
     
     #     # Start clusters:

@@ -22,11 +22,17 @@ genGGM <- function(
     # Ranodm network:
     trueKappa <- as.matrix(igraph::get.adjacency(igraph::erdos.renyi.game(Nvar, p)))
   } else if (graph == "scalefree") {
+    if(!requireNamespace("BDgraph")) stop("'BDgraph' package needs to be installed.")
+    
     trueKappa <- BDgraph::bdgraph.sim(p = Nvar, graph = "scale-free")$G
   } else if (graph == "hub") {
+    if(!requireNamespace("BDgraph")) stop("'BDgraph' package needs to be installed.")
+    
     trueKappa <- BDgraph::bdgraph.sim(p = Nvar, graph = "hub")$G
     class(trueKappa) <- "matrix"
   } else if (graph == "cluster") {
+    if(!requireNamespace("BDgraph")) stop("'BDgraph' package needs to be installed.")
+    
     trueKappa <-  BDgraph::bdgraph.sim(p = Nvar, graph = "cluster", prob = p, class = clusters)$G #can be 
     class(trueKappa) <- "matrix"
   }

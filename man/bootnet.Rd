@@ -11,19 +11,19 @@ This function can be used to bootstrap network estimation methods so that the sp
 bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
                  "ggmModSelect", "pcor", "IsingFit", "IsingSampler",
                  "huge", "adalasso", "mgm", "relimp", "cor", "TMFG",
-                 "ggmModSelect", "LoGo", "SVAR_lavaan"), type =
-                 c("nonparametric", "parametric", "node", "person",
+                 "ggmModSelect", "LoGo", "SVAR_lavaan", "GGMncv"), type
+                 = c("nonparametric", "parametric", "node", "person",
                  "jackknife", "case"), nCores = 1, statistics =
-                 c("edge", "strength", "outStrength", "inStrength"), 
-                 model = c("detect", "GGM", "Ising", "graphicalVAR"), 
-                 fun, verbose = TRUE, labels, alpha =
-                 1, caseMin = 0.05, caseMax = 0.75, caseN = 10,
-                 subNodes, subCases, computeCentrality = TRUE, propBoot
-                 = 1, replacement = TRUE, graph, sampleSize,
-                 intercepts, weighted, signed, directed,
-                 includeDiagonal = FALSE, communities = NULL,
-                 useCommunities = "all", library = .libPaths(),
-                 memorysaver = TRUE, ...)
+                 c("edge", "strength", "outStrength", "inStrength"),
+                 model = c("detect", "GGM", "Ising", "graphicalVAR"),
+                 fun, verbose = TRUE, labels, alpha = 1, caseMin =
+                 0.05, caseMax = 0.75, caseN = 10, subNodes, subCases,
+                 computeCentrality = TRUE, propBoot = 1, replacement =
+                 TRUE, graph, sampleSize, intercepts, weighted, signed,
+                 directed, includeDiagonal = FALSE, communities,
+                 useCommunities, bridgeArgs = list(), library =
+                 .libPaths(), memorysaver = TRUE, ...)
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -112,6 +112,9 @@ Library location to be used in parallel computing.
 }
 \item{memorysaver}{
 Logical. If TRUE (recommended) then raw bootstrapped data and results are not stored in the output object. This saves a lot of memory. Set this only to TRUE if you need the raw results or bootstrap data.}
+\item{bridgeArgs}{
+List of arguments used in the 'bridge' function for computing bridge centrality
+}
 \item{\dots}{
   Additional arguments used in the estimator function.
 }
@@ -166,7 +169,7 @@ plot(Results1, "edge", plot = "difference",onlyNonZero = TRUE,
 plot(Results1, "strength", plot = "difference")
 
 # Test for difference in strength between node "A1" and "C2":
-differenceTest(Results,  "A1", "C2", "strength")
+differenceTest(Results1,  "A1", "C2", "strength")
 
 ### Case-drop bootstrap ###
 # Bootstrap 1000 values, using 8 cores:

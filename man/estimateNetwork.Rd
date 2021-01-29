@@ -15,6 +15,7 @@
 \alias{bootnet_graphicalVAR}
 \alias{bootnet_SVAR_lavaan}
 \alias{bootnet_piecewiseIsing}
+\alias{bootnet_GGMncv}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Estimate a network structure
@@ -26,11 +27,10 @@ This function allows for flexible estimation of a network structure using variou
 estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
                  "IsingFit", "IsingSampler", "huge", "adalasso", "mgm",
                  "relimp", "cor", "TMFG", "ggmModSelect", "LoGo",
-                 "graphicalVAR", "piecewiseIsing", "SVAR_lavaan"), fun,
-                labels, verbose = TRUE,
-                 .dots = list(), weighted = TRUE, signed = TRUE,
-                 directed, datatype, checkNumeric = FALSE, ..., .input,
-                 memorysaver = FALSE)
+                 "graphicalVAR", "piecewiseIsing", "SVAR_lavaan", "GGMncv"), 
+                 fun, labels, verbose = TRUE, .dots = list(), weighted = TRUE, 
+                 signed = TRUE, directed, datatype, checkNumeric = FALSE, ..., 
+                 .input, memorysaver = FALSE)
                 
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor", "cov",
                    "cor_auto", "npn", "spearman"), missing =
@@ -135,6 +135,15 @@ bootnet_SVAR_lavaan(data, verbose = TRUE, principalDirection = FALSE,
                    contWhitelist, contBlacklist, minimalModInd = 10,
                    unlock = FALSE, transform = c("none", "rank",
                    "quantile"), ...)
+                   
+bootnet_GGMncv(data, penalty = c("atan","selo","exp","log","sica","scad","mcp","lasso"),
+  corMethod = c("cor","cov","cor_auto","npn","spearman"), 
+  missing = c("pairwise","listwise","fiml","stop"),
+  sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
+                 "pairwise_minimum"), 
+  verbose = TRUE, corArgs = list(), principalDirection = FALSE, unlock = FALSE,
+  nonPositiveDefinite = c("stop","continue"), transform = c("none","rank","quantile"),
+  ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -264,6 +273,7 @@ Set to \code{"stop"} to stop with an error when the input matrix is not positive
 Set to \code{TRUE} to not result in a standard error. This is to prevent using the inner functions seperatly (see details below). 
 }
 \item{transform}{Should data be transformed before estimate the network? \code{"rank"} will call \code{\link{rank_transformation}} and \code{"quantile"}" will call \code{\link{quantile_transformation}}.}
+\item{penalty}{Penalty to use in the GGMncv methods.}
 }
 \details{
 
