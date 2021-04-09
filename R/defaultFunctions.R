@@ -147,7 +147,7 @@ binarize <- function(x, split = "median", na.rm=TRUE, removeNArows = TRUE, verbo
       splits <- rep(split, length=ncol(x))
     }
     for (i in seq_len(ncol(x))){
-      x[,i] <- 1 * (x[,i] < splits[i])
+      x[,i] <- 1 * (x[,i] >= splits[i])
     }
     
     if (removeNArows){
