@@ -37,11 +37,11 @@ sampleSize_pairwise <- function(data, type = c( "pairwise_average","maximum","mi
     misMatrix <- t(xmat) %*% xmat
     
     if (type == "pairwise_maximum"){
-      sampleSize <- max(misMatrix)
+      sampleSize <- max(misMatrix[lower.tri(misMatrix)])
     } else  if (type == "pairwise_minimum"){
-      sampleSize <- min(misMatrix)
+      sampleSize <- min(misMatrix[lower.tri(misMatrix)])
     } else  if (type == "pairwise_average"){
-      sampleSize <- mean(misMatrix)
+      sampleSize <- mean(misMatrix[lower.tri(misMatrix)])
     }
     
     
