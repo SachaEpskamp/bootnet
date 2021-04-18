@@ -392,12 +392,18 @@ plot.bootnet <- function(
   ### DIFFERENCE PLOTS ####
   if (plot == "difference"){
     
-    if (any(statistics %in% c("strength","betweenness","closeness","expectedInfluence")) & any(statistics %in% c("edge","distance"))){
+    if (any(statistics %in% c("strength","betweenness","closeness","expectedInfluence",
+                              "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid", "eigenvector",
+                              "bridgeStrength", "bridgeCloseness", "bridgeBetweenness",
+                              "bridgeExpectedInfluence")) & any(statistics %in% c("edge","distance"))){
       stop("'difference' plot can not be made for centrality index and edge weights/distances at the same time.")
     }
     
     if (missing(differenceShowValue)){
-      differenceShowValue <- any(statistics %in% c("strength","betweenness","closeness","expectedInfluence"))
+      differenceShowValue <- any(statistics %in% c("strength","betweenness","closeness","expectedInfluence",
+                                                   "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid", "eigenvector",
+                                                   "bridgeStrength", "bridgeCloseness", "bridgeBetweenness",
+                                                   "bridgeExpectedInfluence"))
     }
     
     cent <- x$bootTable %>% filter(type %in% statistics) %>% dplyr::select(name,id,value,type)
