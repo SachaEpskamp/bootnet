@@ -997,7 +997,7 @@ bootnet_mgm <- function(
   data, # Dataset used
   type,
   level,
-  tuning = 0.5,
+  tuning = 0.25,
   missing = c("listwise","stop"),
   verbose = TRUE,
   criterion = c("EBIC","CV"),
