@@ -128,14 +128,14 @@ statTable <- function(x,
       cent <- qgraph::centrality(Wmat, alpha = alpha, all.shortest.paths = FALSE)
       # EI <- expectedInf(Wmat, step="1")
       # names(EI) <- "expectedInfluence"
-      bridgecen <- c("bridgeStrength", "bridgeCloseness", "bridgeBetweenness", "bridgeExpectedInfluence")
+      bridgecen <- c("bridgeStrength", "bridgeBetweenness", "bridgeCloseness", "bridgeExpectedInfluence")
       if(any(bridgecen %in% statistics)){
         bridgeArgs <- c(list(network=Wmat), bridgeArgs)
         if(is.null(bridgeArgs$communities)){
           warning("If bridge statistics are to be bootstrapped, the communities argument should be provided")
         } 
         b <- do.call(networktools::bridge, args=bridgeArgs)
-        names(b) <- c(bridgecen, "bridgeExpectedInfluence2step","communities")
+        names(b) <- c(bridgecen,"bridgeExpectedInfluence2step","communities")
         b$communities <- NULL
       } else {
         b <- NULL
