@@ -128,14 +128,30 @@ statTable <- function(x,
       cent <- qgraph::centrality(Wmat, alpha = alpha, all.shortest.paths = FALSE)
       # EI <- expectedInf(Wmat, step="1")
       # names(EI) <- "expectedInfluence"
-      bridgecen <- c("bridgeStrength", "bridgeBetweenness", "bridgeCloseness", "bridgeExpectedInfluence")
+      bridgecen <- c("bridgeInDegree","bridgeOutDegree","bridgeStrength", "bridgeBetweenness", "bridgeCloseness", "bridgeExpectedInfluence")
       if(any(bridgecen %in% statistics)){
         bridgeArgs <- c(list(network=Wmat), bridgeArgs)
         if(is.null(bridgeArgs$communities)){
           warning("If bridge statistics are to be bootstrapped, the communities argument should be provided")
         } 
+        
         b <- do.call(networktools::bridge, args=bridgeArgs)
-        names(b) <- c(bridgecen,"bridgeExpectedInfluence2step","communities")
+        
+        # Rename:
+        rename <- function(x,from,to){
+          if (from %in% x){
+            x[x==from] <- to
+          }
+          x
+        }
+        names(b) <- rename(names(b), "Bridge Indegree", "bridgeInDegree")
+        names(b) <- rename(names(b), "Bridge Outdegree", "bridgeOutDegree")
+        names(b) <- rename(names(b), "Bridge Strength", "bridgeStrength")
+        names(b) <- rename(names(b), "Bridge Betweenness", "bridgeBetweenness")
+        names(b) <- rename(names(b), "Bridge Closeness", "bridgeCloseness")
+        names(b) <- rename(names(b), "Bridge Expected Influence (1-step)", "bridgeExpectedInfluence")
+        names(b) <- rename(names(b), "Bridge Expected Influence (2-step)", "bridgeExpectedInfluence2step")
+
         b$communities <- NULL
       } else {
         b <- NULL

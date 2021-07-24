@@ -81,7 +81,7 @@ bootnet <- function(
   if (any(statistics=="all")){
     statistics <- c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence",
                     "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid", "eigenvector",
-                    "bridgeStrength", "bridgeCloseness", "bridgeBetweenness",
+                    "bridgeStrength", "bridgeCloseness", "bridgeBetweenness","bridgeInDegree","bridgeOutDegree",
                     "bridgeExpectedInfluence")
   } else {
     message(paste("Note: bootnet will store only the following statistics: ",paste0(statistics, collapse=", ")))

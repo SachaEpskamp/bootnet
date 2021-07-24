@@ -1,3 +1,6 @@
+Changes in Version 1.4.8
+  - Fixed a bug with bridge centrality indices being incorrectly labeled.
+
 Changes in Version 1.4.7
   - 'binarize' now makes values above the split 1 instead of below the split
   - The bootnet plot method now shows values for all centrality metrics when plotting difference tests.
