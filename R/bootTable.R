@@ -35,7 +35,7 @@ statTable <- function(x,
   substr(statistics,0,1) <- tolower(substr(statistics,0,1))
   validStatistics <-  c("intercept","edge","length","distance","closeness","betweenness","strength","expectedInfluence",
                         "outStrength","outExpectedInfluence","inStrength","inExpectedInfluence","rspbc","hybrid", "eigenvector",
-                        "bridgeStrength", "bridgeCloseness", "bridgeBetweenness",
+                        "bridgeStrength", "bridgeCloseness", "bridgeBetweenness","bridgeInDegree","bridgeOutDegree",
                         "bridgeExpectedInfluence")
   if (!all(statistics %in% validStatistics)){
     stop(paste0("'statistics' must be one of: ",paste0("'",validStatistics,"'",collapse=", ")))
