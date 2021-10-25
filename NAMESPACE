@@ -1,4 +1,9 @@
 
+importFrom(rlang,.data)
+import(tibble)
+
+importFrom("stats", "var")
+
 #importFrom("GGMncv","ggmncv")
 
   importFrom("snow","setDefaultClusterOptions")
