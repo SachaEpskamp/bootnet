@@ -1,6 +1,7 @@
 
 importFrom(rlang,.data)
 import(tibble)
+import(tidyselect)
 
 importFrom("stats", "var")
 

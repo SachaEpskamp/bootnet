@@ -8,7 +8,7 @@ summary.netSimulator <- function(object, digits = 2, ...){
   if (all(object$error)) stop(paste0("All simulations resulted in errors:\n",paste(unique(object$errorMessage, collapse = "\n"))))
   
   Exclude <- c(
-    "rep","id","correctModel","sensitivity","specificity","correlation","strength","closeness","betweenness","error","errorMessage"
+    "rep","id","correctModel","sensitivity","specificity","correlation","strength","closeness","betweenness","error","errorMessage","ExpectedInfluence","MaxFalseEdgeWidth","bias"
   )
   # check number of levels:
   Conditions <- names(object)[!names(object)%in%Exclude]
@@ -21,15 +21,12 @@ summary.netSimulator <- function(object, digits = 2, ...){
   
   # Summarize per case:
   suppressWarnings({
-  df <- object %>% dplyr::select_("sensitivity","specificity","correlation","strength","closeness","betweenness",.dots = Conditions) %>% 
-    dplyr::group_by_(.dots = Conditions) %>% dplyr::summarize_each(funs(fun(.,digits=digits))) %>% 
-    dplyr::arrange_(~nCases) %>% as.data.frame
+  df <- object %>% dplyr::select(.data[["sensitivity"]],.data[["specificity"]],.data[["correlation"]],.data[["strength"]],.data[["closeness"]],.data[["betweenness"]],all_of(Conditions)) %>% 
+    dplyr::group_by_at(Conditions) %>% dplyr::summarize_each(funs(fun(.,digits=digits))) %>% 
+    dplyr::arrange(.data[['nCases']]) %>% as.data.frame
   })
   
   # 
-  # dfSD <- object %>% dplyr::select_("sensitivity","specificity","correlation",.dots = Conditions) %>% 
-  #   dplyr::group_by_(.dots = Conditions) %>% dplyr::summarize_each(funs(sd(.,na.rm=TRUE))) %>% 
-  #   dplyr::arrange_(~nCases) %>% as.data.frame
   
   row.names(df) <- NULL
   
@@ -69,8 +66,8 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
   }
   
   # Gather:
-  Gathered <- x %>% # dplyr::select_("nCases","sensitivity","specificity","correlation") %>%
-    tidyr::gather_("measure","value",yvar)
+  Gathered <- x %>% 
+    tidyr::gather("measure","value",yvar)
   
   # AES:
   if (!is.null(color)){

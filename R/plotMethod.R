@@ -757,10 +757,7 @@ plot.bootnet <- function(
       #       maxArea <- "q97.5"  
       #     }
       
-      # sumTable <- sumTable %>% mutate_(
-      #   lbound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIlower,q2.5),
-      #   ubound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIupper, q97.5)
-      # )
+    
       sumTable$lbound <- sumTable[[minArea]]
       sumTable$ubound <- sumTable[[maxArea]]
       

@@ -252,7 +252,7 @@ netSimulator <- function(
         for (i in seq_along(.dots)){
           args[[names(.dots)[i]]] <- get(names(.dots)[i])
         }
-        netResults <- do.call(bootnet::estimateNetwork,args)
+        suppressWarnings(netResults <- do.call(bootnet::estimateNetwork,args))
         estNet <- qgraph::getWmat(netResults)
         
         # Compute measures:
