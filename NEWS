@@ -1,6 +1,7 @@
 Changes in Version 1.5
   - Fixed a bug with bridge centrality indices being incorrectly labeled
   - Fixed a bug with that occured when using order = "sample" together with the subset argument
+  - Removed calls to deprecated dplyr functions
 
 Changes in Version 1.4.7
   - 'binarize' now makes values above the split 1 instead of below the split
