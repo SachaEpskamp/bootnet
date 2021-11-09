@@ -1,0 +1,72 @@
+# R CMD check workflow.
+name: R-CMD-check
+
+# Run on pushes and pull requests to the `master` branch.
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+# Jobs to run.
+jobs:
+
+  # CRAN check job
+  R-CMD-check:
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: macOS-latest,   r: 'release'}
+          - {os: windows-latest, r: 'release'}
+          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,   r: 'release'}
+          - {os: ubuntu-latest,   r: 'oldrel-1'}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      # Checkout the repository.
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Setup `pandoc`.
+      - name: Setup pandoc
+        uses: r-lib/actions/setup-pandoc@v1
+
+      # Setup `R`.
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
+
+      # Setup `powerly` dependencies and extras.
+      - name: Install dependencies
+        uses: r-lib/actions/setup-r-dependencies@v1
+        with:
+          extra-packages: rcmdcheck
+
+      # Perform the CRAN check.
+      - name: Check package
+        uses: r-lib/actions/check-r-package@v1
+
+      # Show `testthat` output.
+      - name: Show testthat output
+        if: always()
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+      # Upload job results on failure.
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: check
