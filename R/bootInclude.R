@@ -31,8 +31,8 @@ bootInclude <- function(bootobject,verbose=TRUE){
 
     # Summary table of edge weights:
     bootSummary <- bootobject$bootTable %>% 
-      dplyr::filter_(~type == "edge", ~graph == graphName) %>%
-      dplyr::group_by_(~node1,~node2) %>%
+      dplyr::filter(.data[['type']] == "edge", .data[['graph']] == graphName) %>%
+      dplyr::group_by(.data[['node1']],.data[['node2']]) %>%
       dplyr::summarize(
         propNonZero=mean(value != 0)
       )

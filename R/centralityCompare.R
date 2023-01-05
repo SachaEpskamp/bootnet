@@ -79,7 +79,7 @@ differenceTest <- function(bootobject,x,y,measure = c("strength","closeness","be
               upper = quantile(value2-value1,1-alpha/2, type = 6)) %>%
     dplyr::mutate(contain0 = 0 >= lower & 0 <= upper) %>% 
     dplyr::mutate(significant = !contain0) %>%
-    dplyr::select_("id1","id2","type","lower","upper","significant") %>%
+    dplyr::select(.data[["id1"]],.data[["id2"]],.data[["type"]],.data[["lower"]],.data[["upper"]],.data[["significant"]]) %>%
     dplyr::rename(measure = type) %>% 
     as.data.frame
   

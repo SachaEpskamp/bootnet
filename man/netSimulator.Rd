@@ -103,11 +103,25 @@ Sim1
 plot(Sim1)
 
 # Compare different default set at two sampling levels:
-Sim2 <- netSimulator(Network,
-                     default = c("EBICglasso","pcor","huge"),
+Sim2_EBICglasso <- netSimulator(Network,
+                     default = c("EBICglasso"),
                      nCases = c(100,250,500),
                      nReps = 100,
                      nCores = 8)
+
+Sim2_pcor <- netSimulator(Network,
+                                default = c("pcor"),
+                                nCases = c(100,250,500),
+                                nReps = 100,
+                                nCores = 8)
+
+Sim2_huge <- netSimulator(Network,
+                          default = c("huge"),
+                          nCases = c(100,250,500),
+                          nReps = 100,
+                          nCores = 8)
+
+Sim2 <- rbind(Sim2_EBICglasso, Sim2_pcor, Sim2_huge)
 
 # Print results:
 Sim2

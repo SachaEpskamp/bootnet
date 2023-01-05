@@ -503,7 +503,7 @@ plot.bootnet <- function(
       )
       Edgelist$id <- paste0(Edgelist$from,"--",Edgelist$to)
       fullEdgelist <- data.frame(id=include,stringsAsFactors=FALSE) %>% 
-        dplyr::left_join(dplyr::select_(Edgelist,"id","col"),by = "id")
+        dplyr::left_join(dplyr::select(Edgelist,.data[["id"]],.data[["col"]]),by = "id")
       fullEdgelist$col[is.na(fullEdgelist$col)] <- "white"
       
       colorValues <- fullEdgelist$col
@@ -651,16 +651,16 @@ plot.bootnet <- function(
         stop("'split0' is not yet supported for plot = 'line'")
       }
       
-      sampleTable <- x[['sampleTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
-      bootTable <- x[['bootTable']] %>% dplyr::filter_(~type %in% statistics) %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
+      sampleTable <- x[['sampleTable']] %>% dplyr::filter(.data[['type']] %in% statistics) %>% dplyr::mutate(type = factor(.data[['type']], levels = statistics))
+      bootTable <- x[['bootTable']] %>% dplyr::filter(.data[['type']] %in% statistics) %>% dplyr::mutate(type = factor(.data[['type']], levels = statistics))
       
       ### Ordering:
       if (order[[1]]=="id"){
         sampleTable$order <- match(as.character(sampleTable$id),gtools::mixedsort(as.character(sampleTable$id)))
       } else if (order[[1]]%in%c("sample","mean")){
         # Summarize first:
-        summarySample <- sampleTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_( value = ~value[type==statistics[[1]]])
-        summaryBoot <- bootTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_( mean = ~mean(value))
+        summarySample <- sampleTable %>% dplyr::group_by(.data[['id']]) %>% dplyr::summarize( value = .data[['value']][.data[['type']]==statistics[[1]]])
+        summaryBoot <- bootTable %>% dplyr::group_by(.data[['id']]) %>% dplyr::summarize( mean = mean(.data[['value']]))
         summary <- left_join(summarySample,summaryBoot,by="id")
         if (order[[1]] == "sample"){
           summary$order <- order(order(summary$value,summary$mean))
@@ -668,25 +668,25 @@ plot.bootnet <- function(
           # summary$order <- dplyr::min_rank(summary$mean)
           summary$order <-  order(order(summary$mean))
         }
-        sampleTable <- sampleTable %>% dplyr::left_join(dplyr::select_(summary,~id,~order), by = "id")
+        sampleTable <- sampleTable %>% dplyr::left_join(dplyr::select(summary,.data[['id']],.data[['order']]), by = "id")
       } else stop(paste("'order'",order[[1]],"Not supported"))
       
       if (!decreasing){
         sampleTable$order <- -sampleTable$order
       }
       
-      bootTable <- bootTable %>% dplyr::left_join(sampleTable %>% dplyr::select_(~order,~id), by = "id") %>%
-        dplyr::arrange_(~dplyr::row_number(order))  %>%
-        dplyr::mutate_(id = ~gsub("^(E|N): ","",as.character(id))) %>%
-        dplyr::mutate_(
-          id = ~factor(id, levels = unique(id))
+      bootTable <- bootTable %>% dplyr::left_join(sampleTable %>% dplyr::select(.data[['order']],.data[['id']]), by = "id") %>%
+        dplyr::arrange(dplyr::row_number(.data[['order']]))  %>%
+        dplyr::mutate(id = gsub("^(E|N): ","",as.character(.data[['id']]))) %>%
+        dplyr::mutate(
+          id = factor(.data[['id']], levels = unique(.data[['id']]))
         )
       
       sampleTable <- sampleTable %>%
-        dplyr::arrange_(~dplyr::row_number(order))  %>%
-        dplyr::mutate_(id = ~gsub("^(E|N): ","",as.character(id))) %>%
-        dplyr::mutate_(
-          id = ~factor(id, levels = unique(id))
+        dplyr::arrange(~dplyr::row_number(.data[['order']]))  %>%
+        dplyr::mutate(id = gsub("^(E|N): ","",as.character(.data[['id']]))) %>%
+        dplyr::mutate(
+          id = factor(.data[['id']], levels = unique(.data[['id']]))
         )
       
       
@@ -715,7 +715,7 @@ plot.bootnet <- function(
       return(g)
     } else if (plot[[1]] %in% c("interval","area")){
       # Compute summary stats:
-      sumTable <- summary(x, statistics = statistics,rank=rank)  %>% ungroup %>% dplyr::mutate_(type = ~factor(type, levels = statistics))
+      sumTable <- summary(x, statistics = statistics,rank=rank)  %>% ungroup %>% dplyr::mutate(type = factor(.data[['type']], levels = statistics))
       
       ### Ordering:
       if (order[[1]]=="id"){
@@ -723,13 +723,13 @@ plot.bootnet <- function(
       } else if (order[[1]]%in%c("sample","mean")){
         # Summarize first:
     
-        summary <- sumTable %>% dplyr::group_by_(~id) %>% dplyr::summarize_(sample = ~sample[type==statistics[[1]]], mean = as.formula(paste0("~mean(",meanVar,",na.rm=TRUE)")))
+        summary <- sumTable %>% dplyr::group_by(.data[['id']]) %>% dplyr::summarize(sample = .data[['sample']][.data[['type']]==statistics[[1]]], mean = mean(.data[[meanVar]],na.rm=TRUE))
         if (order[[1]]=="sample"){
           summary$order <- order(order(summary$sample,summary$mean))
         } else {
           summary$order <- dplyr::min_rank(summary$mean)
         }
-        sumTable <- sumTable %>% dplyr::left_join(dplyr::select_(summary,~id,~order), by = "id")
+        sumTable <- sumTable %>% dplyr::left_join(dplyr::select(summary,.data[['id']],.data[['order']]), by = "id")
       } else stop(paste("'order'",order[[1]],"Not supported"))
       
       if (!decreasing){
@@ -738,10 +738,10 @@ plot.bootnet <- function(
       
       # Reorder:
       sumTable <- sumTable %>%
-        dplyr::arrange_(~dplyr::row_number(order))  %>%
-        dplyr::mutate_(id = ~gsub("^(E|N): ","",as.character(id))) %>%
-        dplyr::mutate_(
-          id = ~factor(id, levels = unique(id))
+        dplyr::arrange(dplyr::row_number(.data[['order']]))  %>%
+        dplyr::mutate(id = gsub("^(E|N): ","",as.character(.data[['id']]))) %>%
+        dplyr::mutate(
+          id = factor(.data[['id']], levels = unique(.data[['id']]))
         )
       
       
@@ -757,17 +757,14 @@ plot.bootnet <- function(
       #       maxArea <- "q97.5"  
       #     }
       
-      # sumTable <- sumTable %>% mutate_(
-      #   lbound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIlower,q2.5),
-      #   ubound = ~ifelse(CIstyle[match(type,statistics)] == "SE", CIupper, q97.5)
-      # )
+    
       sumTable$lbound <- sumTable[[minArea]]
       sumTable$ubound <- sumTable[[maxArea]]
       
 
       sumTable2 <- dplyr::bind_rows(
-        sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~lbound, mean = meanVar, ~prop0),
-        revTable(sumTable %>% select_(~type,~id,~node1,~node2,~sample,ci = ~ubound, mean = meanVar, ~prop0))
+        sumTable %>% select(.data[['type']],.data[['id']],.data[['node1']],.data[['node2']],.data[['sample']],ci = .data[['lbound']], mean = .data[[meanVar]], .data[['prop0']]),
+        revTable(sumTable %>% select(.data[['type']],.data[['id']],.data[['node1']],.data[['node2']],.data[['sample']],ci = .data[['ubound']], mean = .data[[meanVar]], .data[['prop0']]))
       )
       
       
@@ -776,11 +773,21 @@ plot.bootnet <- function(
       
       if (plot == "area"){
         
+        # Subset:
+        if (!missing(subset)){
+          sumTable2 <- sumTable2 %>% filter(.data[['id']] %in% subset | .data[['node1']] %in% subset | .data[['node2']] %in% subset)
+          sumTable <- sumTable %>% filter(.data[['id']] %in% subset | .data[['node1']] %in% subset | .data[['node2']] %in% subset)
+          
+          sumTable2$id <- droplevels(sumTable2$id)
+          sumTable$id <- droplevels(sumTable$id)
+          
+        }
+        
+        
         sumTable$numericID <- as.numeric(sumTable$id)
         sumTable2$numericID <- as.numeric(sumTable2$id)
 
-        gathered_sumTable <- tidyr::gather_(sumTable,"var","value",c("sample",meanVar))
-        
+        gathered_sumTable <- tidyr::gather(sumTable,"var","value",c("sample",meanVar))
       
         # add transparency:
         if (split0){
@@ -790,15 +797,7 @@ plot.bootnet <- function(
         } else {
           gathered_sumTable$alpha <- 1
         }
-        
-        # Subset:
-        # Subset:
-        if (!missing(subset)){
-          gathered_sumTable <- gathered_sumTable %>% filter_(~id %in% subset)
-          sumTable2 <- sumTable2 %>% filter_(~id %in% subset)
-          sumTable <- sumTable %>% filter_(~id %in% subset)
-        }
-        
+
         # Plot:
         g <- ggplot(gathered_sumTable, aes_string(x='value', y='numericID', colour = "var")) + 
           geom_polygon(aes_string(x = "ci", y = "numericID"),fill = bootColor, colour = NA, alpha = areaAlpha, data = sumTable2) +
@@ -840,7 +839,18 @@ plot.bootnet <- function(
       
         
       } else {
-        gathered_sumTable <- tidyr::gather_(sumTable,"var","value",c("sample",meanVar))
+        # Subset:
+        if (!missing(subset)){
+          sumTable <- sumTable %>% filter(.data[['id']] %in% subset | .data[['node1']] %in% subset | .data[['node2']] %in% subset)
+          sumTable2 <- sumTable2 %>% filter(.data[['id']] %in% subset | .data[['node1']] %in% subset | .data[['node2']] %in% subset)
+          
+          # Relevel:
+          sumTable2$id <- droplevels(sumTable2$id)
+          sumTable$id <- droplevels(sumTable$id)
+        }
+        
+        
+        gathered_sumTable <- tidyr::gather(sumTable,"var","value",c("sample",meanVar))
         
         # add transparency:
         if (split0){
@@ -853,12 +863,7 @@ plot.bootnet <- function(
           sumTable2$alpha <- 1
         }
         
-        # Subset:
-        if (!missing(subset)){
-          gathered_sumTable <- gathered_sumTable %>% filter_(~id %in% subset)
-          sumTable <- sumTable %>% filter_(~id %in% subset)
-          sumTable2 <- sumTable2 %>% filter_(~id %in% subset)
-        }
+
         
         g <- ggplot(gathered_sumTable, aes_string(x='value', y='id', group = 'id', colour = "var")) + 
           geom_point(aes_string(alpha = 'alpha')) +

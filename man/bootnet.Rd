@@ -52,6 +52,8 @@ Vector indicating which statistics to store. Options are:
 \item{\code{"expectedInfluence"}}{Expected Influence}
 \item{\code{"outExpectedInfluence"}}{Outgoing expected influence}
 \item{\code{"inExpectedInfluence"}}{Incoming expected influence}
+\item{\code{"bridgeInDegree"}}{Bridge in-degree (see \code{\link[networktools]{bridge}})}
+\item{\code{"bridgeOutnDegree"}}{Bridge out-degree (see \code{\link[networktools]{bridge}})}
 \item{\code{"bridgeStrength"}}{Bridge-strength (see \code{\link[networktools]{bridge}})}
 \item{\code{"bridgeCloseness"}}{Bridge-closeness (see \code{\link[networktools]{bridge}})}
 \item{\code{"bridgeBetweenness"}}{Bridge-betweenness (see \code{\link[networktools]{bridge}})}

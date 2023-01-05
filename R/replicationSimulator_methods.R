@@ -21,15 +21,13 @@ summary.replicationSimulator <- function(object, digits = 2, ...){
   }
   
   # Summarize per case:
-  df <- object %>% dplyr::select_("correlation", 
-                                  "correlationNonZero", "jaccard", "replicatedEdges", "replicatedZeroes", 
-                                  "strength", "closeness", "betweenness",.dots = Conditions) %>% 
-    dplyr::group_by_(.dots = Conditions) %>% dplyr::summarize_each(funs(fun(.,digits=digits))) %>% 
-    dplyr::arrange_(~nCases) %>% as.data.frame
+  df <- object %>% dplyr::select(.data[["correlation"]], 
+                                  .data[["correlationNonZero"]], .data[["jaccard"]], .data[["replicatedEdges"]], .data[["replicatedZeroes"]], 
+                                  .data[["strength"]], .data[["closeness"]], .data[["betweenness"]], all_of(Conditions)) %>% 
+    dplyr::group_by_at(Conditions) %>% dplyr::summarize_each(funs(fun(.,digits=digits))) %>% 
+    dplyr::arrange(.data[['nCases']]) %>% as.data.frame
   # 
-  # dfSD <- object %>% dplyr::select_("sensitivity","specificity","correlation",.dots = Conditions) %>% 
-  #   dplyr::group_by_(.dots = Conditions) %>% dplyr::summarize_each(funs(sd(.,na.rm=TRUE))) %>% 
-  #   dplyr::arrange_(~nCases) %>% as.data.frame
+ 
   
   row.names(df) <- NULL
   

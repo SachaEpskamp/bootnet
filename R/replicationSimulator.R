@@ -97,7 +97,7 @@ replicationSimulator <- function(
         for (i in seq_along(.dots)){
           args1[[names(.dots)[i]]] <- get(names(.dots)[i])
         }
-        netResults1 <- do.call(bootnet::estimateNetwork,args1)
+        suppressWarnings(netResults1 <- do.call(bootnet::estimateNetwork,args1))
         estNet1 <- qgraph::getWmat(netResults1)
         
         
@@ -111,7 +111,7 @@ replicationSimulator <- function(
         for (i in seq_along(.dots)){
           args2[[names(.dots)[i]]] <- get(names(.dots)[i])
         }
-        netResults2 <- do.call(bootnet::estimateNetwork,args2)
+        suppressWarnings(netResults2 <- do.call(bootnet::estimateNetwork,args2))
         estNet2 <- qgraph::getWmat(netResults2)
         
         

@@ -38,14 +38,14 @@ bootThreshold <- function(bootobject, alpha = 0.05,verbose=TRUE, thresholdInterc
     
     # Summary table of edge weights:
     bootSummary <- bootobject$bootTable %>% 
-      dplyr::filter_(~type == "edge", ~graph == graphName) %>%
-      dplyr::group_by_(~node1,~node2) %>%
+      dplyr::filter(.data[['type']] == "edge", .data[['graph']] == graphName) %>%
+      dplyr::group_by(.data[['node1']],.data[['node2']]) %>%
       dplyr::summarize(
         lower = quantile(value, alpha/2),
         upper = quantile(value, 1 - alpha/2)
       ) %>% 
       dplyr::mutate(sig = upper < 0 | lower > 0) %>%
-      filter_(~!sig)
+      filter(!.data[['sig']])
 
     # Threshold network:
     if (nrow(bootSummary) > 0){
@@ -64,14 +64,14 @@ bootThreshold <- function(bootobject, alpha = 0.05,verbose=TRUE, thresholdInterc
       
       # Summary table of edge weights:
       bootSummary <- bootobject$bootTable %>% 
-        dplyr::filter_(~type == "intercept", ~graph == graphName) %>%
-        dplyr::group_by_(~node1) %>%
+        dplyr::filter(.data[['type']] == "intercept", .data[['graph']] == graphName) %>%
+        dplyr::group_by(.data[['node1']]) %>%
         dplyr::summarize(
           lower = quantile(value, alpha/2),
           upper = quantile(value, 1 - alpha/2)
         ) %>% 
         dplyr::mutate(sig = upper < 0 | lower > 0) %>%
-        filter_(~!sig)
+        filter(!.data[['sig']])
       
       # Threshold network:
       if (nrow(bootSummary) > 0){

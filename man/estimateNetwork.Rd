@@ -82,7 +82,7 @@ bootnet_huge(data, tuning = 0.5, missing = c("listwise", "stop"),
                    lambda.min.ratio = 0.01, nlambda = 100, unlock =
                    FALSE, transform = c("none", "rank", "quantile"), ...)
   
-bootnet_mgm(data, type, level, tuning = 0.5, missing =
+bootnet_mgm(data, type, level, tuning = 0.25, missing =
                    c("listwise", "stop"), verbose = TRUE, criterion =
                    c("EBIC", "CV"), nFolds = 10, order = 2, rule =
                    c("AND", "OR"), binarySign, unlock = FALSE, transform
