@@ -3,7 +3,7 @@
 
 <p align="center">
     <a href="https://www.r-pkg.org/pkg/bootnet"><img src="https://www.r-pkg.org/badges/version/bootnet" alt="CRAN version"/></a>
-    <a href="https://cranchecks.info/pkgs/bootnet"><img src="https://cranchecks.info/badges/worst/bootnet" alt="CRAN checks"/></a>
+    <a href="https://cran.r-project.org/web/checks/check_results_bootnet.html"><img src="https://badges.cranchecks.info/worst/bootnet.svg" alt="CRAN checks"/></a>
     <a href="https://github.com/SachaEpskamp/bootnet/actions"><img src="https://github.com/SachaEpskamp/bootnet/workflows/R-CMD-check/badge.svg" alt="R-CMD-check" /></a>
 </p>
 
