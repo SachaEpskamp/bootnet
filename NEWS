@@ -1,3 +1,6 @@
+Changes in Version 1.5.3
+    - Improved support for estimation functions with multiple networks of multiple types
+
 Changes in Version 1.5.2
     - Fixed links in README.md
 
