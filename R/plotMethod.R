@@ -505,7 +505,13 @@ plot.bootnet <- function(
         col = samgraph$graphAttributes$Edges$color,
         stringsAsFactors=FALSE
       )
-      Edgelist$id <- paste0(Edgelist$from,"--",Edgelist$to)
+
+      if (any(samgraph$Edgelist$directed)){
+          Edgelist$id <- paste0(Edgelist$from,"->",Edgelist$to)
+      } else {
+          Edgelist$id <- paste0(Edgelist$from,"--",Edgelist$to)
+      }
+
       fullEdgelist <- data.frame(id=include,stringsAsFactors=FALSE) %>%
         dplyr::left_join(dplyr::select(Edgelist,.data[["id"]],.data[["col"]]),by = "id")
       fullEdgelist$col[is.na(fullEdgelist$col)] <- "white"
