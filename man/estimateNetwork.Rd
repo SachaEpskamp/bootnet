@@ -27,11 +27,11 @@ This function allows for flexible estimation of a network structure using variou
 estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
                  "IsingFit", "IsingSampler", "huge", "adalasso", "mgm",
                  "relimp", "cor", "TMFG", "ggmModSelect", "LoGo",
-                 "graphicalVAR", "piecewiseIsing", "SVAR_lavaan", "GGMncv"), 
-                 fun, labels, verbose = TRUE, .dots = list(), weighted = TRUE, 
-                 signed = TRUE, directed, datatype, checkNumeric = FALSE, ..., 
+                 "graphicalVAR", "piecewiseIsing", "SVAR_lavaan", "GGMncv"),
+                 fun, labels, verbose = TRUE, .dots = list(), weighted = TRUE,
+                 signed = TRUE, directed, datatype, checkNumeric = FALSE, ...,
                  .input, memorysaver = FALSE)
-                
+
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor", "cov",
                    "cor_auto", "npn", "spearman"), missing =
                    c("pairwise", "listwise", "fiml", "stop"), sampleSize
@@ -42,7 +42,7 @@ bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor", "cov",
                    nlambda = 100, threshold = FALSE, unlock = FALSE,
                    nonPositiveDefinite = c("stop", "continue"), transform
                    = c("none", "rank", "quantile"), ...)
-  
+
 bootnet_pcor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
                    "spearman"), missing = c("pairwise", "listwise",
                    "fiml", "stop"), sampleSize = c("pairwise_average",
@@ -52,7 +52,7 @@ bootnet_pcor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
                    principalDirection = FALSE, unlock = FALSE,
                    nonPositiveDefinite = c("stop", "continue"), transform
                    = c("none", "rank", "quantile"))
-  
+
 bootnet_cor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
                    "spearman"), missing = c("pairwise", "listwise",
                    "fiml", "stop"), sampleSize = c("pairwise_average",
@@ -62,32 +62,33 @@ bootnet_cor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
                    FALSE, unlock = FALSE, nonPositiveDefinite = c("stop",
                    "continue"), transform = c("none", "rank",
                    "quantile"))
-  
+
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise", "stop"),
                     verbose = TRUE, rule = c("AND", "OR"), split =
                     "median", principalDirection = FALSE, unlock = FALSE)
-  
+
 bootnet_IsingSampler(data, missing = c("listwise", "stop"), verbose = TRUE,
-                    split = "median", method = c("default", "ll", "pl",
-                    "uni", "bi"), principalDirection = FALSE, unlock =
-                    FALSE)
-  
+                    split = "median", method = c("uni", "ll", "pl", "bi"),
+                    principalDirection = FALSE, unlock = FALSE, threshold
+                    = FALSE, alpha = 0.01, min_sum = -Inf, rule = c("AND",
+                    "OR"))
+
 bootnet_adalasso(data, missing = c("listwise", "stop"), verbose = TRUE,
                    nFolds = 10, principalDirection = FALSE, unlock =
                    FALSE, transform = c("none", "rank", "quantile"), ...)
-  
+
 bootnet_huge(data, tuning = 0.5, missing = c("listwise", "stop"),
                    verbose = TRUE, npn = TRUE, criterion = c("ebic",
                    "ric", "stars"), principalDirection = FALSE,
                    lambda.min.ratio = 0.01, nlambda = 100, unlock =
                    FALSE, transform = c("none", "rank", "quantile"), ...)
-  
+
 bootnet_mgm(data, type, level, tuning = 0.25, missing =
                    c("listwise", "stop"), verbose = TRUE, criterion =
                    c("EBIC", "CV"), nFolds = 10, order = 2, rule =
                    c("AND", "OR"), binarySign, unlock = FALSE, transform
                    = c("none", "rank", "quantile"), ...)
-  
+
 bootnet_relimp(data, normalized = TRUE, type = "lmg",
                    structureDefault = c("none", "custom", "EBICglasso",
                    "pcor", "IsingFit", "IsingSampler", "huge",
@@ -95,24 +96,24 @@ bootnet_relimp(data, normalized = TRUE, type = "lmg",
                    "LoGo"), missing = c("listwise", "stop"), ..., verbose
                    = TRUE, threshold = 0, unlock = FALSE, transform =
                    c("none", "rank", "quantile"))
-  
+
 bootnet_TMFG(data, graphType = c("cor", "pcor"), corMethod =
                    c("cor", "cov", "cor", "npn", "cor_auto"), missing =
                    c("pairwise", "listwise", "fiml", "stop"), verbose =
                    TRUE, corArgs = list(), principalDirection = FALSE,
                    unlock = FALSE, transform = c("none", "rank",
                    "quantile"), ...)
-    
+
 bootnet_LoGo(data, corMethod = c("cor", "cov", "cor", "npn",
                    "cor_auto"), missing = c("pairwise", "listwise",
                    "fiml", "stop"), verbose = TRUE, corArgs = list(),
                    principalDirection = FALSE, unlock = FALSE, transform
                    = c("none", "rank", "quantile"), ...)
-  
+
 bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection
                    = FALSE, missing = c("listwise", "stop"), unlock =
                    FALSE, transform = c("none", "rank", "quantile"), ...)
-  
+
 bootnet_ggmModSelect(data, tuning = 0, corMethod = c("cor", "cov",
                    "cor_auto", "npn", "spearman"), missing =
                    c("pairwise", "listwise", "fiml", "stop"), sampleSize
@@ -123,24 +124,24 @@ bootnet_ggmModSelect(data, tuning = 0, corMethod = c("cor", "cov",
                    nCores = 1, unlock = FALSE, nonPositiveDefinite =
                    c("stop", "continue"), transform = c("none", "rank",
                    "quantile"), ...)
-  
+
 bootnet_piecewiseIsing(data, cutoff, missing = c("listwise", "stop"), verbose
                     = TRUE, IsingDefault = c("IsingSampler", "IsingFit",
                     "custom"), zeroThreshold = 1, minimalN = ncol(data) +
                     1, unlock = FALSE, ...)
-  
+
 bootnet_SVAR_lavaan(data, verbose = TRUE, principalDirection = FALSE,
                    missing = c("listwise", "stop"), criterion = "bic",
                    eqThreshold = 1e-04, tempWhitelist, tempBlacklist,
                    contWhitelist, contBlacklist, minimalModInd = 10,
                    unlock = FALSE, transform = c("none", "rank",
                    "quantile"), ...)
-                   
+
 bootnet_GGMncv(data, penalty = c("atan","selo","exp","log","sica","scad","mcp","lasso"),
-  corMethod = c("cor","cov","cor_auto","npn","spearman"), 
+  corMethod = c("cor","cov","cor_auto","npn","spearman"),
   missing = c("pairwise","listwise","fiml","stop"),
   sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
-                 "pairwise_minimum"), 
+                 "pairwise_minimum"),
   verbose = TRUE, corArgs = list(), principalDirection = FALSE, unlock = FALSE,
   nonPositiveDefinite = c("stop","continue"), transform = c("none","rank","quantile"),
   ...)
@@ -178,7 +179,7 @@ A custom estimation function, when no default set is used. This must be a functi
 \item{sampleSize}{How will sample size be computed in EBICglasso default set? The default \code{"pairwise_average"} will set the sample size to the average of sample sizes used for each individual correlation. Other options are \code{"pairwise_maximum"} (largest sample sized used for each individual correlation), \code{"pairwise_minimum"} (smallest sample sized used for each individual correlation), \code{"maximum"} (takes total number of rows including rows with NA), and \code{"minimum"} (takes total number of rows that contain no NA).}
 \item{corArgs}{A list with arguments for the function used defined by \code{corMethod}.}
 \item{threshold}{
-Thresholding to use in partial correlation networks. Can be a fixed number to threshold all absolute edges below this value, \code{'locfdr'} for local FDR, or any option corresponding to adjustments in \code{\link[psych]{corr.p}} (\code{'none'}, \code{'sig'}, \code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'} or \code{'fdr'})). 
+Thresholding to use in partial correlation networks. Can be a fixed number to threshold all absolute edges below this value, \code{'locfdr'} for local FDR, or any option corresponding to adjustments in \code{\link[psych]{corr.p}} (\code{'none'}, \code{'sig'}, \code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'} or \code{'fdr'})). Can also be used for \code{default = "IsingSampler"} but can only be set to a logical enabling or disabling significance thresholding.
 }
 \item{refit}{Logical used in EBICglasso default set: should the estimated model structure be refitted without LASSO regularization?}
 \item{rule}{The rule to use to select an edge in nodewise estimation. \code{"AND"} to only select in edge if both regression coefficients are nonzero and \code{"OR"} if only one is nonzero. Used in 'IsingFit' and 'mgm' default sets.}
@@ -270,10 +271,12 @@ Minimal modification index to consider when adding parameters in SVAR search.
 Set to \code{"stop"} to stop with an error when the input matrix is not positive definite, and to \code{"continue"} (old behavior) to continue anyway.
 }
 \item{unlock}{
-Set to \code{TRUE} to not result in a standard error. This is to prevent using the inner functions seperatly (see details below). 
+Set to \code{TRUE} to not result in a standard error. This is to prevent using the inner functions seperatly (see details below).
 }
 \item{transform}{Should data be transformed before estimate the network? \code{"rank"} will call \code{\link{rank_transformation}} and \code{"quantile"}" will call \code{\link{quantile_transformation}}.}
 \item{penalty}{Penalty to use in the GGMncv methods.}
+\item{min_sum}{ The minimum sum score that is artifically possible in the dataset. Defaults to -Inf. Set this only if you know a lower sum score is not possible in the data, for example due to selection bias.}
+    \item{AND}{Logical, should an AND-rule (both regressions need to be significant) or OR-rule (one of the regressions needs to be significant) be used?}
 }
 \details{
 
@@ -305,7 +308,7 @@ Network <- estimateNetwork(bfiSub, default = "EBICglasso")
 print(Network)
 
 # Estimated network:
-plot(Network, layout = 'spring') 
+plot(Network, layout = 'spring')
 
 # Centrality indices:
 library("qgraph")
