@@ -1,6 +1,10 @@
+Changes in Version 1.5.5
+    - Small help file fix
+
 Changes in Version 1.5.4
     - IsingSampler default set now always uses method = "uni" by default
     - Added min_sum and threshold options to defailt = "IsingSampler"
+    - Fixed a small problem in the bootnet package help file
 
 Changes in Version 1.5.3
     - Improved support for estimation functions with multiple networks of multiple types
