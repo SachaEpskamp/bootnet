@@ -65,7 +65,8 @@ bootnet_cor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
 
 bootnet_IsingFit(data, tuning = 0.25, missing = c("listwise", "stop"),
                     verbose = TRUE, rule = c("AND", "OR"), split =
-                    "median", principalDirection = FALSE, unlock = FALSE)
+                    "median", principalDirection = FALSE,
+                    min_sum = -Inf, unlock = FALSE)
 
 bootnet_IsingSampler(data, missing = c("listwise", "stop"), verbose = TRUE,
                     split = "median", method = c("uni", "ll", "pl", "bi"),

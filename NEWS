@@ -1,3 +1,6 @@
+Changes in Version 1.5.6
+    - Included min_sum argument in the IsingFit default
+
 Changes in Version 1.5.5
     - Small help file fix
 

@@ -649,6 +649,7 @@ bootnet_IsingFit <- function(
   rule = c("AND","OR"),
   split = "median",
   principalDirection = FALSE,
+  min_sum = -Inf,
   unlock = FALSE
 ){
   if (!unlock){
@@ -715,7 +716,7 @@ bootnet_IsingFit <- function(
   }
 
   # Estimate network:
-  Results <- IsingFit::IsingFit(data, AND = rule == "AND", gamma = tuning,progressbar = verbose,plot = FALSE)
+  Results <- IsingFit::IsingFit(data, AND = rule == "AND", gamma = tuning,progressbar = verbose,plot = FALSE, min_sum = min_sum)
 
 
   # Transform back:
@@ -833,7 +834,8 @@ bootnet_IsingSampler <- function(
 
       Results <- IsingSampler::EstimateIsing(as.matrix(data), method = method)
   } else {
-      Results <- IsingSampler::EstimateIsing(as.matrix(data), method = method, thresholding = threshold, alpha = alpha, AND = rule == "AND", min_sum=min_sum)
+      Results <- IsingSampler::EstimateIsing(as.matrix(data), method = method,
+                     thresholding = threshold, alpha = alpha, AND = rule == "AND", min_sum=min_sum)
   }
 
 
