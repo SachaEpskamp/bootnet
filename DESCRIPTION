@@ -18,3 +18,5 @@ Description: Bootstrap methods to assess accuracy and stability of estimated net
               specification of any undirected network estimation procedure in R, and offers 
               default sets for various estimation routines.
 License: GPL-2
+BugReports: https://github.com/SachaEpskamp/bootnet/issues
+URL: https://github.com/SachaEpskamp/bootnet
