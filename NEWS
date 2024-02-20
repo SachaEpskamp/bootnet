@@ -1,4 +1,22 @@
+Changes in Version 1.5.6
+    - Included min_sum argument in the IsingFit default
+
+Changes in Version 1.5.5
+    - Small help file fix
+
+Changes in Version 1.5.4
+    - IsingSampler default set now always uses method = "uni" by default
+    - Added min_sum and threshold options to defailt = "IsingSampler"
+    - Fixed a small problem in the bootnet package help file
+
+Changes in Version 1.5.3
+    - Improved support for estimation functions with multiple networks of multiple types
+
+Changes in Version 1.5.2
+    - Fixed links in README.md
+
 Changes in Version 1.5.1
+  - Changed CRAN NOTE regarding class check
   - Fixed remaining deprecated dplyr functions
   - Fixed a bug with netSimulator and replicationSimulator print method
 
@@ -63,7 +81,7 @@ Changes in Version 1.2
       - Added bootThreshold function to threshold a network based on bootstraps (e.g., bootstrapped interval includes 0)
       - Added bootInclude function to obtain a network of bootstrap inclusion probabilities
       - the 'statistics' argument in bootnet now defaults to c("edge","strength","outStrength","inStrength"). This means that closeness and betweenness are no longer stored by default!
-      - corStability will now use all tested statistics by default  
+      - corStability will now use all tested statistics by default
   o Updates:
       - The corStability function now accepts statistics written with an upper case first letter
       - Fixed a bug using default = "mgm" with only one binary variable
@@ -92,7 +110,7 @@ Changes in Version 1.1
   - Many default sets now support the 'principalDirection' argument, which can be used to multiply variables with the sign of the first principal component
   - plot method now supports split0 = TRUE, will show how often an edge was 0 and only show CIs of non-zero estimates (faded relative to proportion of times edge was zero).
   - Updated the 'genGGM' function to support various different network structures, with thanks to Mark Brandt!
-  - Added RSPBC and Hybrid centrality, thanks to Alex Christensen 
+  - Added RSPBC and Hybrid centrality, thanks to Alex Christensen
   - Added the 'alpha' argument to default set "pcor"
   - Added functionality for functions returning multiple graphs
   - Added outStrength, inStrength, outExpectedInfluence and inExpectedInfluence
@@ -142,39 +160,38 @@ Changes in version 0.4:
   - Default set "mgm" is now supported
   - labels argument is now supported in difference plots
   - Quantile now uses type = 6, this makes CIs slightly wider and therefore the difference test slightly more conservative
-  
-  
+
+
 Changes in version 0.3:
 	- Eiko Fried joined the author list
-	- Added 'estimateNetwork' function, allowing one to estimate the network structure 
+	- Added 'estimateNetwork' function, allowing one to estimate the network structure
 	  from within bootnet
 		- The plot method will run qgraph on the estimated network structure
-		- The qgraph function getWmat can now be applied to networks estimated in bootnet. 
-		  Allowing one to use, e.g., centralityPlot on a network estimated with 
+		- The qgraph function getWmat can now be applied to networks estimated in bootnet.
+		  Allowing one to use, e.g., centralityPlot on a network estimated with
 		  'estimateNetwork'
-	- Added 'differenceTest' function to test for significant differences between edge 
+	- Added 'differenceTest' function to test for significant differences between edge
 	  weights and centrality indices
 	- Added 'corStability' to compute the CS-coefficient as described in our paper:
-			- Epskamp, S., Borsboom, D., & Fried, E. I. (2016). Estimating psychological 
-			  networks and their accuracy: a tutorial paper. arXiv preprint, 
+			- Epskamp, S., Borsboom, D., & Fried, E. I. (2016). Estimating psychological
+			  networks and their accuracy: a tutorial paper. arXiv preprint,
 			  arXiv:1604.08462.
-	- The plot method now supports 'plot = "difference"', to make plots of significant 
+	- The plot method now supports 'plot = "difference"', to make plots of significant
 	  differences between edge-weights and centralities
 	- New default sets:
 			- "huge"
 			- "adalasso"
 	- 'nCores' argument added to bootnet to use parallel computing
-	- bootnet print methods now print a list of relevant references on the network 
+	- bootnet print methods now print a list of relevant references on the network
 	  estimation procedure used
-	- When EBICglasso is used as default set, variables that are made ordinal are now 
+	- When EBICglasso is used as default set, variables that are made ordinal are now
 	  printed only when estimating the first network
 	- Updated CITATION such that citation("bootnet") now references the pre-print
 	- Bootnet now gives a message on loading that it is BETA software
-	- Added 'statistics' argument to bootnet. Now, distance and length are not stored by 
+	- Added 'statistics' argument to bootnet. Now, distance and length are not stored by
 	  default
 	- Several minor bugfixes
-	
-	
-	
-	
-	
+
+
+
+

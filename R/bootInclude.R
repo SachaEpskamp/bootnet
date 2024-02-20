@@ -1,15 +1,15 @@
 # Function to create include probability network
 bootInclude <- function(bootobject,verbose=TRUE){
   # Check if object is bootnet object:
-  if (class(bootobject) != "bootnet"){
+  if (!is(bootobject,"bootnet")){
     stop("'bootobject' must be an object of class 'bootnet'")
   }
-  
+
   # Check type:
   if (bootobject$type != "nonparametric" & bootobject$type != "parametric"){
     stop("Bootstrap type must be 'nonparametric' or 'parametric'")
   }
-  
+
   # Extract the network object:
   Network <- bootobject$sample
   # Dummy for multiple graphs:
@@ -24,24 +24,24 @@ bootInclude <- function(bootobject,verbose=TRUE){
     Directed <- Network$directed
     Intercepts <-  Network$intercepts
   }
-  
+
   # For every graph:
   for (g in seq_along(Graphs)){
     graphName <- names(Graphs)[g]
 
     # Summary table of edge weights:
-    bootSummary <- bootobject$bootTable %>% 
+    bootSummary <- bootobject$bootTable %>%
       dplyr::filter(.data[['type']] == "edge", .data[['graph']] == graphName) %>%
       dplyr::group_by(.data[['node1']],.data[['node2']]) %>%
       dplyr::summarize(
         propNonZero=mean(value != 0)
       )
-    
+
     # Reweight network:
     # if (nrow(bootSummary) > 0){
     Graphs[[graphName]][] <- 0
 
-    
+
     for (i in 1:nrow(bootSummary)){
       Graphs[[graphName]][Network$labels == bootSummary$node1[i],Network$labels == bootSummary$node2[i]] <- bootSummary$propNonZero[i]
       if (!Directed[[graphName]]){
@@ -49,7 +49,7 @@ bootInclude <- function(bootobject,verbose=TRUE){
       }
     }
   }
-  
+
   # Return to network object:
   if (length(Graphs) == 1){
     Network$graph <- Graphs[[1]]
@@ -58,10 +58,10 @@ bootInclude <- function(bootobject,verbose=TRUE){
     Network$graph <- Graphs
     Network$intercepts <- NULL
   }
-  
+
   # Add indicator network is about include proportions:
   Network$bootInclude <- TRUE
-  
+
   # Return network:
   return(Network)
 }
