@@ -700,7 +700,6 @@ plot.bootnet <- function(
         )
 
 
-
       g <- ggplot(bootTable, aes_string(x = 'value', y = 'id', group = 'name')) +
         geom_path(alpha = bootAlpha, lwd = bootlwd) +
         geom_path(data = sampleTable, alpha=1, color = sampleColor, lwd = samplelwd) +

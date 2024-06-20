@@ -18,8 +18,15 @@ principalDirection_noCor <- function(data){
 
 
 # Function for sampleSize:
-sampleSize_pairwise <- function(data, type = c( "pairwise_average","maximum","minimum","pairwise_maximum",
-                                               "pairwise_minimum")){
+sampleSize_pairwise <- function(data, type = c( "pairwise_average",
+                                                "maximum",
+                                                "minimum",
+                                                "pairwise_maximum",
+                                               "pairwise_minimum",
+                                               "pairwise_average_v1.5",
+                                               "pairwise_maximum_v1.5",
+                                               "pairwise_minimum_v1.5"
+                                               )){
   type <- match.arg(type)
 
   if (type == "maximum"){
@@ -42,6 +49,12 @@ sampleSize_pairwise <- function(data, type = c( "pairwise_average","maximum","mi
       sampleSize <- min(misMatrix[lower.tri(misMatrix)])
     } else  if (type == "pairwise_average"){
       sampleSize <- mean(misMatrix[lower.tri(misMatrix)])
+    } else if (type == "pairwise_maximum_v1.5"){
+        sampleSize <- max(misMatrix)
+    } else  if (type == "pairwise_minimum_v1.5"){
+        sampleSize <- min(misMatrix)
+    } else  if (type == "pairwise_average_v1.5"){
+        sampleSize <- mean(misMatrix)
     }
 
 
@@ -189,8 +202,15 @@ bootnet_EBICglasso <- function(
   tuning = 0.5, # tuning parameter
   corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
-                 "pairwise_minimum"), # Sample size when using missing = "pairwise"
+  sampleSize =  c( "pairwise_average",
+                  "maximum",
+                  "minimum",
+                  "pairwise_maximum",
+                  "pairwise_minimum",
+                  "pairwise_average_v1.5",
+                  "pairwise_maximum_v1.5",
+                  "pairwise_minimum_v1.5"
+  ), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   refit = FALSE,
@@ -299,8 +319,15 @@ bootnet_ggmModSelect <- function(
   tuning = 0, # tuning parameter
   corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
-                 "pairwise_minimum"), # Sample size when using missing = "pairwise"
+  sampleSize =  c( "pairwise_average",
+                   "maximum",
+                   "minimum",
+                   "pairwise_maximum",
+                   "pairwise_minimum",
+                   "pairwise_average_v1.5",
+                   "pairwise_maximum_v1.5",
+                   "pairwise_minimum_v1.5"
+  ), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,
@@ -405,8 +432,15 @@ bootnet_pcor <- function(
   data, # Dataset used
   corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("pairwise_average", "maximum","minimum","pairwise_maximum",
-                 "pairwise_minimum"), # Sample size when using missing = "pairwise"
+  sampleSize =  c( "pairwise_average",
+                   "maximum",
+                   "minimum",
+                   "pairwise_maximum",
+                   "pairwise_minimum",
+                   "pairwise_average_v1.5",
+                   "pairwise_maximum_v1.5",
+                   "pairwise_minimum_v1.5"
+  ), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   threshold = 0,
@@ -534,8 +568,15 @@ bootnet_cor <- function(
   data, # Dataset used
   corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("pairwise_average", "maximum","minimum","pairwise_maximum",
-                 "pairwise_minimum"), # Sample size when using missing = "pairwise"
+  sampleSize =  c( "pairwise_average",
+                   "maximum",
+                   "minimum",
+                   "pairwise_maximum",
+                   "pairwise_minimum",
+                   "pairwise_average_v1.5",
+                   "pairwise_maximum_v1.5",
+                   "pairwise_minimum_v1.5"
+  ), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   threshold = 0,
@@ -2112,8 +2153,15 @@ bootnet_GGMncv <- function(
   penalty = c("atan","selo","exp","log","sica","scad","mcp","lasso"),
   corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stop"),
-  sampleSize = c("pairwise_average","maximum","minimum","pairwise_maximum",
-                 "pairwise_minimum"), # Sample size when using missing = "pairwise"
+  sampleSize =  c( "pairwise_average",
+                   "maximum",
+                   "minimum",
+                   "pairwise_maximum",
+                   "pairwise_minimum",
+                   "pairwise_average_v1.5",
+                   "pairwise_maximum_v1.5",
+                   "pairwise_minimum_v1.5"
+  ), # Sample size when using missing = "pairwise"
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,

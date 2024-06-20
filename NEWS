@@ -1,3 +1,6 @@
+Changes in Version 1.6
+    - Changed the way the pairwise, minimum and maximum sample sizes are computed for estimators using a correlation matrix as input with missing data. Thanks to Carl Falk. This might lead to different results compared to older bootnet versions! To recover old results, use the "pairwise_average_v1.5", "pairwise_minimum_v1.5", and "pairwise_maximum_v1.5" arguments in the sampleSize argument of the default functions.
+
 Changes in Version 1.5.6
     - Included min_sum argument in the IsingFit default
 
