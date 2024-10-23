@@ -1,6 +1,9 @@
 # R CMD check workflow.
 name: R-CMD-check
 
+# Set workflow permissions.
+permissions: read-all
+
 # Run on pushes and pull requests to the `master` branch.
 on:
   push:
@@ -32,10 +35,11 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
 
+    # Actions.
     steps:
       # Checkout the repository.
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Setup `pandoc`.
       - name: Setup pandoc
@@ -49,7 +53,7 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      # Setup `powerly` dependencies and extras.
+      # Setup package dependencies and extras.
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
@@ -61,3 +65,4 @@ jobs:
         uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
