@@ -312,16 +312,17 @@ netSimulator <- function(
 
         SimulationResults$bias <- mean(abs(est - real))
         # ##
-        if (length(moreOutput) > 1){
-          if (is.null(names(moreOutput))){
-            names(moreOutput) <- paste0("moreOutput",seq_along(moreOutput))
+        if (length(moreOutput) > 0){
+          moreOutputNames <- names(moreOutput)
+          if (is.null(moreOutputNames)){
+            moreOutputNames <- paste0("moreOutput",seq_along(moreOutput))
           }
-          
-          for (out in seq_along(moreOutput)){
-            SimulationResults[[out]] <- moreOutput[[i]](estNet, trueNet)
+
+          for (iOut in seq_along(moreOutput)){
+            SimulationResults[[moreOutputNames[iOut]]] <- moreOutput[[iOut]](estNet, trueNet)
           }
         }
-        
+
         SimulationResults
       })),
       .dots)
