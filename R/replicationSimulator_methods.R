@@ -24,7 +24,7 @@ summary.replicationSimulator <- function(object, digits = 2, ...){
   df <- object %>% dplyr::select(.data[["correlation"]], 
                                   .data[["correlationNonZero"]], .data[["jaccard"]], .data[["replicatedEdges"]], .data[["replicatedZeroes"]], 
                                   .data[["strength"]], .data[["closeness"]], .data[["betweenness"]], all_of(Conditions)) %>% 
-    dplyr::group_by_at(Conditions) %>% dplyr::summarize_each(funs(fun(.,digits=digits))) %>% 
+    dplyr::group_by(across(all_of(Conditions))) %>% dplyr::summarize(across(everything(), ~fun(., digits=digits))) %>% 
     dplyr::arrange(.data[['nCases']]) %>% as.data.frame
   # 
  
