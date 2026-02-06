@@ -52,14 +52,15 @@ parSim <- function(
     ######################
     ## use Socket clusters
     if (!debug){
-      cl <- snow::makeSOCKcluster(nClust)  
+      cl <- snow::makeSOCKcluster(nClust)
     } else {
       cl <- snow::makeSOCKcluster(nClust, outfile = "clusterLOG.txt")
     }
-    
+    on.exit(stopCluster(cl), add = TRUE)
+
     #     # Start clusters:
     #     cl <- makeCluster(getOption("cl.cores", nCores))
-    #     
+    #
     # Export the sim conditions:
     clusterExport(cl, c("AllConditions","expr","debug"), envir = environment())
     
@@ -86,9 +87,6 @@ parSim <- function(
       df$errorMessage <- ''
       df
     }, cl = cl)
-    
-    # Stop the cluster:
-    stopCluster(cl)
   } else {
     # Export:
     if (!missing(export)){
