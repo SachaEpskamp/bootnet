@@ -3,7 +3,7 @@ Changes in Version 1.7
   - Replaced deprecated aes_string() with aes() + .data[[]] (ggplot2 >= 3.0.0)
   - Replaced deprecated dplyr underscore variants (filter_, mutate_, etc.) and funs()
   - Fixed cluster connection cleanup warnings when using nCores > 1
-  - Moved GGMncv and huge to optional (not in Suggests) while off CRAN
+  - Fixed Rd cross-reference for huge package
   - NA in weights matrix now leads to centrality indices not to be computed
 
 Changes in Version 1.6
