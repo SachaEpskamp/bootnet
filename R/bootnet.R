@@ -586,6 +586,7 @@ bootnet <- function(
 
         nClust <- nCores - 1
         cl <- snow::makeSOCKcluster(nClust)
+        on.exit(stopCluster(cl), add = TRUE)
 
         # IF graph or data is missing, dummy graph:
         if (missing(graph)){
@@ -792,8 +793,6 @@ bootnet <- function(
 
             statTable(bootResults[[b]], name = paste("boot",b), alpha = alpha, computeCentrality = computeCentrality, statistics=statistics, directed=directed, bridgeArgs=bridgeArgs, includeDiagonal=includeDiagonal)
         }, cl = cl)
-        # Stop the cluster:
-        stopCluster(cl)
     }
 
 
