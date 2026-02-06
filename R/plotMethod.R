@@ -203,7 +203,7 @@ plot.bootnet <- function(
       if (perNode){
 
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = meanVar, group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id"))
+          g <- ggplot(Sum, aes(x = .data[["nNode"]], y = .data[[meanVar]], group = .data[["id"]], colour = .data[["id"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["id"]]))
 
           if (panels){
             g <- g + facet_grid(type ~ ., scales = "free")
@@ -224,7 +224,7 @@ plot.bootnet <- function(
 
         } else {
 
-          g <- ggplot(Sum, aes_string(x = 'nPerson', y = meanVar, group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id"))
+          g <- ggplot(Sum, aes(x = .data[["nPerson"]], y = .data[[meanVar]], group = .data[["id"]], colour = .data[["id"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["id"]]))
 
           if (isTRUE(panels)){
             g <- g + facet_grid(type ~ ., scales = "free")
@@ -258,7 +258,7 @@ plot.bootnet <- function(
 
         Sum <- Sum %>% filter(!is.na(mean))
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = meanVar, group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))
+          g <- ggplot(Sum, aes(x = .data[["nNode"]], y = .data[[meanVar]], group = .data[["type"]], colour = .data[["type"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["type"]]))
           if (area){
             g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
           }
@@ -272,7 +272,7 @@ plot.bootnet <- function(
 
         } else {
 
-          g <- ggplot(Sum, aes_string(x = 'nPerson', y = meanVar, group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type"))
+          g <- ggplot(Sum, aes(x = .data[["nPerson"]], y = .data[[meanVar]], group = .data[["type"]], colour = .data[["type"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["type"]]))
           if (area){
             g <- g + geom_ribbon(colour = NA, alpha = areaAlpha)
           }
@@ -303,7 +303,7 @@ plot.bootnet <- function(
       if (perNode){
 
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = meanVar, group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) +
+          g <- ggplot(Sum, aes(x = .data[["nNode"]], y = .data[[meanVar]], group = .data[["id"]], colour = .data[["id"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["id"]])) +
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -318,7 +318,7 @@ plot.bootnet <- function(
           }
         } else {
 
-          g <- ggplot(Sum, aes_string(x = 'nPeople', y = meanVar, group = 'id', colour = 'id',ymin = minArea, ymax = maxArea, fill = "id")) +
+          g <- ggplot(Sum, aes(x = .data[["nPeople"]], y = .data[[meanVar]], group = .data[["id"]], colour = .data[["id"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["id"]])) +
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -346,7 +346,7 @@ plot.bootnet <- function(
       } else {
 
         if (x$type == "node"){
-          g <- ggplot(Sum, aes_string(x = 'nNode', y = meanVar, group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) +
+          g <- ggplot(Sum, aes(x = .data[["nNode"]], y = .data[[meanVar]], group = .data[["type"]], colour = .data[["type"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["type"]])) +
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -358,7 +358,7 @@ plot.bootnet <- function(
             ylim(-1,1)
         } else {
 
-          g <- ggplot(Sum, aes_string(x = 'nPeople', y = meanVar, group = 'type', colour = 'type',ymin = minArea, ymax = maxArea, fill = "type")) +
+          g <- ggplot(Sum, aes(x = .data[["nPeople"]], y = .data[[meanVar]], group = .data[["type"]], colour = .data[["type"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["type"]])) +
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -700,7 +700,7 @@ plot.bootnet <- function(
         )
 
 
-      g <- ggplot(bootTable, aes_string(x = 'value', y = 'id', group = 'name')) +
+      g <- ggplot(bootTable, aes(x = .data[["value"]], y = .data[["id"]], group = .data[["name"]])) +
         geom_path(alpha = bootAlpha, lwd = bootlwd) +
         geom_path(data = sampleTable, alpha=1, color = sampleColor, lwd = samplelwd) +
         # facet_grid(~ type, scales = "free") +
@@ -808,11 +808,11 @@ plot.bootnet <- function(
         }
 
         # Plot:
-        g <- ggplot(gathered_sumTable, aes_string(x='value', y='numericID', colour = "var")) +
-          geom_polygon(aes_string(x = "ci", y = "numericID"),fill = bootColor, colour = NA, alpha = areaAlpha, data = sumTable2) +
-          geom_path(aes_string(x=meanVar,y="numericID"), colour = meanColor, lwd = meanlwd, data = sumTable) +
-          geom_path(aes_string(x="sample",y="numericID"), colour = sampleColor, lwd = samplelwd, data = sumTable) +
-          geom_point(aes_string(alpha = "alpha"),show.legend = c(alpha = FALSE, colour = TRUE)) +
+        g <- ggplot(gathered_sumTable, aes(x=.data[["value"]], y=.data[["numericID"]], colour = .data[["var"]])) +
+          geom_polygon(aes(x = .data[["ci"]], y = .data[["numericID"]]),fill = bootColor, colour = NA, alpha = areaAlpha, data = sumTable2) +
+          geom_path(aes(x=.data[[meanVar]],y=.data[["numericID"]]), colour = meanColor, lwd = meanlwd, data = sumTable) +
+          geom_path(aes(x=.data[["sample"]],y=.data[["numericID"]]), colour = sampleColor, lwd = samplelwd, data = sumTable) +
+          geom_point(aes(alpha = .data[["alpha"]]),show.legend = c(alpha = FALSE, colour = TRUE)) +
           # geom_point(aes_string(x="mean",y="numericID"), colour = meanColor, data = sumTable) +
           # geom_point(aes_string(x="sample",y="numericID"), colour = sampleColor, data = sumTable) +
           theme_bw() +
@@ -874,9 +874,9 @@ plot.bootnet <- function(
 
 
 
-        g <- ggplot(gathered_sumTable, aes_string(x='value', y='id', group = 'id', colour = "var")) +
-          geom_point(aes_string(alpha = 'alpha')) +
-   geom_path(aes_string(y='id', group = 'id',x='ci',alpha = 'alpha'), colour = bootColor, data = sumTable2) +
+        g <- ggplot(gathered_sumTable, aes(x=.data[["value"]], y=.data[["id"]], group = .data[["id"]], colour = .data[["var"]])) +
+          geom_point(aes(alpha = .data[["alpha"]])) +
+   geom_path(aes(y=.data[["id"]], group = .data[["id"]],x=.data[["ci"]],alpha = .data[["alpha"]]), colour = bootColor, data = sumTable2) +
           theme_bw() +
           xlab("") +
           ylab("") +

@@ -72,9 +72,9 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
   # AES:
   if (!is.null(color)){
     Gathered[[color]] <- as.factor(Gathered[[color]])
-    AES <- ggplot2::aes_string(x=xvar,y="value",fill=color)
+    AES <- ggplot2::aes(x=.data[[xvar]],y=.data[["value"]],fill=.data[[color]])
   } else {
-    AES <- ggplot2::aes_string(x=xvar,y="value")
+    AES <- ggplot2::aes(x=.data[[xvar]],y=.data[["value"]])
   }
   
   # Create plot:

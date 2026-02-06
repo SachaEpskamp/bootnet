@@ -52,9 +52,9 @@ multiverse <- function(x, labels = FALSE){
   
   # Make the plot:
   p <- ggplot(bigDF, 
-              aes_string(x="id",
-                  y="edge",
-                  fill="weight")) + 
+              aes(x=.data[["id"]],
+                  y=.data[["edge"]],
+                  fill=.data[["weight"]])) + 
     geom_tile() + 
     # geom_text(col = rgb(0.3,0.3,0.3), size = 1) +
     scale_fill_gradient2("",
