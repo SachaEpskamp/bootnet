@@ -21,7 +21,14 @@ parSim <- function(
   
   # Exclude cases:
   if (!missing(exclude)){
-    AllConditions <- AllConditions %>% filter_(.dots = exclude)
+    for (ex in exclude){
+      if (inherits(ex, "formula")){
+        ex <- ex[[length(ex)]]
+      } else {
+        ex <- rlang::parse_expr(ex)
+      }
+      AllConditions <- AllConditions %>% filter(!!ex)
+    }
   }
   
   

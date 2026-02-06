@@ -22,7 +22,7 @@ summary.netSimulator <- function(object, digits = 2, ...){
   # Summarize per case:
   suppressWarnings({
   df <- object %>% dplyr::select(.data[["sensitivity"]],.data[["specificity"]],.data[["correlation"]],.data[["strength"]],.data[["closeness"]],.data[["betweenness"]],all_of(Conditions)) %>% 
-    dplyr::group_by_at(Conditions) %>% dplyr::summarize_each(funs(fun(.,digits=digits))) %>% 
+    dplyr::group_by(across(all_of(Conditions))) %>% dplyr::summarize(across(everything(), ~fun(., digits=digits))) %>% 
     dplyr::arrange(.data[['nCases']]) %>% as.data.frame
   })
   

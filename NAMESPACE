@@ -88,8 +88,8 @@ import(snow)
 importFrom(IsingFit,"IsingFit")
 import(qgraph)
 import(ggplot2)
-importFrom("dplyr","anti_join","arrange","arrange_","bind_rows","filter","filter_","funs","group_by",
-           "group_by_","left_join","mutate","mutate_","rename","select","select_","summarize","summarize_",
+importFrom("dplyr","anti_join","arrange","across","bind_rows","filter","group_by",
+           "left_join","mutate","rename","select","summarize",
            "tally","ungroup")
 importFrom("igraph", "get.adjacency","watts.strogatz.game")
 import(tidyr)
