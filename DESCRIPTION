@@ -1,7 +1,7 @@
 Package: bootnet
 Type: Package
 Title: Bootstrap Methods for Various Network Estimation Routines
-Version: 1.6
+Version: 1.7
 Authors@R: c(
   person("Sacha", "Epskamp", email = "mail@sachaepskamp.com",role = c("aut", "cre")),
   person("Eiko I.", "Fried", role = c("ctb"))
@@ -20,3 +20,4 @@ Description: Bootstrap methods to assess accuracy and stability of estimated net
 License: GPL-2
 BugReports: https://github.com/SachaEpskamp/bootnet/issues
 URL: https://github.com/SachaEpskamp/bootnet
+RoxygenNote: 7.3.3

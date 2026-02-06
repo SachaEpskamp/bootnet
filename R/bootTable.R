@@ -104,6 +104,12 @@ statTable <- function(x,
     ))
   }
 
+  # If NA in W mat do not compute centrality:
+  if (any(is.na(Wmat)) && computeCentrality){
+    warning("NAs found in weights matrix; skipping centrality computation.")
+    computeCentrality <- FALSE
+  }
+  
   if (computeCentrality){
     # Centrality analysis:
     if (all(x[['graph']]==0)){
