@@ -83,7 +83,7 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","npn",
   # Correlate data:
   # npn:
   if (corMethod == "npn"){
-    if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
+    check_pkg("huge")
     data <- getExportedValue("huge", "huge.npn")(data)
     corMethod <- "cor"
   }
@@ -983,7 +983,7 @@ bootnet_huge <- function(
   transform = c("none","rank","quantile"),
   ...){
 
-  if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
+  check_pkg("huge")
 
   transform <- match.arg(transform)
   if (transform == "rank"){
@@ -1438,7 +1438,7 @@ bootnet_TMFG <- function(
   # Correlate data:
   # npn:
   if (corMethod == "npn"){
-    if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
+    check_pkg("huge")
     data <- getExportedValue("huge", "huge.npn")(data)
     corMethod <- "cor"
   }
@@ -1560,7 +1560,7 @@ bootnet_LoGo <- function(
   # Correlate data:
   # npn:
   if (corMethod == "npn"){
-    if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
+    check_pkg("huge")
     data <- getExportedValue("huge", "huge.npn")(data)
     corMethod <- "cor"
   }
@@ -2172,7 +2172,7 @@ bootnet_GGMncv <- function(
   transform = c("none","rank","quantile"),
   ...){
 
-  if(!requireNamespace("GGMncv")) stop("'GGMncv' package needs to be installed.")
+  check_pkg("GGMncv")
 
   penalty <- match.arg(penalty)
 
