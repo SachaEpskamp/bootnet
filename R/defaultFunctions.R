@@ -83,7 +83,8 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","npn",
   # Correlate data:
   # npn:
   if (corMethod == "npn"){
-    data <- huge::huge.npn(data)
+    if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
+    data <- getExportedValue("huge", "huge.npn")(data)
     corMethod <- "cor"
   }
 
@@ -1037,7 +1038,7 @@ bootnet_huge <- function(
 
   # Nonparanormal:
   if (npn){
-    data <- huge::huge.npn(na.omit(as.matrix(data)),verbose = verbose)
+    data <- getExportedValue("huge", "huge.npn")(na.omit(as.matrix(data)),verbose = verbose)
   }
 
   # Principal direction:
@@ -1046,7 +1047,7 @@ bootnet_huge <- function(
   }
 
   # Estimate network:
-  Results <- huge::huge.select(huge::huge(data,method = "glasso",verbose=verbose,lambda.min.ratio=lambda.min.ratio,nlambda=nlambda), criterion = criterion,verbose = verbose,ebic.gamma = tuning)
+  Results <- getExportedValue("huge", "huge.select")(getExportedValue("huge", "huge")(data,method = "glasso",verbose=verbose,lambda.min.ratio=lambda.min.ratio,nlambda=nlambda), criterion = criterion,verbose = verbose,ebic.gamma = tuning)
 
   # Return:
   return(list(
@@ -1438,7 +1439,7 @@ bootnet_TMFG <- function(
   # npn:
   if (corMethod == "npn"){
     if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
-    data <- huge::huge.npn(data)
+    data <- getExportedValue("huge", "huge.npn")(data)
     corMethod <- "cor"
   }
 
@@ -1559,7 +1560,8 @@ bootnet_LoGo <- function(
   # Correlate data:
   # npn:
   if (corMethod == "npn"){
-    data <- huge::huge.npn(data)
+    if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
+    data <- getExportedValue("huge", "huge.npn")(data)
     corMethod <- "cor"
   }
 
@@ -2250,7 +2252,7 @@ bootnet_GGMncv <- function(
   }
 
   # Estimate network:
-  Results <- GGMncv::ggmncv(corMat,
+  Results <- getExportedValue("GGMncv", "ggmncv")(corMat,
                                   n =  sampleSize,
                                   penalty = penalty,
                             progress = verbose,
