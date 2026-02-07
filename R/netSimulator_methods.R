@@ -66,15 +66,18 @@ plot.netSimulator <- function(x, xvar = "factor(nCases)",
   }
   
   # Gather:
-  Gathered <- x %>% 
+  Gathered <- x %>%
     tidyr::gather("measure","value",yvar)
-  
+
+  # Evaluate xvar expression (e.g., "factor(nCases)") into a column:
+  Gathered[[".xvar"]] <- eval(parse(text = xvar), envir = Gathered)
+
   # AES:
   if (!is.null(color)){
     Gathered[[color]] <- as.factor(Gathered[[color]])
-    AES <- ggplot2::aes(x=.data[[xvar]],y=.data[["value"]],fill=.data[[color]])
+    AES <- ggplot2::aes(x=.data[[".xvar"]],y=.data[["value"]],fill=.data[[color]])
   } else {
-    AES <- ggplot2::aes(x=.data[[xvar]],y=.data[["value"]])
+    AES <- ggplot2::aes(x=.data[[".xvar"]],y=.data[["value"]])
   }
   
   # Create plot:
