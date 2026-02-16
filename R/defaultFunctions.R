@@ -2191,12 +2191,22 @@ bootnet_ncvRegularize <- function(
 
   penalty <- match.arg(penalty)
 
+  # check used arguments
+  if (all(c("lambda.min.ratio", "lambda_min_ratio") %in% names(match.call(expand.dots = TRUE)))) {
+    stop("'lambda.min.ratio' and 'lambda_min_ratio' specify the same setting in the mantar implementation. Please provide only one.")
+  }
+
   dots <- list(...)
 
   extended_gamma <- dots[["extended_gamma"]]
   ic_type <- dots[["ic_type"]]
   n_lambda <- dots[["n_lambda"]]
-  dots[c("tuning", "extended_gamma", "ic_type")] <- NULL
+  lambda_min_ratio <- dots[["lambda_min_ratio"]]
+  dots[c("n_lambda", "extended_gamma", "ic_type","lambda_min_ratio")] <- NULL
+
+  if (is.null(lambda_min_ratio)){
+    lambda_min_ratio <- lambda.min.ratio
+  }
 
   if (!is.null(tuning) && !is.null(extended_gamma)) {
     stop("'tuning' and 'extended_gamma' specify the same parameter in the mantar implementation. Please provide only one.")
@@ -2314,7 +2324,7 @@ bootnet_ncvRegularize <- function(
            ic_type = ic_type,
            extended_gamma = extended_gamma,
            penalty = penalty,
-           lambda_min_ratio = lambda.min.ratio,
+           lambda_min_ratio = lambda_min_ratio,
            n_lambda = n_lambda),
       dots)
   )
