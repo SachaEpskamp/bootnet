@@ -15,7 +15,8 @@
 \alias{bootnet_graphicalVAR}
 \alias{bootnet_SVAR_lavaan}
 \alias{bootnet_piecewiseIsing}
-\alias{bootnet_GGMncv}
+\alias{bootnet_ncvRegularize}
+\alias{bootnet_nodeRegresIC}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Estimate a network structure
@@ -27,7 +28,8 @@ This function allows for flexible estimation of a network structure using variou
 estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
                  "IsingFit", "IsingSampler", "huge", "adalasso", "mgm",
                  "relimp", "cor", "TMFG", "ggmModSelect", "LoGo",
-                 "graphicalVAR", "piecewiseIsing", "SVAR_lavaan", "GGMncv"),
+                 "graphicalVAR", "piecewiseIsing", "SVAR_lavaan",
+                 "ncvRegularize", "nodeRegresIC"),
                  fun, labels, verbose = TRUE, .dots = list(), weighted = TRUE,
                  signed = TRUE, directed, datatype, checkNumeric = FALSE, ...,
                  .input, memorysaver = FALSE)
@@ -144,12 +146,12 @@ bootnet_SVAR_lavaan(data, verbose = TRUE, principalDirection = FALSE,
                    unlock = FALSE, transform = c("none", "rank",
                    "quantile"), ...)
 
-bootnet_GGMncv(data, penalty = c("atan", "selo", "exp", "log",
-                    "sica", "scad", "mcp", "lasso"), corMethod = c("cor",
-                    "cov", "cor_auto", "npn", "spearman"), missing =
-                    c("pairwise", "listwise", "fiml", "stop"), sampleSize
-                    = c("pairwise_average", "maximum", "minimum",
-                    "pairwise_maximum", "pairwise_minimum",
+bootnet_ncvRegularize(data, penalty = c("atan", "selo", "exp", "log",
+                    "sica", "scad", "mcp", "glasso"), corMethod = c("cor",
+                    "cov", "cor_auto", "cor_mantar", "npn", "spearman"),
+                    missing = c("pairwise", "listwise", "fiml", "stackedMI",
+                    "stop"), sampleSize = c("pairwise_average", "maximum",
+                    "minimum", "pairwise_maximum", "pairwise_minimum",
                     "pairwise_average_v1.5", "pairwise_maximum_v1.5",
                     "pairwise_minimum_v1.5"), verbose = TRUE, corArgs =
                     list(), principalDirection = FALSE, unlock = FALSE,
@@ -165,11 +167,12 @@ A data frame or matrix containing the raw data. Must be numeric, integer or orde
 A string indicating the method to use. Specifying a \code{default} sets default values to \code{prepFun}, \code{prepArgs}, \code{estFun}, \code{estArgs}, \code{graphFun}, \code{graphArgs}, \code{intFun} and \code{intArgs}. Setting a \code{default} can be omitted but that does require specifying all above mentioned arguments. Current options are:
 \describe{
 \item{\code{"EBICglasso"}}{Gaussian Markov random field estimation using graphical LASSO and extended Bayesian information criterion to select optimal regularization parameter. Using \code{\link[qgraph]{EBICglasso}} from the qgraph package. Calls \code{bootnet_EBICglasso}.}
+\item{\code{"ncvRegularize"}}{Estimates a GGM using nonconvex regularization with model selection based on an information criterion. Convex regularization via graphical LASSO is also supported. Uses \code{\link[mantar]{regularization_net}} from the mantar package. Calls \code{bootnet_ncvRegularize}.}
 \item{\code{"IsingFit"}}{Ising model estimation using LASSO regularized nodewise logistic regression and extended Bayesian information criterion to select optimal regularization parameter. Using \code{\link[IsingFit]{IsingFit}} from the IsingFit package.  Calls \code{bootnet_IsingFit}.}
 \item{\code{"IsingSampler"}}{Calls the \code{\link[IsingSampler]{EstimateIsing}} function from the IsingSampler package. }
 \item{\code{"pcor"}}{Partial correlation network (non-regularized Gaussian Markov random field), using \code{\link[corpcor]{cor2pcor}} from the corpcor package.  Calls \code{bootnet_pcor}.}
 \item{\code{"cor"}}{Correlation network.}
-% \item{\code{"adalasso"}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
+%\item{\code{"adalasso"}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
 \item{\code{"huge"}}{Uses EBIC model selection of GGM networks estimated via the glasso algorithm as implemented in the huge package (as opposed to glasso and qgraph packages used in \code{default = "EBICglasso"}). Uses nonparanormal transformation in preparing the data and does not use polychoric correlations. Calls \code{bootnet_huge}.}
 \item{\code{"mgm"}}{Estimates a Mixed graphical model by using the the mgm (or mgmfit in older versions) function of the mgm package. Calls \code{bootnet_mgm}.}
 \item{\code{"TMFG"}}{Estimates a Triangulated Maximally Filtered Graph, using the function \code{TMFG} of the NetworkToolbox package.  Calls \code{bootnet_TMFG}. Note that this estimates a *correlation network* by default (use the 'graphType' argument to estimate a partial correlation network instead).}
@@ -183,9 +186,9 @@ See details section for a more detailed description.
 \item{fun}{
 A custom estimation function, when no default set is used. This must be a function that takes the data as input (first argument) and returns either a weights matrix or a list containing the elements \code{"graph"} for the weights matrix, \code{"intercepts"} for the intercepts (optional) and \code{"results"} for the full estimation results (optional).
 }
-\item{tuning}{EBIC tuning parameter, used in 'EBICglasso', 'IsingFit', 'huge', 'mgm' and 'ggmModSelect' default sets. Note that the default value differs: 'EBICglasso', 'huge' and 'mgm' use 0.5, 'IsingFit' uses 0.25 and 'ggmModSelect uses 0.}
-\item{corMethod}{Correlation method, used in 'EBICglasso' and 'pcor' default sets. \code{"cor_auto"} uses \code{\link[qgraph]{cor_auto}} for polychoric and polyserial correlations, \code{"cov"} uses the \code{\link{cov}} function for covariances, \code{"cor"} will use the \code{\link{cor}} function for correlations and \code{"npn"} will apply the nonparanormal transformation (via \code{huge::huge.npn}) and then compute correlations.}
-\item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion, \code{"fiml"} for full-information maximum likelihood and \code{"stop"} to stop with an error.}
+\item{tuning}{EBIC tuning parameter, used in 'EBICglasso', 'ncvRegularize', 'IsingFit', 'huge', 'mgm', and 'ggmModSelect' default sets. Note that default values differ across methods: 'EBICglasso', 'ncvRegularize' (for convex regularization), 'huge', and 'mgm' use 0.5; 'IsingFit' uses 0.25; and 'ggmModSelect' as well as 'ncvRegularize' (for nonconvex regularization) use 0, corresponding to the basic BIC.}
+\item{corMethod}{Correlation method, used in 'EBICglasso' and 'pcor' default sets. \code{"cor_auto"} uses \code{\link[qgraph]{cor_auto}} and \code{"cor_mantar"} uses \code{\link[mantar]{cor_calc}} for pearson, polychoric and polyserial correlations, \code{"cov"} uses the \code{\link{cov}} function for covariances, \code{"cor"} will use the \code{\link{cor}} function for correlations and \code{"npn"} will apply the nonparanormal transformation (via \code{huge::huge.npn}) and then compute correlations.}
+\item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion, \code{"fiml"} for full-information maximum likelihood, \code{"stackedMI"} for stacked multiple imputation, and \code{"stop"} to stop with an error.}
 \item{sampleSize}{How will sample size be computed in EBICglasso default set? The default \code{"pairwise_average"} will set the sample size to the average of sample sizes used for each individual correlation. Other options are \code{"pairwise_maximum"} (largest sample sized used for each individual correlation), \code{"pairwise_minimum"} (smallest sample sized used for each individual correlation), \code{"maximum"} (takes total number of rows including rows with NA), and \code{"minimum"} (takes total number of rows that contain no NA). The arguments "pairwise_average_v1.5", "pairwise_minimum_v1.5", and "pairwise_maximum_v1.5" can be used to mimic bootnet's behavior in version 1.5 and earlier (which also computed the sample size based on the sample sizes for the variances).}
 \item{corArgs}{A list with arguments for the function used defined by \code{corMethod}.}
 \item{threshold}{
