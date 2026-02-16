@@ -157,6 +157,16 @@ bootnet_ncvRegularize(data, penalty = c("atan", "selo", "exp", "log",
                     list(), principalDirection = FALSE, unlock = FALSE,
                     nonPositiveDefinite = c("stop", "continue"), transform
                     = c("none", "rank", "quantile"), ...)
+
+bootnet_nodeRegresIC(data, rule = c("AND", "OR"), regressionSampleSize =
+                    c("individual","average","max","total"), criterion =
+                    c("bic","aic","aicc"), corMethod = c("cor",
+                    "cov", "cor_auto", "cor_mantar", "npn", "spearman"),
+                    missing = c("pairwise", "listwise", "fiml", "stackedMI",
+                    "stop"), verbose = TRUE, corArgs =
+                    list(), principalDirection = FALSE, unlock = FALSE,
+                    nonPositiveDefinite = c("stop", "continue"), transform
+                    = c("none", "rank", "quantile"), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -188,8 +198,9 @@ A custom estimation function, when no default set is used. This must be a functi
 }
 \item{tuning}{EBIC tuning parameter, used in 'EBICglasso', 'ncvRegularize', 'IsingFit', 'huge', 'mgm', and 'ggmModSelect' default sets. Note that default values differ across methods: 'EBICglasso', 'ncvRegularize' (for convex regularization), 'huge', and 'mgm' use 0.5; 'IsingFit' uses 0.25; and 'ggmModSelect' as well as 'ncvRegularize' (for nonconvex regularization) use 0, corresponding to the basic BIC.}
 \item{corMethod}{Correlation method, used in 'EBICglasso' and 'pcor' default sets. \code{"cor_auto"} uses \code{\link[qgraph]{cor_auto}} and \code{"cor_mantar"} uses \code{\link[mantar]{cor_calc}} for pearson, polychoric and polyserial correlations, \code{"cov"} uses the \code{\link{cov}} function for covariances, \code{"cor"} will use the \code{\link{cor}} function for correlations and \code{"npn"} will apply the nonparanormal transformation (via \code{huge::huge.npn}) and then compute correlations.}
-\item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion, \code{"fiml"} for full-information maximum likelihood, \code{"stackedMI"} for stacked multiple imputation, and \code{"stop"} to stop with an error.}
+\item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion, \code{"fiml"} for full-information maximum likelihood (called two-step EM in mantar package), \code{"stackedMI"} for stacked multiple imputation, and \code{"stop"} to stop with an error.}
 \item{sampleSize}{How will sample size be computed in EBICglasso default set? The default \code{"pairwise_average"} will set the sample size to the average of sample sizes used for each individual correlation. Other options are \code{"pairwise_maximum"} (largest sample sized used for each individual correlation), \code{"pairwise_minimum"} (smallest sample sized used for each individual correlation), \code{"maximum"} (takes total number of rows including rows with NA), and \code{"minimum"} (takes total number of rows that contain no NA). The arguments "pairwise_average_v1.5", "pairwise_minimum_v1.5", and "pairwise_maximum_v1.5" can be used to mimic bootnet's behavior in version 1.5 and earlier (which also computed the sample size based on the sample sizes for the variances).}
+\item{regressionSampleSize}{How will sample size be computed in nodeRegresIC default set for node-wise regression models? The default \code{"individual"} uses the number of non-missing observations for the respective dependent variable. Other options are \code{"average"} (average number of non-missing observations for all variables), \code{"max"} (maximum number of non-missing observations across all variables), and \code{"total"} (takes total number of rows including rows with NA).}
 \item{corArgs}{A list with arguments for the function used defined by \code{corMethod}.}
 \item{threshold}{
 Thresholding to use in partial correlation networks. Can be a fixed number to threshold all absolute edges below this value, \code{'locfdr'} for local FDR, or any option corresponding to adjustments in \code{\link[psych]{corr.p}} (\code{'none'}, \code{'sig'}, \code{'holm'}, \code{'hochberg'}, \code{'hommel'}, \code{'bonferroni'}, \code{'BH'}, \code{'BY'} or \code{'fdr'})). Can also be used for \code{default = "IsingSampler"} but can only be set to a logical enabling or disabling significance thresholding.
@@ -199,7 +210,7 @@ Thresholding to use in partial correlation networks. Can be a fixed number to th
 \item{split}{A function or character string (\code{"median"} or \code{"mean"}) indicating how to binarize values when estimating an Ising model.}
 \item{method}{The estimation method used in the IsingSampler default set (see \code{\link[IsingSampler]{EstimateIsing}}).}
 \item{npn}{Logical, should nonparanormal be used in huge default set?}
-\item{criterion}{The criterion used in model selection. \code{"ebic"}, \code{"ric"} or \code{"stars"} in the huge default set or \code{"EBIC"} or \code{"CV"} in the mgm default set.}
+\item{criterion}{The criterion used in model selection. \code{"ebic"}, \code{"ric"} or \code{"stars"} in the huge default set, \code{"bic"}, \code{"aic"} or \code{"aicc"} in the nodeRegresIC default set or \code{"EBIC"} or \code{"CV"} in the mgm default set.}
 \item{nFolds}{Number of folds used in k-fold cross-validation.}
 \item{type}{For mgm, see mgm or mgmfit; for relative importance networks, see \code{\link[relaimpo]{calc.relimp}}}
 \item{level}{See  \code{\link[mgm]{mgm}}. Automatically set if not assigned.}

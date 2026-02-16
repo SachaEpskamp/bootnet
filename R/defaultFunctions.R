@@ -88,9 +88,9 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","cor_m
   }
 
 
-  if (missing == "stackedMI"){
+  if (missing == "stackedMI" & corMethod != "cor_mantar"){
     stop("missing = 'stackedMI' only supported with corMethod = 'cor_mantar'")
-  } else if (missing == "fiml"){
+  } else if (missing == "fiml" & !(corMethod %in% c("cor_mantar", "cor_auto"))){
     stop("missing = 'fiml' only supported with corMethod = 'cor_auto' or corMethod = 'cor_mantar'")
   }
 
@@ -110,6 +110,8 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","cor_m
         args[[names(corArgs)[[i]]]] <- corArgs[[i]]
       }
     }
+    args$missing[args$missing == "fiml"] <- "two-step-em"
+    args$missing[args$missing == "stackedMI"] <- "stacked-mi"
     names(args)[names(args) == "missing"] <- "missing_handling"
     corMat <- do.call(mantar::cor_calc,args)$mat
   } else if (corMethod%in%c("cor","cov","spearman")){
@@ -2166,8 +2168,10 @@ bootnet_ncvRegularize <- function(
   data, # Dataset used
   penalty = c("atan","selo","exp","log","sica","scad","mcp","glasso"),
   tuning = NULL,
+  lambda.min.ratio = 0.01,
+  nlambda = NULL,
   corMethod = c("cor","cov","cor_auto","cor_mantar", "npn","spearman"), # Correlation method
-  missing = c("pairwise","listwise","fiml","stackedMI", "stop"),
+  missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
                    "maximum",
                    "minimum",
@@ -2187,20 +2191,40 @@ bootnet_ncvRegularize <- function(
 
   penalty <- match.arg(penalty)
 
-  if (is.null(tuning)){
-    if (penalty == "glasso"){
-      ic_type <- "ebic"
-      extended_gamma <- 0.5
-    } else {
-      ic_type <- "bic"
-      extended_gamma <- 0
-    }
-  } else if (tuning == 0){
-    ic_type <- "bic"
-    extended_gamma <- 0
-  } else{
-    ic_type <- "ebic"
+  dots <- list(...)
+
+  extended_gamma <- dots[["extended_gamma"]]
+  ic_type <- dots[["ic_type"]]
+  n_lambda <- dots[["n_lambda"]]
+  dots[c("tuning", "extended_gamma", "ic_type")] <- NULL
+
+  if (!is.null(tuning) && !is.null(extended_gamma)) {
+    stop("'tuning' and 'extended_gamma' specify the same parameter in the mantar implementation. Please provide only one.")
+  }
+
+  if (is.null(extended_gamma) && !is.null(tuning)) {
     extended_gamma <- tuning
+  }
+
+  if (is.null(extended_gamma)) {
+    extended_gamma <- if (penalty == "glasso") 0.5 else 0
+  }
+
+  if (is.null(ic_type)) {
+    if (extended_gamma == 0) {
+      ic_type <- "bic"
+    } else {
+      ic_type <- "ebic"
+    }
+  }
+
+
+  if (!is.null(n_lambda) && !is.null(nlambda)) {
+    stop("'n_lambda' and 'nlambda' specify the same argument in the mantar implementation. Please provide only one.")
+  } else if (is.null(n_lambda) && !is.null(nlambda)) {
+    n_lambda <- nlambda
+  } else if (is.null(n_lambda) && is.null(nlambda)) {
+    n_lambda <- if (penalty == "glasso") 100 else 50
   }
 
   transform <- match.arg(transform)
@@ -2282,13 +2306,18 @@ bootnet_ncvRegularize <- function(
   }
 
   # Estimate network:
-  Results <- mantar::regularization_net(mat = corMat,
-                                  ns =  sampleSize,
-                                  likelihood = "mat_based",
-                                  ic_type = ic_type,
-                                  extended_gamma = extended_gamma,
-                                  penalty = penalty,
-                                  ...)
+  Results <- do.call(
+    mantar::regularization_net,
+    c(list(mat = corMat,
+           ns =  sampleSize,
+           likelihood = "mat_based",
+           ic_type = ic_type,
+           extended_gamma = extended_gamma,
+           penalty = penalty,
+           lambda_min_ratio = lambda.min.ratio,
+           n_lambda = n_lambda),
+      dots)
+  )
   # Return:
   return(list(graph=as.matrix(Results$pcor),results=Results))
 }
@@ -2299,17 +2328,10 @@ bootnet_ncvRegularize <- function(
 bootnet_nodeRegresIC <- function(
     data, # Dataset used
     rule = c("AND","OR"),
+    regressionSampleSize = c("individual","average","max","total"),
+    criterion = c("bic","aic","aicc"),
     corMethod = c("cor","cov","cor_auto","cor_mantar", "npn","spearman"), # Correlation method
     missing = c("pairwise","listwise","fiml","stackedMI", "stop"),
-    sampleSize =  c( "pairwise_average",
-                     "maximum",
-                     "minimum",
-                     "pairwise_maximum",
-                     "pairwise_minimum",
-                     "pairwise_average_v1.5",
-                     "pairwise_maximum_v1.5",
-                     "pairwise_minimum_v1.5"
-    ), # Sample size when using missing = "pairwise"
     verbose = TRUE,
     corArgs = list(), # Extra arguments to the correlation function
     principalDirection = FALSE,
@@ -2331,9 +2353,39 @@ bootnet_nodeRegresIC <- function(
   }
 
   # Check arguments:
+  if (all(c("regressionSampleSize", "n_calc") %in% names(match.call(expand.dots = TRUE)))) {
+    stop("'n_calc' and 'regressionSampleSize' specify the same setting in the mantar implementation. Please provide only one.")
+  }
+  if (all(c("ic_type", "criterion") %in% names(match.call(expand.dots = TRUE)))) {
+    stop("'ic_type' and 'criterion' specify the same setting in the mantar implementation. Please provide only one.")
+  }
+  if (all(c("pcor_merge_rule", "rule") %in% names(match.call(expand.dots = TRUE)))) {
+    stop("'pcor_merge_rule' and 'rule' specify the same setting in the mantar implementation. Please provide only one.")
+  }
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
-  # sampleSize <- match.arg(sampleSize)
+  regressionSampleSize <- match.arg(regressionSampleSize)
+  criterion <- match.arg(criterion)
+
+
+  dots <- list(...)
+
+  ns <- dots[["ns"]]
+  n_calc <- dots[["n_calc"]]
+  ic_type <- dots[["ic_type"]]
+  pcor_merge_rule <- dots[["pcor_merge_rule"]]
+  dots[c("ns", "n_calc", "ic_type", "pcor_merge_rule")] <- NULL
+
+  if (is.null(n_calc)){
+    n_calc <- regressionSampleSize
+  }
+  if (is.null(ic_type)){
+    ic_type <- criterion
+  }
+  if (is.null(pcor_merge_rule)){
+    pcor_merge_rule <- rule
+  }
+
 
   # Message:
   if (verbose){
@@ -2380,16 +2432,20 @@ bootnet_nodeRegresIC <- function(
                               verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
 
   # Sample size:
-  if (missing == "listwise"){
-    sampleSize <- nrow(na.omit(data))
-  } else{
-    sampleSize <- sampleSize_pairwise(data, sampleSize)
-    # if (sampleSize == "maximum"){
-    #   sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
-    # } else {
-    #   sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
-    # }
-  }
+  if (is.null(ns)){
+  if (n_calc == "individual"){
+    # each variable gets its own sample size
+    ns <- colSums(!is.na(data))
+  } else if (n_calc == "average"){
+    # calculate mean number of non-missing observations across variables
+    ns <- rep(mean(colSums(!is.na(data))), ncol(data))
+  } else if (n_calc == "max"){
+    # number of observation of "best" case variable
+    ns <- rep(max(colSums(!is.na(data))), ncol(data))
+  } else if (n_calc == "total"){
+    # total number of rows in data - disregarding missings completely
+    ns <- rep(nrow(data), ncol(data))
+  }}
 
   # Principal direction:
   if (principalDirection){
@@ -2397,11 +2453,12 @@ bootnet_nodeRegresIC <- function(
   }
 
   # Estimate network:
-  Results <- mantar::neighborhood_net(mat = corMat,
-                                        ns =  sampleSize,
-                                        ic_type = "bic",
-                                        pcor_merge_rule = rule,
-                                        ...)
+  Results <- do.call(mantar::neighborhood_net,
+                     c(list(mat = corMat,
+                            ns =  ns,
+                            ic_type = ic_type,
+                            pcor_merge_rule = pcor_merge_rule),
+                       dots))
   # Return:
   return(list(graph=as.matrix(Results$pcor),results=Results))
 }
