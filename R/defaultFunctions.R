@@ -113,7 +113,12 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","cor_m
     args$missing[args$missing == "fiml"] <- "two-step-em"
     args$missing[args$missing == "stackedMI"] <- "stacked-mi"
     names(args)[names(args) == "missing"] <- "missing_handling"
-    corMat <- do.call(mantar::cor_calc,args)$mat
+    tmp <- NULL
+    invisible(capture.output(
+      tmp <- suppressWarnings(suppressMessages(do.call(mantar::cor_calc, args))),
+      type = "output"
+    ))
+    corMat <- tmp$mat
   } else if (corMethod%in%c("cor","cov","spearman")){
     # Normal correlations
 
@@ -2170,7 +2175,7 @@ bootnet_ncvRegularize <- function(
   tuning = NULL,
   lambda.min.ratio = 0.01,
   nlambda = NULL,
-  corMethod = c("cor","cov","cor_auto","cor_mantar", "npn","spearman"), # Correlation method
+  corMethod = c("cor_mantar","cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
                    "maximum",
@@ -2340,8 +2345,8 @@ bootnet_nodeRegresIC <- function(
     rule = c("AND","OR"),
     regressionSampleSize = c("individual","average","max","total"),
     criterion = c("bic","aic","aicc"),
-    corMethod = c("cor","cov","cor_auto","cor_mantar", "npn","spearman"), # Correlation method
-    missing = c("pairwise","listwise","fiml","stackedMI", "stop"),
+    corMethod = c("cor_mantar","cor","cov","cor_auto", "npn","spearman"), # Correlation method
+    missing = c("pairwise","listwise","fiml","stackedMI","stop"),
     verbose = TRUE,
     corArgs = list(), # Extra arguments to the correlation function
     principalDirection = FALSE,
