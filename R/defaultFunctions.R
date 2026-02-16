@@ -65,8 +65,8 @@ sampleSize_pairwise <- function(data, type = c( "pairwise_average",
 }
 
 # Function for correlation/covariance:
-bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","npn","spearman"),
-                              corArgs = list(), missing = c("pairwise","listwise","fiml","stop"),
+bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","cor_mantar","npn","spearman"),
+                              corArgs = list(), missing = c("pairwise","listwise","fiml","stackedMI","stop"),
                               verbose = TRUE, nonPositiveDefinite = c("stop","continue"),
                               transform = c("none","rank","quantile")){
   transform <- match.arg(transform)
@@ -87,6 +87,13 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","npn",
     corMethod <- "cor"
   }
 
+
+  if (missing == "stackedMI"){
+    stop("missing = 'stackedMI' only supported with corMethod = 'cor_mantar'")
+  } else if (missing == "fiml"){
+    stop("missing = 'fiml' only supported with corMethod = 'cor_auto' or corMethod = 'cor_mantar'")
+  }
+
   # cor_auto:
   if (corMethod == "cor_auto"){
     args <- list(data=data,missing=missing,verbose=verbose)
@@ -96,11 +103,18 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","npn",
       }
     }
     corMat <- do.call(qgraph::cor_auto,args)
+  } else if  (corMethod == "cor_mantar"){
+    args <- list(data=data,missing=missing,verbose=verbose)
+    if (length(corArgs) > 0){
+      for (i in seq_along(corArgs)){
+        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
+      }
+    }
+    names(args)[names(args) == "missing"] <- "missing_handling"
+    corMat <- do.call(mantar::cor_calc,args)$mat
   } else if (corMethod%in%c("cor","cov","spearman")){
     # Normal correlations
-    if (missing == "fiml"){
-      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
-    }
+
     use <- switch(missing,
                   pairwise = "pairwise.complete.obs",
                   listwise = "complete.obs")
@@ -116,7 +130,8 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","npn",
       corMethod <- "cor"
     }
 
-    corMat <- do.call(corMethod,args)
+    corResults <- do.call(corMethod,args)
+    corMat <- corResults$mat
   } else stop ("Correlation method is not supported.")
 
   if (nonPositiveDefinite == "stop"){
@@ -2147,12 +2162,13 @@ bootnet_piecewiseIsing <- function(
 
 }
 
-### GGMncv:
-bootnet_GGMncv <- function(
+### ncvRegularize:
+bootnet_ncvRegularize <- function(
   data, # Dataset used
-  penalty = c("atan","selo","exp","log","sica","scad","mcp","lasso"),
-  corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
-  missing = c("pairwise","listwise","fiml","stop"),
+  penalty = c("atan","selo","exp","log","sica","scad","mcp","glasso"),
+  tuning = NULL,
+  corMethod = c("cor","cov","cor_auto","cor_mantar", "npn","spearman"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stackedMI", "stop"),
   sampleSize =  c( "pairwise_average",
                    "maximum",
                    "minimum",
@@ -2170,9 +2186,23 @@ bootnet_GGMncv <- function(
   transform = c("none","rank","quantile"),
   ...){
 
-  if(!requireNamespace("GGMncv")) stop("'GGMncv' package needs to be installed.")
-
   penalty <- match.arg(penalty)
+
+  if (is.null(tuning)){
+    if (penalty == "glasso"){
+      ic_type <- "ebic"
+      extended_gamma <- 0.5
+    } else {
+      ic_type <- "bic"
+      extended_gamma <- 0
+    }
+  } else if (tuning == 0){
+    ic_type <- "bic"
+    extended_gamma <- 0
+  } else{
+    ic_type <- "ebic"
+    extended_gamma <- tuning
+  }
 
   transform <- match.arg(transform)
   if (transform == "rank"){
@@ -2194,9 +2224,12 @@ bootnet_GGMncv <- function(
   # Message:
   if (verbose){
     msg <- "Estimating Network. Using package::function:"
-    msg <- paste0(msg,"\n  - GGMncv::ggmncv for model estimation")
+    msg <- paste0(msg,"\n  - mantar::regulaization_net for model estimation")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "cor_mantar"){
+      msg <- paste0(msg,"\n  - mantar::cor_calc for correlation computation")
     }
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
@@ -2250,14 +2283,128 @@ bootnet_GGMncv <- function(
   }
 
   # Estimate network:
-  Results <- GGMncv::ggmncv(corMat,
-                                  n =  sampleSize,
+  Results <- mantar::regularization_net(mat = corMat,
+                                  ns =  sampleSize,
+                                  likelihood = "mat_based",
+                                  ic_type = ic_type,
+                                  extended_gamma = extended_gamma,
                                   penalty = penalty,
-                            progress = verbose,
                                   ...)
   # Return:
-  return(list(graph=as.matrix(Results$P),results=Results))
+  return(list(graph=as.matrix(Results$pcor),results=Results))
 }
 
+
+
+### ncvRegularize:
+bootnet_nodeRegresIC <- function(
+    data, # Dataset used
+    rule = c("AND","OR"),
+    corMethod = c("cor","cov","cor_auto","cor_mantar", "npn","spearman"), # Correlation method
+    missing = c("pairwise","listwise","fiml","stackedMI", "stop"),
+    sampleSize =  c( "pairwise_average",
+                     "maximum",
+                     "minimum",
+                     "pairwise_maximum",
+                     "pairwise_minimum",
+                     "pairwise_average_v1.5",
+                     "pairwise_maximum_v1.5",
+                     "pairwise_minimum_v1.5"
+    ), # Sample size when using missing = "pairwise"
+    verbose = TRUE,
+    corArgs = list(), # Extra arguments to the correlation function
+    principalDirection = FALSE,
+    unlock = FALSE,
+    nonPositiveDefinite = c("stop","continue"),
+    transform = c("none","rank","quantile"),
+    ...){
+
+  transform <- match.arg(transform)
+  if (transform == "rank"){
+    data <- rank_transformation(data)
+  } else if (transform == "quantile"){
+    data <- quantile_transformation(data)
+  }
+
+  nonPositiveDefinite <- match.arg(nonPositiveDefinite)
+  if (!unlock){
+    stop("You are using an internal estimator function without using 'estimateNetwork'. This function is only intended to be used from within 'estimateNetwork' and will not run now. To force manual use of this function (not recommended), use unlock = TRUE.")
+  }
+
+  # Check arguments:
+  corMethod <- match.arg(corMethod)
+  missing <- match.arg(missing)
+  # sampleSize <- match.arg(sampleSize)
+
+  # Message:
+  if (verbose){
+    msg <- "Estimating Network. Using package::function:"
+    msg <- paste0(msg,"\n  - mantar::neighborhood_net for model estimation")
+    if (corMethod == "cor_auto"){
+      msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "cor_mantar"){
+      msg <- paste0(msg,"\n  - mantar::cor_calc for correlation computation")
+    }
+    if (corMethod == "npn"){
+      msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
+    }
+    # msg <- paste0(msg,"\n\nPlease reference accordingly\n")
+    message(msg)
+  }
+
+
+  # First test if data is a data frame:
+  if (!(is.data.frame(data) || is.matrix(data))){
+    stop("'data' argument must be a data frame")
+  }
+
+  # If matrix coerce to data frame:
+  if (is.matrix(data)){
+    data <- as.data.frame(data)
+  }
+
+  # Obtain info from data:
+  N <- ncol(data)
+  Np <- nrow(data)
+
+  # Check missing:
+  if (missing == "stop"){
+    if (any(is.na(data))){
+      stop("Missing data detected and missing = 'stop'")
+    }
+  }
+
+  # Correlate data:
+  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+                              corArgs = corArgs, missing = missing,
+                              verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+
+  # Sample size:
+  if (missing == "listwise"){
+    sampleSize <- nrow(na.omit(data))
+  } else{
+    sampleSize <- sampleSize_pairwise(data, sampleSize)
+    # if (sampleSize == "maximum"){
+    #   sampleSize <- sum(apply(data,1,function(x)!all(is.na(x))))
+    # } else {
+    #   sampleSize <- sum(apply(data,1,function(x)!any(is.na(x))))
+    # }
+  }
+
+  # Principal direction:
+  if (principalDirection){
+    corMat <- principalDirection(corMat)
+  }
+
+  # Estimate network:
+  Results <- mantar::neighborhood_net(mat = corMat,
+                                        ns =  sampleSize,
+                                        ic_type = "bic",
+                                        pcor_merge_rule = rule,
+                                        ...)
+  # Return:
+  return(list(graph=as.matrix(Results$pcor),results=Results))
+}
 
 
