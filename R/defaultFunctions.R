@@ -130,8 +130,7 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","cor_m
       corMethod <- "cor"
     }
 
-    corResults <- do.call(corMethod,args)
-    corMat <- corResults$mat
+    corMat <- do.call(corMethod,args)
   } else stop ("Correlation method is not supported.")
 
   if (nonPositiveDefinite == "stop"){
@@ -2224,7 +2223,7 @@ bootnet_ncvRegularize <- function(
   # Message:
   if (verbose){
     msg <- "Estimating Network. Using package::function:"
-    msg <- paste0(msg,"\n  - mantar::regulaization_net for model estimation")
+    msg <- paste0(msg,"\n  - mantar::regularization_net for model estimation")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
     }
