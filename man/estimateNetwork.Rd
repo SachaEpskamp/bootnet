@@ -35,8 +35,8 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
                  .input, memorysaver = FALSE)
 
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor", "cov",
-                    "cor_auto", "npn", "spearman"), missing =
-                    c("pairwise", "listwise", "fiml", "stop"), sampleSize
+                    "cor_auto", "cor_mantar", "npn", "spearman"), missing =
+                    c("pairwise", "listwise", "fiml", "stackedMI", "stop"), sampleSize
                     = c("pairwise_average", "maximum", "minimum",
                     "pairwise_maximum", "pairwise_minimum",
                     "pairwise_average_v1.5", "pairwise_maximum_v1.5",
@@ -47,9 +47,9 @@ bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor", "cov",
                     "continue"), transform = c("none", "rank",
                     "quantile"), ...)
 
-bootnet_pcor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
-                    "spearman"), missing = c("pairwise", "listwise",
-                    "fiml", "stop"), sampleSize = c("pairwise_average",
+bootnet_pcor(data, corMethod = c("cor", "cov", "cor_auto", "cor_mantar",
+                    "npn", "spearman"), missing = c("pairwise", "listwise",
+                    "fiml", "stackedMI", "stop"), sampleSize = c("pairwise_average",
                     "maximum", "minimum", "pairwise_maximum",
                     "pairwise_minimum", "pairwise_average_v1.5",
                     "pairwise_maximum_v1.5", "pairwise_minimum_v1.5"),
@@ -58,9 +58,9 @@ bootnet_pcor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
                     = FALSE, nonPositiveDefinite = c("stop", "continue"),
                     transform = c("none", "rank", "quantile"))
 
-bootnet_cor(data, corMethod = c("cor", "cov", "cor_auto", "npn",
-                    "spearman"), missing = c("pairwise", "listwise",
-                    "fiml", "stop"), sampleSize = c("pairwise_average",
+bootnet_cor(data, corMethod = c("cor", "cov", "cor_auto", "cor_mantar",
+                    "npn", "spearman"), missing = c("pairwise", "listwise",
+                    "fiml", "stackedMI", "stop"), sampleSize = c("pairwise_average",
                     "maximum", "minimum", "pairwise_maximum",
                     "pairwise_minimum", "pairwise_average_v1.5",
                     "pairwise_maximum_v1.5", "pairwise_minimum_v1.5"),
@@ -100,20 +100,21 @@ bootnet_relimp(data, normalized = TRUE, type = "lmg",
                    structureDefault = c("none", "custom", "EBICglasso",
                    "pcor", "IsingFit", "IsingSampler", "huge",
                    "adalasso", "mgm", "cor", "TMFG", "ggmModSelect",
-                   "LoGo"), missing = c("listwise", "stop"), ..., verbose
+                   "LoGo", "nodeRegresIC", "ncvRegularize"),
+                   missing = c("listwise", "stop"), ..., verbose
                    = TRUE, threshold = 0, unlock = FALSE, transform =
                    c("none", "rank", "quantile"))
 
 bootnet_TMFG(data, graphType = c("cor", "pcor"), corMethod =
-                   c("cor", "cov", "cor", "npn", "cor_auto"), missing =
-                   c("pairwise", "listwise", "fiml", "stop"), verbose =
-                   TRUE, corArgs = list(), principalDirection = FALSE,
-                   unlock = FALSE, transform = c("none", "rank",
-                   "quantile"), ...)
+                   c("cor", "cov", "cor", "npn", "cor_auto", "cor_mantar"),
+                   missing = c("pairwise", "listwise", "fiml", "stackedMI",
+                   "stop"), verbose = TRUE, corArgs = list(),
+                   principalDirection = FALSE, unlock = FALSE, transform =
+                   c("none", "rank", "quantile"), ...)
 
-bootnet_LoGo(data, corMethod = c("cor", "cov", "cor", "npn",
+bootnet_LoGo(data, corMethod = c("cor", "cov", "cor", "npn", "cor_mantar",
                    "cor_auto"), missing = c("pairwise", "listwise",
-                   "fiml", "stop"), verbose = TRUE, corArgs = list(),
+                   "fiml", "stackedMI", "stop"), verbose = TRUE, corArgs = list(),
                    principalDirection = FALSE, unlock = FALSE, transform
                    = c("none", "rank", "quantile"), ...)
 
@@ -122,9 +123,9 @@ bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection
                    FALSE, transform = c("none", "rank", "quantile"), ...)
 
 bootnet_ggmModSelect(data, tuning = 0, corMethod = c("cor", "cov",
-                    "cor_auto", "npn", "spearman"), missing =
-                    c("pairwise", "listwise", "fiml", "stop"), sampleSize
-                    = c("pairwise_average", "maximum", "minimum",
+                    "cor_auto", "cor_mantar", "npn", "spearman"), missing =
+                    c("pairwise", "listwise", "fiml", "stackedMI", "stop"),
+                    sampleSize = c("pairwise_average", "maximum", "minimum",
                     "pairwise_maximum", "pairwise_minimum",
                     "pairwise_average_v1.5", "pairwise_maximum_v1.5",
                     "pairwise_minimum_v1.5"), verbose = TRUE, corArgs =
@@ -182,7 +183,7 @@ A string indicating the method to use. Specifying a \code{default} sets default 
 \item{\code{"IsingSampler"}}{Calls the \code{\link[IsingSampler]{EstimateIsing}} function from the IsingSampler package. }
 \item{\code{"pcor"}}{Partial correlation network (non-regularized Gaussian Markov random field), using \code{\link[corpcor]{cor2pcor}} from the corpcor package.  Calls \code{bootnet_pcor}.}
 \item{\code{"cor"}}{Correlation network.}
-%\item{\code{"adalasso"}}{Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
+\item{\code{"adalasso"}}{Temporarily deprecated due to required functions not being available on CRAN: Uses the \code{\link[parcor]{adalasso.net}} from the parcor package. Calls \code{bootnet_adalasso}.}
 \item{\code{"huge"}}{Uses EBIC model selection of GGM networks estimated via the glasso algorithm as implemented in the huge package (as opposed to glasso and qgraph packages used in \code{default = "EBICglasso"}). Uses nonparanormal transformation in preparing the data and does not use polychoric correlations. Calls \code{bootnet_huge}.}
 \item{\code{"mgm"}}{Estimates a Mixed graphical model by using the the mgm (or mgmfit in older versions) function of the mgm package. Calls \code{bootnet_mgm}.}
 \item{\code{"TMFG"}}{Estimates a Triangulated Maximally Filtered Graph, using the function \code{TMFG} of the NetworkToolbox package.  Calls \code{bootnet_TMFG}. Note that this estimates a *correlation network* by default (use the 'graphType' argument to estimate a partial correlation network instead).}
@@ -305,7 +306,6 @@ Set to \code{TRUE} to not result in a standard error. This is to prevent using t
 \item{transform}{Should data be transformed before estimate the network? \code{"rank"} will call \code{\link{rank_transformation}} and \code{"quantile"}" will call \code{\link{quantile_transformation}}.}
 \item{penalty}{Penalty to use in the GGMncv methods.}
 \item{min_sum}{ The minimum sum score that is artifically possible in the dataset. Defaults to -Inf. Set this only if you know a lower sum score is not possible in the data, for example due to selection bias.}
-    \item{AND}{Logical, should an AND-rule (both regressions need to be significant) or OR-rule (one of the regressions needs to be significant) be used?}
 }
 \details{
 
