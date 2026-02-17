@@ -108,15 +108,16 @@ bootnet_relimp(data, normalized = TRUE, type = "lmg",
 bootnet_TMFG(data, graphType = c("cor", "pcor"), corMethod =
                    c("cor", "cov", "cor", "npn", "cor_auto", "cor_mantar"),
                    missing = c("pairwise", "listwise", "fiml", "stackedMI",
-                   "stop"), verbose = TRUE, corArgs = list(),
-                   principalDirection = FALSE, unlock = FALSE, transform =
-                   c("none", "rank", "quantile"), ...)
+                   "stop"), verbose = TRUE, corArgs = list(), nonPositiveDefinite
+                   = c("stop", "continue"), principalDirection = FALSE, unlock =
+                   FALSE, transform = c("none", "rank", "quantile"), ...)
 
 bootnet_LoGo(data, corMethod = c("cor", "cov", "cor", "npn", "cor_mantar",
                    "cor_auto"), missing = c("pairwise", "listwise",
                    "fiml", "stackedMI", "stop"), verbose = TRUE, corArgs = list(),
-                   principalDirection = FALSE, unlock = FALSE, transform
-                   = c("none", "rank", "quantile"), ...)
+                   principalDirection = FALSE, unlock = FALSE, nonPositiveDefinite =
+                   c("stop","continue"),transform =
+                   c("none", "rank", "quantile"), ...)
 
 bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection
                    = FALSE, missing = c("listwise", "stop"), unlock =

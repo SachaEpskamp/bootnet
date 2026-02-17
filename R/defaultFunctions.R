@@ -221,8 +221,8 @@ bootnet_argEstimator <- function(data, prepFun, prepArgs, estFun, estArgs, graph
 bootnet_EBICglasso <- function(
   data, # Dataset used
   tuning = 0.5, # tuning parameter
-  corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
-  missing = c("pairwise","listwise","fiml","stop"),
+  corMethod = c("cor","cov","cor_auto","cor_mantar","npn","spearman"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
                   "maximum",
                   "minimum",
@@ -267,6 +267,9 @@ bootnet_EBICglasso <- function(
     msg <- paste0(msg,"\n  - qgraph::EBICglasso for EBIC model selection\n    - using glasso::glasso")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "cor_mantar"){
+      msg <- paste0(msg,"\n  - mantar::cor_calc for correlation computation")
     }
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
@@ -338,8 +341,8 @@ bootnet_EBICglasso <- function(
 bootnet_ggmModSelect <- function(
   data, # Dataset used
   tuning = 0, # tuning parameter
-  corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
-  missing = c("pairwise","listwise","fiml","stop"),
+  corMethod = c("cor","cov","cor_auto","cor_mantar","npn","spearman"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
                    "maximum",
                    "minimum",
@@ -383,6 +386,9 @@ bootnet_ggmModSelect <- function(
     msg <- paste0(msg,"\n  - qgraph::ggmModSelect for model selection\n    - using glasso::glasso")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "cor_mantar"){
+      msg <- paste0(msg,"\n  - mantar::cor_calc for correlation computation")
     }
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
@@ -451,8 +457,8 @@ bootnet_ggmModSelect <- function(
 ### PCOR ESTIMATOR ###
 bootnet_pcor <- function(
   data, # Dataset used
-  corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
-  missing = c("pairwise","listwise","fiml","stop"),
+  corMethod = c("cor","cov","cor_auto","cor_mantar","npn","spearman"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
                    "maximum",
                    "minimum",
@@ -501,6 +507,9 @@ bootnet_pcor <- function(
     msg <- paste0(msg,"\n  - qgraph::qgraph(..., graph = 'pcor') for network computation")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "cor_mantar"){
+      msg <- paste0(msg,"\n  - mantar::cor_calc for correlation computation")
     }
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
@@ -587,8 +596,8 @@ bootnet_pcor <- function(
 ### COR ESTIMATOR ###
 bootnet_cor <- function(
   data, # Dataset used
-  corMethod = c("cor","cov","cor_auto","npn","spearman"), # Correlation method
-  missing = c("pairwise","listwise","fiml","stop"),
+  corMethod = c("cor","cov","cor_auto","cor_mantar","npn","spearman"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
                    "maximum",
                    "minimum",
@@ -635,6 +644,9 @@ bootnet_cor <- function(
     # msg <- paste0(msg,"\n  - qgraph::qgraph(..., graph = 'cor') for network computation")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "cor_mantar"){
+      msg <- paste0(msg,"\n  - mantar::cor_calc for correlation computation")
     }
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
@@ -1250,7 +1262,7 @@ bootnet_relimp <- function(
   normalized = TRUE,
   type = "lmg",
   structureDefault = c("none", "custom", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","cor","TMFG",
-                       "ggmModSelect", "LoGo"),
+                       "ggmModSelect", "LoGo", "ncvRegularize", "nodeRegresIC"),
   missing = c("listwise","stop"),
   ..., # Arguments sent to the structure function
   verbose = TRUE,
@@ -1389,12 +1401,13 @@ bootnet_relimp <- function(
 bootnet_TMFG <- function(
   data, # Dataset used
   graphType = c("cor","pcor"),
-  corMethod = c("cor","cov","cor","npn","cor_auto"), # Correlation method
-  missing = c("pairwise","listwise","fiml","stop"),
+  corMethod = c("cor","cov","cor","npn","cor_auto","cor_mantar"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   verbose = TRUE,
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,
   unlock = FALSE,
+  nonPositiveDefinite = c("stop","continue"),
   transform = c("none","rank","quantile"),
   ...){
 
@@ -1412,6 +1425,7 @@ bootnet_TMFG <- function(
 
 
   # Check arguments:
+  nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
 
@@ -1425,6 +1439,9 @@ bootnet_TMFG <- function(
     msg <- paste0(msg,"\n  - NetworkToolbox::TMFG for Triangulated Maximally Filtered Graph")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "cor_mantar"){
+      msg <- paste0(msg,"\n  - mantar::cor_calc for correlation computation")
     }
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
@@ -1456,41 +1473,9 @@ bootnet_TMFG <- function(
   }
 
   # Correlate data:
-  # npn:
-  if (corMethod == "npn"){
-    if(!requireNamespace("huge")) stop("'huge' package needs to be installed.")
-    data <- huge::huge.npn(data)
-    corMethod <- "cor"
-  }
-
-  # cor_auto:
-  if (corMethod == "cor_auto"){
-    args <- list(data=data,missing=missing,verbose=verbose)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    corMat <- do.call(qgraph::cor_auto,args)
-  } else if (corMethod%in%c("cor","cov")){
-    # Normal correlations
-    if (missing == "fiml"){
-      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
-    }
-    use <- switch(missing,
-                  pairwise = "pairwise.complete.obs",
-                  listwise = "complete.obs",
-                  fiml = "fiml")
-
-    args <- list(x=data,use=use)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-
-    corMat <- do.call(corMethod,args)
-  } else stop ("Correlation method is not supported.")
+  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+                              corArgs = corArgs, missing = missing,
+                              verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
 
   # Principal direction:
   if (principalDirection){
@@ -1515,9 +1500,10 @@ bootnet_TMFG <- function(
 ### Local/Global Sparse Inverse Covariance Matrix ###
 bootnet_LoGo <- function(
   data, # Dataset used
-  corMethod = c("cor","cov","cor","npn","cor_auto"), # Correlation method
-  missing = c("pairwise","listwise","fiml","stop"),
+  corMethod = c("cor","cov","cor","npn","cor_auto","cor_mantar"), # Correlation method
+  missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   verbose = TRUE,
+  nonPositiveDefinite = c("stop","continue"),
   corArgs = list(), # Extra arguments to the correlation function
   principalDirection = FALSE,
   unlock = FALSE,
@@ -1538,6 +1524,7 @@ bootnet_LoGo <- function(
 
 
   # Check arguments:
+  nonPositiveDefinite <- match.arg(nonPositiveDefinite)
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
 
@@ -1547,6 +1534,9 @@ bootnet_LoGo <- function(
     msg <- paste0(msg,"\n  - NetworkToolbox::LoGo for Local/Global Sparse Inverse Covariance Matrix")
     if (corMethod == "cor_auto"){
       msg <- paste0(msg,"\n  - qgraph::cor_auto for correlation computation\n    - using lavaan::lavCor")
+    }
+    if (corMethod == "cor_mantar"){
+      msg <- paste0(msg,"\n  - mantar::cor_calc for correlation computation")
     }
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
@@ -1578,39 +1568,9 @@ bootnet_LoGo <- function(
   }
 
   # Correlate data:
-  # npn:
-  if (corMethod == "npn"){
-    data <- huge::huge.npn(data)
-    corMethod <- "cor"
-  }
-
-  # cor_auto:
-  if (corMethod == "cor_auto"){
-    args <- list(data=data,missing=missing,verbose=verbose)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-    corMat <- do.call(qgraph::cor_auto,args)
-  } else if (corMethod%in%c("cor","cov")){
-    # Normal correlations
-    if (missing == "fiml"){
-      stop("missing = 'fiml' only supported with corMethod = 'cor_auto'")
-    }
-    use <- switch(missing,
-                  pairwise = "pairwise.complete.obs",
-                  listwise = "complete.obs")
-
-    args <- list(x=data,use=use)
-    if (length(corArgs) > 0){
-      for (i in seq_along(corArgs)){
-        args[[names(corArgs)[[i]]]] <- corArgs[[i]]
-      }
-    }
-
-    corMat <- do.call(corMethod,args)
-  } else stop ("Correlation method is not supported.")
+  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+                              corArgs = corArgs, missing = missing,
+                              verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
 
   # Principal direction:
   if (principalDirection){
@@ -1626,7 +1586,6 @@ bootnet_LoGo <- function(
 }
 
 
-####
 ### graphicalVAR ESTIMATOR ###
 bootnet_graphicalVAR <- function(
   data, # Dataset used
