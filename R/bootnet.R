@@ -94,15 +94,14 @@ bootnet <- function(
     }
 
     # Check missing handling
-    if (!is.null(list(...)[["missing"]]) &
-        list(...)[["missing"]] == "stackedMI" &
-        type != "parametric") {
+    if (!is.null(list(...)[["missing"]]) & type != "parametric"){
+      if(list(...)[["missing"]] == "stackedMI"){
       message("============================================================\n",
               "============================================================\n",
               "Combining multiple imputation with bootstrapping, while potentially providing the most robust estimation, can be computationally very demanding. It is strongly recommended to first test the procedure using a small number of bootstraps ('nBoot') and imputations ('nimp') to ensure that the estimation runs without errors and to get an impression of the expected runtime. Once verified, the full analysis should be executed on a machine that can run uninterrupted for an extended period, potentially even several days.",
               "============================================================\n",
               "============================================================\n")
-    }
+    }}
 
     # Check bridgeArgs:
     if (!missing(communities)){

@@ -1,5 +1,5 @@
-getRefs <- function(x){
-  citation <- switch(
+getRefs <- function(x, y){
+  citation_default <- switch(
     x,
     "none" = "",
     "EBICglasso" = c("Friedman, J. H., Hastie, T., & Tibshirani, R. (2008). Sparse inverse covariance estimation with the graphical lasso. Biostatistics, 9 (3), 432-441.",
@@ -39,9 +39,21 @@ getRefs <- function(x){
     )
   )
 
-  citation <- c(citation,"Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating psychological networks and their accuracy: a tutorial paper. Multivariate Behavioral Research, 50(1), 195-212.")
+  citation_corMethod<- switch(
+    y,
+    "cor" = NULL,
+    "cov" = NULL,
+    "spearman" = NULL,
+    "cor_auto" = "Epskamp, S., Cramer, A., Waldorp, L., Schmittmann, V. D., & Borsboom, D. (2012). qgraph: Network visualizations of relationships in psychometric data. Journal of Statistical Software, 48 (1), 1-18.",
+    "cor_mantar" = "Nehler, K. J. (2026). mantar: Missingness Alleviation for Network Analysis. Retrieved from https://CRAN.R-project.org/package=mantar"
+,
+    "npn" = "Zhao, T., Li, X., Liu, H., Roeder, K., Lafferty, J., & Wasserman, L. (2015). huge: High-dimensional undirected graph estimation. Retrieved from https://CRAN.R-project.org/package=huge"
+  )
 
-  citation
+  citation <- unique(c(citation_default,citation_corMethod,
+                "Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating psychological networks and their accuracy: a tutorial paper. Multivariate Behavioral Research, 50(1), 195-212."))
+
+  if(!is.null(citation)) citation
 }
 
 print.bootnet <- function(x, ...){
@@ -58,7 +70,7 @@ print.bootnet <- function(x, ...){
         paste0("\nUse plot(",name,"$sample, graph = '...') to plot estimated network of original sample"),
         paste0("\nUse summary(",name,", graph = '...') to inspect summarized statistics (see ?summary.bootnet for details)"),
         paste0("\nUse plot(",name,", graph = '...') to plot summarized statistics (see ?plot.bootnet for details)"),
-        "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$sample$default),collapse="\n")
+        "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$sample$default, x$sample$arguments$corMethod),collapse="\n")
     )
   } else {
 
@@ -86,7 +98,7 @@ print.bootnet <- function(x, ...){
         paste0("\nUse plot(",name,"$sample) to plot estimated network of original sample"),
         paste0("\nUse summary(",name,") to inspect summarized statistics (see ?summary.bootnet for details)"),
         paste0("\nUse plot(",name,") to plot summarized statistics (see ?plot.bootnet for details)"),
-        "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$sample$default),collapse="\n")
+        "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$sample$default, x$sample$arguments$corMethod),collapse="\n")
     )
   }
 
@@ -102,7 +114,7 @@ print.bootnetResult <- function(x, ...){
     cat(paste0("\nDefault set used: ",x$default),
         "\n",
         paste0("\nUse bootnet(",name,") to bootstrap edge weights and centrality indices"),
-        "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$default),collapse="\n"))
+        "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$default, x$arguments$corMethod),collapse="\n"))
 
     for (i in 1:length(x$graph)){
       if (x$directed[[i]]){
@@ -145,7 +157,7 @@ print.bootnetResult <- function(x, ...){
         "\n",
         paste0("\nUse plot(",name,") to plot estimated network"),
         paste0("\nUse bootnet(",name,") to bootstrap edge weights and centrality indices"),
-        "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$default),collapse="\n")
+        "\n\nRelevant references:\n\n",paste0("\t",getRefs(x$default, x$arguments$corMethod),collapse="\n")
     )
   }
 
