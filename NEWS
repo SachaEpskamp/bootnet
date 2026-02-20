@@ -1,3 +1,8 @@
+Changes in Version 1.7.1
+  - Updated nonconvex regularization to use mantar instead of GGMncv
+  - Added multiple imputation as a missing data handling option for cross-sectional network analysis via the new cor_mantar functionality
+  - Added nodewise regression with information-criterion based model selection as a method for estimating GGM network
+
 Changes in Version 1.7
   - Fixed compatibility with dplyr >= 1.2.0 (removal of dplyr::id())
   - Replaced deprecated aes_string() with aes() + .data[[]] (ggplot2 >= 3.0.0)

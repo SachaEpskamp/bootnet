@@ -1,9 +1,9 @@
 
 # Function that checks input and returns the functions:
 checkInput <- function(
-  default = c("none", "EBICglasso","ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", 
+  default = c("none", "EBICglasso","ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp",
               "cor","TMFG","ggmModSelect","LoGo","graphicalVAR","piecewiseIsing","SVAR_lavaan",
-              "GGMncv"),
+              "ncvRegularize","nodeRegresIC"),
   fun, # Estimator function
   # prepFun, # Fun to produce the correlation or covariance matrix
   # prepArgs, # list with arguments for the correlation function
@@ -24,20 +24,20 @@ checkInput <- function(
   if (default[[1]]=="IsingSampler") default <- "IsingSampler"
   default <- match.arg(default)
   # construct <- match.arg(construct)
-  
+
   ### DEFAULT OPTIONS ###
   if (missing(fun)){
     fun <- NULL
   }
-  
-  
-  
+
+
+
   # Stop if not compatible:
   dots <- c(.dots,list(...))
-  
+
   # gather names:
   argNames <- character(0)
-  # 
+  #
   # if (!missing(prepFun)){
   #   argNames <- c(argNames,"prepFun")
   # }
@@ -62,65 +62,65 @@ checkInput <- function(
   # if (!missing(intArgs)){
   #   argNames <- c(argNames,"intArgs")
   # }
-  # 
+  #
   # # Not compatible if construct is used:
   # if (length(dots) > 0 && construct == "arguments"){
-  #   
+  #
   #   stop(paste0("Ambiguous argument specification. Old functonality is used (construct = 'arguments') in combination with new functionality arguments (implying construct = 'function'): ",
   #               paste0("'",names(dots),"'",collapse="; "),". These arguments are NOT compatible!"))
-  #   
+  #
   # }
-  # 
+  #
   # # relimp not compatable with old:
   # if (construct == "arguments" & default == "relimp"){
   #   stop("default = 'relimp' not supported with old bootnet style (construct = 'arguments')")
-  #   
+  #
   # }
-  # 
+  #
   # if (length(argNames) > 0 && construct == "function"){
-  #   
+  #
   #   stop(paste0("Ambiguous argument specification. New functonality is used (construct = 'function') in combination with old functionality arguments (implying construct = 'arguments'): ",
   #               paste0("'",argNames,"'",collapse="; "),". These arguments are NOT compatible!"))
-  #   
+  #
   # }
-  #   
+  #
   # # not compatible if both dots are used and arguments are used:
   # if (length(argNames) > 0 & length(dots) > 0){
-  # 
+  #
   #   stop(paste0("Ambiguous argument specification. Both old functionality arguments are used, compatible with construct = 'arguments': ",
   #               paste0("'",argNames,"'",collapse="; "),", as well as new functionality arguments are used, compatible with construct = 'function': ",
   #               paste0("'",names(dots),"'",collapse="; "),". These two types of arguments are NOT compatible!"))
-  #   
+  #
   # }
-  # 
-  # 
+  #
+  #
   # # Check to construct via function or to construct via arguments:
   # # if no default and no fun, use arguments:
   # if (construct == "default"){
   #   construct <- "function"
-  #   
+  #
   #   if (default == "none" && is.null(fun)){
   #     construct <- "arguments"
   #   }
-  #   
+  #
   #   # If fun is missing, default is not none and one argument is not missing, use arguments (backward competability):
   #   if (default != "none" && is.null(fun) && (!missing(prepFun) | !missing(prepArgs) | !missing(estFun) | !missing(estArgs))){
   #     construct <- "arguments"
   #   }
   # }
-  # 
+  #
   # # Check if arguments are not missing:
   # if (default == "none" && construct == "arguments"){
   #   if (missing(prepFun) | missing(prepArgs) | missing(estFun) | missing(estArgs)){
   #     stop("If 'default' is not set and 'fun' is missing, 'prepFun', 'prepArgs', 'estFun' and 'estArgs' may not be missing.")
   #   }
   # }
-  
+
   ### Construct estimator function via function:
   if (construct == "function"){
     # Arguments:
       Args <- dots
-      # 
+      #
       # # Warn user that arguments are ignored:
       # if (!missing(prepFun)){
       #   warning("'prepFun' argument is ignored as a function is used as arguments. To use 'prepFun', please set construct = 'arguments'")
@@ -146,7 +146,7 @@ checkInput <- function(
       # if (!missing(intArgs)){
       #   warning("'intArgs' argument is ignored as a function is used as arguments. To use 'intArgs', please set construct = 'arguments'")
       # }
-      # 
+      #
       # per default:
       if (default == "none"){
         Function <- fun
@@ -175,26 +175,28 @@ checkInput <- function(
       } else if (default == "LoGo"){
         Function <- bootnet_LoGo
       } else if (default == "graphicalVAR"){
-        Function <- bootnet_graphicalVAR  
+        Function <- bootnet_graphicalVAR
       } else if (default == "piecewiseIsing"){
         Function <- bootnet_piecewiseIsing
       } else if (default == "SVAR_lavaan"){
-        Function <- bootnet_SVAR_lavaan  
-      } else if (default == "GGMncv"){
-        Function <- bootnet_GGMncv 
+        Function <- bootnet_SVAR_lavaan
+      } else if (default == "ncvRegularize"){
+        Function <- bootnet_ncvRegularize
+      } else if (default == "nodeRegresIC"){
+        Function <- bootnet_nodeRegresIC
       } else stop("Currently not supported.")
-      
-      
-      
+
+
+
       # } else {
       #   warning("Arguments (prepFun, estFun, etcetera) used to construct estimator. This functionality is deprecated and will no longer be supported in a future version of bootnet. Please consult the manual or contact the authors.")
-      #   
+      #
       #   # Check dots, and warn user:
       #   if (length(dots) > 0){
       #     dotNames <- names(dots)
       #     warning(paste0("Arguments (prepFun, estFun, etcetera) used to construct estimator. As a result, the following arguments are ignored: ",paste0("'",dotNames,"'", collapse = ", "),". To use these arguments use construct = 'function' and supply a default set or set the 'fun' argument. In addition, do not use the 'prepFun', 'estFun', etcetera arguments."))
       #   }
-      #   
+      #
       #   # Construct via arguments
       #   if (!(default == "none")){
       #     # prepFun:
@@ -211,19 +213,19 @@ checkInput <- function(
       #       #                         EBICglasso = cor,
       #       #                         IsingFit = binarize,
       #       #                         pcor = cor
-      #       #       )      
+      #       #       )
       #     }
-      #     
+      #
       #     # prepArgs:
       #     #     qgraphVersion <- packageDescription("qgraph")$Version
       #     #     qgraphVersion <- as.numeric(strsplit(qgraphVersion,split="\\.|\\-")[[1]])
       #     #     if (length(qgraphVersion)==1) qgraphVersion <- c(qgraphVersion,0)
       #     #     if (length(qgraphVersion)==2) qgraphVersion <- c(qgraphVersion,0)
-      #     #     goodVersion <- 
-      #     #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) | 
-      #     #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) | 
+      #     #     goodVersion <-
+      #     #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] >= 3 & qgraphVersion[[3]] >= 1) |
+      #     #       (qgraphVersion[[1]] >= 1 & qgraphVersion[[2]] > 3) |
       #     #       qgraphVersion[[1]] > 1
-      #     
+      #
       #     if (missing(prepArgs)){
       #       prepArgs <- switch(default,
       #                          EBICglasso = ifElse(identical(prepFun,qgraph::cor_auto),list(verbose=verbose),
@@ -235,11 +237,11 @@ checkInput <- function(
       #                          huge = list(),
       #                          adalasso = list()
       #       )
-      #       
-      #       
+      #
+      #
       #     }
-      #     
-      
+      #
+
       # # estFun:
       # if (missing(estFun)){
       #   estFun <- switch(default,
@@ -251,7 +253,7 @@ checkInput <- function(
       #                    adalasso = parcor::adalasso.net
       #   )
       # }
-      
+
       # # estArgs:
       # if (missing(estArgs)){
       #   estArgs <- switch(default,
@@ -263,7 +265,7 @@ checkInput <- function(
       #                     adalasso = list()
       #   )
       # }
-      # 
+      #
       # # graphFun:
       # if (missing(graphFun)){
       #   graphFun <- switch(default,
@@ -275,7 +277,7 @@ checkInput <- function(
       #                      adalasso = function(x)as.matrix(Matrix::forceSymmetric(x$pcor.adalasso))
       #   )
       # }
-      # 
+      #
       # # graphArgs:
       # if (missing(graphArgs)){
       #   graphArgs <- switch(default,
@@ -287,7 +289,7 @@ checkInput <- function(
       #                       adalasso = list()
       #   )
       # }
-      # 
+      #
       # intFun:
       # if (missing(intFun)){
       #   intFun <- switch(default,
@@ -299,37 +301,37 @@ checkInput <- function(
       #                    adalasso = null
       #   )
       # }
-      
-      
+
+
       # }
-      # 
+      #
       # if (missing(prepFun)){
       #   prepFun <- identity
       # }
-      # 
+      #
       # if (missing(prepArgs)){
       #   prepArgs <- list()
       # }
-      # 
+      #
       # if (missing(graphFun)){
       #   graphFun <- identity
       # }
-      # 
+      #
       # if (missing(graphArgs)){
       #   graphArgs <- list()
       # }
-      # 
+      #
       # if (missing(intFun)){
       #   intFun <- null
       # }
-      # 
+      #
       # if (missing(intArgs)){
       #   intArgs <- list()
       # }
-      # 
+      #
       # Function:
       # Function <- bootnet_argEstimator
-      #   
+      #
       #   # List of arguents:
       #   Args <- list(
       #     prepFun = prepFun,
@@ -342,10 +344,10 @@ checkInput <- function(
       #     intArgs = intArgs
       #   )
       # }
-      # 
-      
+      #
+
   }
-  
+
   # Output:
   Output <- list(
     data = data,
@@ -353,6 +355,6 @@ checkInput <- function(
     estimator = Function,
     arguments = Args
   )
-  
+
   return(Output)
 }

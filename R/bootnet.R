@@ -24,7 +24,7 @@ noDiag <- function(x){
 bootnet <- function(
         data, # Dataset
         nBoots = 1000, # Number of bootstrap samples.
-        default = c("none", "EBICglasso", "ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp","cor","TMFG", "ggmModSelect", "LoGo","SVAR_lavaan","GGMncv"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
+        default = c("none", "EBICglasso", "ggmModSelect", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp","cor","TMFG","LoGo","SVAR_lavaan","ncvRegularize","nodeRegresIC"), # Default method to use. EBICglasso, IsingFit, concentration, some more....
         type = c("nonparametric","parametric","node","person","jackknife","case"), # Bootstrap method to use
         nCores = 1,
         statistics = c("edge","strength","outStrength","inStrength"),
@@ -92,6 +92,16 @@ bootnet <- function(
     } else {
         message(paste("Note: bootnet will store only the following statistics: ",paste0(statistics, collapse=", ")))
     }
+
+    # Check missing handling
+    if (!is.null(list(...)[["missing"]]) & type != "parametric"){
+      if(list(...)[["missing"]] == "stackedMI"){
+      message("============================================================\n",
+              "============================================================\n",
+              "Combining multiple imputation with bootstrapping, while potentially providing the most robust estimation, can be computationally very demanding. It is strongly recommended to first test the procedure using a small number of bootstraps ('nBoot') and imputations ('nimp') to ensure that the estimation runs without errors and to get an impression of the expected runtime. Once verified, the full analysis should be executed on a machine that can run uninterrupted for an extended period, potentially even several days.",
+              "============================================================\n",
+              "============================================================\n")
+    }}
 
     # Check bridgeArgs:
     if (!missing(communities)){

@@ -8,7 +8,7 @@ importFrom("stats", "var")
 #importFrom("GGMncv","ggmncv")
 
   importFrom("snow","setDefaultClusterOptions")
-  
+
 # Transformations:
 export(quantile_transformation)
 export(rank_transformation)
@@ -39,6 +39,8 @@ export(bootnet_LoGo)
 export(bootnet_ggmModSelect)
 export(bootnet_graphicalVAR)
 export(bootnet_piecewiseIsing)
+export(bootnet_nodeRegresIC)
+export(bootnet_ncvRegularize)
 export(bootThreshold)
 
 
@@ -48,6 +50,7 @@ importFrom("stats", "qnorm")
 # importFrom(huge,"huge","huge.npn","huge.select")
 # importFrom(parcor,"adalasso.net")
 import(mgm)
+import(mantar)
 #importFrom(relaimpo, "calc.relimp")
 
 # exportPattern("^[[:alpha:]]+")

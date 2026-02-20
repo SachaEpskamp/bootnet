@@ -11,10 +11,10 @@ This function can be used to bootstrap network estimation methods so that the sp
 bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
                  "ggmModSelect", "pcor", "IsingFit", "IsingSampler",
                  "huge", "adalasso", "mgm", "relimp", "cor", "TMFG",
-                 "ggmModSelect", "LoGo", "SVAR_lavaan", "GGMncv"), type
-                 = c("nonparametric", "parametric", "node", "person",
-                 "jackknife", "case"), nCores = 1, statistics =
-                 c("edge", "strength", "outStrength", "inStrength"),
+                 "LoGo", "SVAR_lavaan", "ncvRegularize",
+                 "nodeRegresIC"), type = c("nonparametric", "parametric",
+                 "node", "person", "jackknife", "case"), nCores = 1,
+                 statistics = c("edge", "strength", "outStrength", "inStrength"),
                  model = c("detect", "GGM", "Ising", "graphicalVAR"),
                  fun, verbose = TRUE, labels, alpha = 1, caseMin =
                  0.05, caseMax = 0.75, caseN = 10, subNodes, subCases,
@@ -88,7 +88,7 @@ A character vector containing the node labels. If omitted the column names of th
   Range of persons to sample in person-drop bootstrap
   }
   \item{computeCentrality}{
-    Logical, should centrality be computed?  
+    Logical, should centrality be computed?
   }
   \item{propBoot}{
     Proportion of persons to sample in bootstraps. Set to lower than 1 for m out of n bootstrap
@@ -154,7 +154,7 @@ centralityPlot(Network)
 
 \donttest{
 # Estimated network:
-plot(Network, layout = 'spring') 
+plot(Network, layout = 'spring')
 
 ### Non-parametric bootstrap ###
 # Bootstrap 1000 values, using 8 cores:
@@ -165,7 +165,7 @@ plot(Results1, labels = FALSE, order = "sample")
 
 # Plot significant differences (alpha = 0.05) of edges:
 plot(Results1, "edge", plot = "difference",onlyNonZero = TRUE,
-     order = "sample") 
+     order = "sample")
 
 # Plot significant differences (alpha = 0.05) of node strength:
 plot(Results1, "strength", plot = "difference")
@@ -175,7 +175,7 @@ differenceTest(Results1,  "A1", "C2", "strength")
 
 ### Case-drop bootstrap ###
 # Bootstrap 1000 values, using 8 cores:
-Results2 <- bootnet(Network, nBoots = 1000, nCores = 8, 
+Results2 <- bootnet(Network, nBoots = 1000, nCores = 8,
               type = "case")
 
 # Plot centrality stability:
