@@ -192,6 +192,7 @@ A string indicating the method to use. Specifying a \code{default} sets default 
 \item{\code{"relimp"}}{Estimates a (directed) relative importance network, using the function 'calc.relimp' of the 'relaimpo' package. The 'structureDefault' argument can be used to use a different default set for estimating the structure of the graph. Calls \code{bootnet_relimp}.}
 \item{\code{"ggmModSelect"}}{Estimates an unregularized GGM using the glasso algorithm and stepwise model selection, using the 'ggmModSelect' function from the qgraph package. Calls \code{bootnet_ggmModSelect}.}
 \item{\code{"graphicalVAR"}}{Estimates a graphical VAR model using the graphicalVAR package. This results in two networks which can be plotted using the 'graph' argument in the plot method. Calls \code{bootnet_graphicalVAR}.}
+\item{\code{"nodeRegresIC"}}{Estimates an unregularized GGM using neighborhood selection (nodewise multiple regressions) based on an information criterion. Uses \code{\link[mantar]{neighborhood_net}} from the mantar package. Calls \code{bootnet_nodeRegresIC}.}
 }
 See details section for a more detailed description.
 }
