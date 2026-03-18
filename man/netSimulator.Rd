@@ -144,6 +144,7 @@ Sim3
 # Plot results:
 plot(Sim3, color = "corMethod")
 
+\dontrun{
 # Ising model:
 trueNetwork <- read.csv('http://sachaepskamp.com/files/weiadj.csv')[,-1]
 trueNetwork <- as.matrix(trueNetwork)
@@ -181,6 +182,6 @@ Sim5
 
 # Plot:
 plot(Sim5, yfacet = "rule")
-
+}
 }
 }

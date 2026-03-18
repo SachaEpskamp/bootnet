@@ -1,14 +1,15 @@
 Package: bootnet
 Type: Package
 Title: Bootstrap Methods for Various Network Estimation Routines
-Version: 1.7.1
+Version: 1.8
 Authors@R: c(
   person("Sacha", "Epskamp", email = "mail@sachaepskamp.com",role = c("aut", "cre")),
-  person("Eiko I.", "Fried", role = c("ctb"))
+  person("Eiko I.", "Fried", role = c("ctb")),
+  person("Kai J.", "Nehler", role = c("ctb"))
   )
 Maintainer: Sacha Epskamp <mail@sachaepskamp.com>
 Depends: ggplot2, R (>= 3.0.0)
-Imports: methods, igraph, IsingFit (>= 0.4), qgraph, dplyr (>= 0.3.0.2), tidyr, 
+Imports: methods, igraph, IsingFit (>= 0.4), qgraph, mantar, dplyr (>= 0.3.0.2), tidyr, 
         gtools, corpcor, IsingSampler (>= 0.2.3), mvtnorm, abind, Matrix, snow, 
         mgm (>= 1.2), NetworkToolbox (>= 1.1.0),
         pbapply, networktools, rlang, tibble, tidyselect

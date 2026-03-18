@@ -3,7 +3,7 @@ estimateNetwork <- function(
   data,
   default = c("none", "EBICglasso", "pcor","IsingFit","IsingSampler", "huge","adalasso","mgm","relimp", "cor","TMFG",
               "ggmModSelect", "LoGo","graphicalVAR", "piecewiseIsing","SVAR_lavaan",
-              "GGMncv"),
+              "ncvRegularize", "nodeRegresIC"),
   fun, # A function that takes data and returns a network or list entitled "graph" and "thresholds". optional.
   # prepFun, # Fun to produce the correlation or covariance matrix
   # prepArgs, # list with arguments for the correlation function
@@ -30,10 +30,16 @@ estimateNetwork <- function(
   construct <- "function"
   # Borsboom easter egg:
   if (default[1] == "Borsboom") return(42)
-  
+
   if (default[[1]]=="glasso") default <- "EBICglasso"
+
+  if (default[[1]]=="GGMncv"){
+    .Deprecated(new = "ncvRegularize", msg = "'GGMncv' is deprecated; using 'ncvRegularize'.")
+    default <- "ncvRegularize"
+  }
+
   default <- match.arg(default)
-  
+
   # datatype test:
   if (missing(datatype)){
     if (is(data,"tsData")){
@@ -41,13 +47,13 @@ estimateNetwork <- function(
     } else {
       datatype <- "normal"
     }
-      
+
   }
 
   if (!datatype%in% c("normal","graphicalVAR")){
     stop("Only datatypes 'normal' and 'graphicalVAR' currently supported.")
   }
-#   
+#
   # If NAs and default can't handle, stop:
   # if (any(is.na(data)) && default %in% c("huge","adalasso")){
   #   stop(paste0("Missing data not supported for default set '",default,"'. Try using na.omit(data)."))
@@ -57,35 +63,35 @@ estimateNetwork <- function(
   if (datatype == "normal" && !(is.data.frame(data) || is.matrix(data))){
     stop("'data' argument must be a data frame")
   }
-  
+
   # If matrix coerce to data frame:
   if (datatype == "normal" && is.matrix(data)){
     data <- as.data.frame(data)
   }
- 
+
   if (missing(directed)){
     if (default == "graphicalVAR"){
       directed <- list(contemporaneous = FALSE, temporal = TRUE)
     } else  if (default == "SVAR_lavaan"){
       directed <- list(contemporaneous = TRUE, temporal = TRUE)
     } else if (!default %in% c("relimp","DAG")){
-      directed <- FALSE 
+      directed <- FALSE
     } else {
       directed <- TRUE
     }
   }
-  
+
   if (datatype == "normal"){
     N <- ncol(data)
-    Np <- nrow(data)   
+    Np <- nrow(data)
     if (missing(labels)){
       labels <- colnames(data)
     }
-    
+
     if (checkNumeric){
       # Check and remove any variable that is not ordered, integer or numeric:
       goodColumns <- sapply(data, function(x) is.numeric(x) | is.ordered(x) | is.integer(x))
-      
+
       if (!all(goodColumns)){
         if (verbose){
           warning(paste0("Removing non-numeric columns: ",paste(which(!goodColumns),collapse="; ")))
@@ -94,7 +100,7 @@ estimateNetwork <- function(
       }
     }
 
-    
+
   } else if (datatype == "graphicalVAR"){
    N <- length(data$vars)
    Np <- nrow(data$data_c)
@@ -103,10 +109,10 @@ estimateNetwork <- function(
    }
   }
 
- 
-  
-  
-  
+
+
+
+
   # Compute estimator:
   if (missing(.input)){
     .input <- checkInput(
@@ -128,13 +134,13 @@ estimateNetwork <- function(
     )
   }
 
-  
+
   # Add verbose:
   # Every estimator must have argument verbose:
   if ("verbose" %in% names(formals(.input$estimator))){
     .input$arguments$verbose <- verbose
   }
-  
+
   # Unlock function:
   # Every estimator must have argument verbose:
   if ("unlock" %in% names(formals(.input$estimator))){
@@ -161,17 +167,17 @@ estimateNetwork <- function(
     nNode <- ncol(Result$graph)
   }
 
-  
+
   if (!is.matrix(sampleGraph)){
     if (is.list(sampleGraph)){
       if (!is.matrix(sampleGraph[[1]])){
-        stop("Estimated result is not a list of matrices encoding networks.")   
+        stop("Estimated result is not a list of matrices encoding networks.")
       }
     } else {
       stop("Estimated result is not a matrix encoding a network.")
     }
   }
-  
+
   # Special data?
   if (!is.list(Result) || is.null(Result$specialData)){
     outdata <- data
@@ -180,7 +186,7 @@ estimateNetwork <- function(
     outdata <- Result$specialData$data
     datatype <- Result$specialData$type
   }
-  
+
 
   sampleResult <- list(
     graph = sampleGraph,
@@ -201,14 +207,14 @@ estimateNetwork <- function(
     thresholded = FALSE
   )
   class(sampleResult) <- c("bootnetResult", "list")
-  
+
   if (default == "graphicalVAR"){
        sampleResult$labels <- output$data$vars
   }
   if (default == "SVAR_lavaan"){
     sampleResult$labels  <- outdata$vars
   }
-  
+
   # Memory save:
   if(memorysaver)
   {
@@ -217,12 +223,12 @@ estimateNetwork <- function(
     sampleResult$data <- NA
     sampleResult$.input <- NA
   }
-  
+
   # Plot?
 #   if (plot){
 #     plot(sampleResult,labels=labels,layout = "spring", ...)
 #   }
-  
+
   # Return network:
   return(sampleResult)
 }
