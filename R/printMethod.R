@@ -39,8 +39,10 @@ getRefs <- function(x, y){
     )
   )
 
-  citation_corMethod<- switch(
-    y,
+  citation_corMethod <- if (is.null(y)) {
+    NULL
+  } else {
+    switch(y,
     "cor" = NULL,
     "cov" = NULL,
     "spearman" = NULL,
@@ -48,7 +50,7 @@ getRefs <- function(x, y){
     "cor_mantar" = "Nehler, K. J. (2026). mantar: Missingness Alleviation for Network Analysis. Retrieved from https://CRAN.R-project.org/package=mantar"
 ,
     "npn" = "Zhao, T., Li, X., Liu, H., Roeder, K., Lafferty, J., & Wasserman, L. (2015). huge: High-dimensional undirected graph estimation. Retrieved from https://CRAN.R-project.org/package=huge"
-  )
+  )}
 
   citation <- unique(c(citation_default,citation_corMethod,
                 "Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating psychological networks and their accuracy: a tutorial paper. Multivariate Behavioral Research, 50(1), 195-212."))
