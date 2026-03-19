@@ -693,7 +693,7 @@ plot.bootnet <- function(
         )
 
       sampleTable <- sampleTable %>%
-        dplyr::arrange(~dplyr::row_number(.data[['order']]))  %>%
+        dplyr::arrange(dplyr::row_number(.data[['order']]))  %>%
         dplyr::mutate(id = gsub("^(E|N): ","",as.character(.data[['id']]))) %>%
         dplyr::mutate(
           id = factor(.data[['id']], levels = unique(.data[['id']]))

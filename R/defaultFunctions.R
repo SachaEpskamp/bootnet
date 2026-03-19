@@ -1216,43 +1216,24 @@ bootnet_mgm <- function(
     pbar = verbose,
     ruleReg = rule, saveData = FALSE, binarySign = binarySign, ...))
 
-  # Warn for unsigned:
-  if (any(Results$pairwise$signs==0,na.rm = TRUE)){
-    warning("Bootnet does not support unsigned edges and treats these as positive edges.")
-  }
+  # Handle unsigned edges (e.g. categorical nodes with >2 levels):
   Results$pairwise$signs[is.na(Results$pairwise$signs)] <- 0
 
   # Graph:
   Graph <- Results$pairwise$wadj
   Graph <- ifelse(Results$pairwise$signs==-1,-Graph,Graph)
-  #
-  # } else {
-  #   log <- capture.output(Results <- do.call(mgmfun,list(
-  #     data,
-  #     type=type,
-  #     lev=lev,
-  #     lambda.sel = criterion,
-  #     folds = nFolds,
-  #     gam = tuning,
-  #     d = degree,
-  #     pbar = verbose,
-  #     rule.reg = rule)))
-  #
-  #   # Warn for unsigned:
-  #   if (any(Results$signs==0,na.rm = TRUE)){
-  #     warning("Bootnet does not support unsigned edges and treats these as positive edges.")
-  #   }
-  #   Results$signs[is.na(Results$signs)] <- 0
-  #
-  #   # Graph:
-  #   Graph <- Results$wadj
-  #   Graph <- ifelse(Results$signs==-1,-Graph,Graph)
-  # }
+
+  # Build edge color matrix: gray for unsigned edges, NA elsewhere (let qgraph decide):
+  N <- ncol(Graph)
+  edgeColors <- matrix(NA_character_, N, N)
+  unsignedMask <- Results$pairwise$signs == 0 & Results$pairwise$wadj != 0
+  edgeColors[unsignedMask] <- "gray"
 
   # Return:
   return(list(
     graph=Graph,
-    results=Results))
+    results=Results,
+    edgeColors=edgeColors))
 }
 
 

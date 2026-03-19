@@ -66,15 +66,35 @@ plot.bootnetResult <- function(x, graph,
     qgraph::qgraph(wMat,labels=labels,directed=directed,
                    parallelEdge = parallelEdge,
                    theme = theme,
-                   cut = cut, layout = layout,  
+                   cut = cut, layout = layout,
                    edge.color = "black", maximum = 1,
-                   diag = TRUE,...)  
+                   diag = TRUE,...)
+  } else if (!is.null(x$edgeColors) && isTRUE(signed) && !("edge.color" %in% names(list(...)))) {
+    # Two-pass plot: first get qgraph's default theme-aware colors, then override unsigned edges to gray
+    q <- qgraph::qgraph(wMat, labels = labels, directed = directed,
+                        parallelEdge = parallelEdge,
+                        theme = theme,
+                        cut = cut, layout = layout, DoNotPlot = TRUE, ...)
+    edgeCols <- q$graphAttributes$Edges$color
+    fromNodes <- q$Edgelist$from
+    toNodes <- q$Edgelist$to
+    for (e in seq_along(fromNodes)) {
+      i <- fromNodes[e]
+      j <- toNodes[e]
+      ec_ij <- x$edgeColors[i, j]
+      ec_ji <- x$edgeColors[j, i]
+      if ((!is.na(ec_ij) && ec_ij == "gray") || (!is.na(ec_ji) && ec_ji == "gray")) {
+        edgeCols[e] <- "gray"
+      }
+    }
+    q$graphAttributes$Edges$color <- edgeCols
+    plot(q)
   } else {
-    
+
     qgraph::qgraph(wMat,labels=labels,directed=directed,
                    parallelEdge = parallelEdge,
                    theme = theme,
-                   cut = cut, layout = layout,  ...)    
+                   cut = cut, layout = layout,  ...)
   }
 
 }

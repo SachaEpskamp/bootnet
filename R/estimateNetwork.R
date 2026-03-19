@@ -188,6 +188,9 @@ estimateNetwork <- function(
   }
 
 
+  # Extract edge colors if the estimator provides them (e.g. mgm with unsigned edges):
+  edgeColors <- if (is.list(Result) && !is.null(Result$edgeColors)) Result$edgeColors else NULL
+
   sampleResult <- list(
     graph = sampleGraph,
     intercepts = intercepts,
@@ -204,7 +207,8 @@ estimateNetwork <- function(
     signed = signed,
     directed=directed,
     .input = .input,
-    thresholded = FALSE
+    thresholded = FALSE,
+    edgeColors = edgeColors
   )
   class(sampleResult) <- c("bootnetResult", "list")
 
