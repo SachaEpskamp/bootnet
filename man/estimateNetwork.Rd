@@ -37,8 +37,8 @@ estimateNetwork(data, default = c("none", "EBICglasso", "pcor",
 bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor", "cov",
                     "cor_auto", "cor_mantar", "npn", "spearman"), missing =
                     c("pairwise", "listwise", "fiml", "stackedMI", "stop"), sampleSize
-                    = c("pairwise_average", "maximum", "minimum",
-                    "pairwise_maximum", "pairwise_minimum",
+                    = c("pairwise_average", "pairwise_average_mantar", "maximum",
+                    "minimum", "pairwise_maximum", "pairwise_minimum",
                     "pairwise_average_v1.5", "pairwise_maximum_v1.5",
                     "pairwise_minimum_v1.5"), verbose = TRUE, corArgs =
                     list(), refit = FALSE, principalDirection = FALSE,
@@ -50,7 +50,7 @@ bootnet_EBICglasso(data, tuning = 0.5, corMethod = c("cor", "cov",
 bootnet_pcor(data, corMethod = c("cor", "cov", "cor_auto", "cor_mantar",
                     "npn", "spearman"), missing = c("pairwise", "listwise",
                     "fiml", "stackedMI", "stop"), sampleSize = c("pairwise_average",
-                    "maximum", "minimum", "pairwise_maximum",
+                    "pairwise_average_mantar", "maximum", "minimum", "pairwise_maximum",
                     "pairwise_minimum", "pairwise_average_v1.5",
                     "pairwise_maximum_v1.5", "pairwise_minimum_v1.5"),
                     verbose = TRUE, corArgs = list(), threshold = 0, alpha
@@ -61,7 +61,7 @@ bootnet_pcor(data, corMethod = c("cor", "cov", "cor_auto", "cor_mantar",
 bootnet_cor(data, corMethod = c("cor", "cov", "cor_auto", "cor_mantar",
                     "npn", "spearman"), missing = c("pairwise", "listwise",
                     "fiml", "stackedMI", "stop"), sampleSize = c("pairwise_average",
-                    "maximum", "minimum", "pairwise_maximum",
+                    "pairwise_average_mantar",  "maximum", "minimum", "pairwise_maximum",
                     "pairwise_minimum", "pairwise_average_v1.5",
                     "pairwise_maximum_v1.5", "pairwise_minimum_v1.5"),
                     verbose = TRUE, corArgs = list(), threshold = 0, alpha
@@ -127,8 +127,8 @@ bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection
 bootnet_ggmModSelect(data, tuning = 0, corMethod = c("cor", "cov",
                     "cor_auto", "cor_mantar", "npn", "spearman"), missing =
                     c("pairwise", "listwise", "fiml", "stackedMI", "stop"),
-                    sampleSize = c("pairwise_average", "maximum", "minimum",
-                    "pairwise_maximum", "pairwise_minimum",
+                    sampleSize = c("pairwise_average", "pairwise_average_mantar", "maximum",
+                    "minimum", "pairwise_maximum", "pairwise_minimum",
                     "pairwise_average_v1.5", "pairwise_maximum_v1.5",
                     "pairwise_minimum_v1.5"), verbose = TRUE, corArgs =
                     list(), principalDirection = FALSE, start =
@@ -150,13 +150,13 @@ bootnet_SVAR_lavaan(data, verbose = TRUE, principalDirection = FALSE,
                    "quantile"), ...)
 
 bootnet_ncvRegularize(data, penalty = c("atan", "selo", "exp", "log",
-                    "sica", "scad", "mcp", "glasso"), tuning = NULL,
-                    lambda.min.ratio = 0.01, nlambda = NULL,
+                    "sica", "scad", "mcp", "glasso"), likelihood_comp = "obs_based",
+                    tuning = NULL, lambda.min.ratio = 0.01, nlambda = NULL,
                     corMethod = c("cor_mantar", "cor",
                     "cov", "cor_auto", "npn", "spearman"),
                     missing = c("pairwise", "listwise", "fiml", "stackedMI",
-                    "stop"), sampleSize = c("pairwise_average", "maximum",
-                    "minimum", "pairwise_maximum", "pairwise_minimum",
+                    "stop"), sampleSize = c("pairwise_average", "pairwise_average_mantar",
+                    "maximum", "minimum", "pairwise_maximum", "pairwise_minimum",
                     "pairwise_average_v1.5", "pairwise_maximum_v1.5",
                     "pairwise_minimum_v1.5"), verbose = TRUE, corArgs =
                     list(), principalDirection = FALSE, unlock = FALSE,
@@ -205,11 +205,11 @@ A custom estimation function, when no default set is used. This must be a functi
 \item{tuning}{EBIC tuning parameter, used in 'EBICglasso', 'ncvRegularize', 'IsingFit', 'huge', 'mgm', and 'ggmModSelect' default sets. Note that default values differ across methods: 'EBICglasso', 'ncvRegularize' (for convex regularization), 'huge', and 'mgm' use 0.5; 'IsingFit' uses 0.25; and 'ggmModSelect' as well as 'ncvRegularize' (for nonconvex regularization) use 0, corresponding to the basic BIC.}
 \item{corMethod}{Correlation method, used in 'EBICglasso' and 'pcor' default sets. \code{"cor_auto"} uses \code{\link[qgraph]{cor_auto}} and \code{"cor_mantar"} uses \code{\link[mantar]{cor_calc}} for pearson, polychoric and polyserial correlations, \code{"cov"} uses the \code{\link{cov}} function for covariances, \code{"cor"} will use the \code{\link{cor}} function for correlations and \code{"npn"} will apply the nonparanormal transformation (via \code{huge::huge.npn}) and then compute correlations.}
 \item{missing}{How to handle missing data? \code{"pairwise"} for pairwise deletion, \code{"listwise"} for listwise deletion, \code{"fiml"} for full-information maximum likelihood (called two-step EM in mantar package), \code{"stackedMI"} for stacked multiple imputation, and \code{"stop"} to stop with an error.}
-\item{sampleSize}{How will sample size be computed in EBICglasso default set? The default \code{"pairwise_average"} will set the sample size to the average of sample sizes used for each individual correlation. Other options are \code{"pairwise_maximum"} (largest sample sized used for each individual correlation), \code{"pairwise_minimum"} (smallest sample sized used for each individual correlation), \code{"maximum"} (takes total number of rows including rows with NA), and \code{"minimum"} (takes total number of rows that contain no NA). The arguments "pairwise_average_v1.5", "pairwise_minimum_v1.5", and "pairwise_maximum_v1.5" can be used to mimic bootnet's behavior in version 1.5 and earlier (which also computed the sample size based on the sample sizes for the variances).}
+\item{sampleSize}{How will sample size be computed in EBICglasso default set? The default, \code{"pairwise_average"}, sets the sample size to the mean of the sample sizes used for the individual correlations. The option \code{"pairwise_average_mantar"} computes the mean of the sample sizes for all correlations between variables and the variances of the variables. Other options are: \code{"pairwise_maximum"} (largest sample size used for any individual correlation), \code{"pairwise_minimum"} (smallest sample size used for any individual correlation), \code{"maximum"} (total number of rows, including rows with missing values), and \code{"minimum"} (number of rows without any missing values). The arguments \code{"pairwise_average_v1.5"}, \code{"pairwise_minimum_v1.5"}, and \code{"pairwise_maximum_v1.5"} reproduce the behavior of bootnet version 1.5 and earlier, in which variance sample sizes were included and covariance sample sizes contributed twice because the full symmetric sample size matrix was used.}
 \item{regressionSampleSize}{How will sample size be computed in nodeRegresIC default set for node-wise regression models? The default \code{"individual"} uses the number of non-missing observations for the respective dependent variable. Other options are \code{"average"} (average number of non-missing observations for all variables), \code{"max"} (maximum number of non-missing observations across all variables), and \code{"total"} (takes total number of rows including rows with NA).}
 \item{corArgs}{
 A list of additional arguments passed to the function specified by \code{corMethod}.
-For \code{"cor_mantar"} (\code{\link[mantar]{cor_calc}}), particularly relevant arguments are \code{ordered}, which allows column-wise specification of whether variables are treated as ordered, and, when data contain missing values, \code{nimp} (number of imputations) and \code{imp_method} (imputation method used).
+For \code{"cor_mantar"} (\code{\link[mantar]{cor_calc}}), particularly relevant arguments are \code{ordered}, which allows column-wise specification of whether variables are treated as ordered categorical, and \code{network_vars}, which specifies the variables for which the final correlation matrix is returned (e.g., the variables included in the network). In addition, \code{auxiliary_vars} can be used to include further variables in the estimation of the correlation matrix under missing data without including them in the final network. When missing values are handled using stacked multiple imputation, the arguments \code{nimp} (number of imputations) and \code{imp_method} (imputation method used) are additionally relevant.
 For \code{"cor_auto"} (\code{\link[qgraph]{cor_auto}}), important arguments include \code{detectOrdinal}, which enables automatic detection of ordinal variables, and \code{ordinalLevelMax}, which defines the maximum number of levels used to classify a variable as ordinal.
 All arguments have defaults in their respective functions.
 }
@@ -310,6 +310,7 @@ Set to \code{TRUE} to not result in a standard error. This is to prevent using t
 }
 \item{transform}{Should data be transformed before estimate the network? \code{"rank"} will call \code{\link{rank_transformation}} and \code{"quantile"}" will call \code{\link{quantile_transformation}}.}
 \item{penalty}{Penalty to use in the GGMncv methods.}
+\item{likelihood_comp}{Character string specifying how the log-likelihood is computed in GGMncv. Possible values are \code{"obs_based"}, which uses the observed-data log-likelihood and is recommended for continuous data, and \code{"mat_based"}, which uses a log-likelihood based on the sample correlation matrix.}
 \item{min_sum}{ The minimum sum score that is artifically possible in the dataset. Defaults to -Inf. Set this only if you know a lower sum score is not possible in the data, for example due to selection bias.}
 }
 \details{

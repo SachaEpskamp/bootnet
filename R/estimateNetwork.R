@@ -219,6 +219,12 @@ estimateNetwork <- function(
     sampleResult$labels  <- outdata$vars
   }
 
+  if ("corMethod" %in% names(.input$arguments)){
+    if(.input$arguments$corMethod == "cor_mantar" & (!is.null(.input$arguments$network_vars) | !is.null(.input$arguments$corArgs$network_vars))){
+      sampleResult$labels <- colnames(sampleResult$graph)
+  }
+  }
+
   # Memory save:
   if(memorysaver)
   {

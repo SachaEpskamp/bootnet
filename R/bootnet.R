@@ -101,6 +101,11 @@ bootnet <- function(
               "Combining multiple imputation with bootstrapping, while potentially providing the most robust estimation, can be computationally very demanding. It is strongly recommended to first test the procedure using a small number of bootstraps ('nBoot') and imputations ('nimp') to ensure that the estimation runs without errors and to get an impression of the expected runtime. Once verified, the full analysis should be executed on a machine that can run uninterrupted for an extended period, potentially even several days.",
               "============================================================\n",
               "============================================================\n")
+      }}
+
+    if (!is.null(list(...)[["corMethod"]])){
+      if (list(...)[["corMethod"]] == "cor_mantar" && type == "node"){
+        stop("corMethod = 'cor_mantar' is not supported for node-wise bootstrapping. Please use a different correlation method or a different bootstrap type.")
     }}
 
     # Check bridgeArgs:
@@ -447,7 +452,7 @@ bootnet <- function(
 
                 if (! type %in% c("node","person")){
                     nNode <- N
-                    inSample <- seq_len(N)
+                    inSample <- sampleResult$labels
 
                     if (type == "jackknife"){
                         if (datatype == "normal"){
@@ -468,6 +473,8 @@ bootnet <- function(
                             g <- -sampleResult$graph
                             diag(g) <- 1
                             bootData <- mvtnorm::rmvnorm(round(propBoot*Np), sigma = corpcor::pseudoinverse(g))
+                            colnames(bootData) <- inSample
+                            inputCheck$arguments$corArgs$auxiliary_vars <- inputCheck$arguments$auxiliary_vars <- NULL
 
                         } else if (model == "graphicalVAR"){
 

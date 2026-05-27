@@ -1,3 +1,9 @@
+Changes in Version 1.9
+  - Enabled the use of network variables in cor_mantar()
+  - Enabled the use of auxiliary variables for missing data handling in cor_mantar()
+  - Enabled observation-based likelihood computation in GGMncv
+  - Added the sampleSize option "pairwise_average_mantar" for methods using correlation matrices with missing data. This option computes the mean sample size across all pairwise correlations and variances, mimicking the behavior of the mantar package.
+
 Changes in Version 1.8
   - Updated nonconvex regularization to use mantar instead of GGMncv
   - Added multiple imputation as a missing data handling option for cross-sectional network analysis via the new cor_mantar functionality
