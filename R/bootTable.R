@@ -128,6 +128,8 @@ statTable <- function(x,
         bridgeStrength= rep(0,ncol(x[['graph']])),
         bridgeCloseness= rep(0,ncol(x[['graph']])),
         bridgeBetweenness= rep(0,ncol(x[['graph']])),
+        bridgeInDegree= rep(0,ncol(x[['graph']])),
+        bridgeOutDegree= rep(0,ncol(x[['graph']])),
         bridgeExpectedInfluence= rep(0,ncol(x[['graph']]))
       )
       bridgeCentralityNames <- x[['labels']]
@@ -293,7 +295,7 @@ statTable <- function(x,
       })
 
       if (is(tryhybrid,"try-error")){
-        tables$rspbc <- tibble::as_tibble(data.frame(
+        tables$hybrid <- tibble::as_tibble(data.frame(
           name = name,
           type = "hybrid",
           node1 = x[['labels']],
@@ -388,6 +390,30 @@ statTable <- function(x,
         node1 = bridgeCentralityNames,
         node2 = '',
         value = cent[['bridgeBetweenness']],
+        stringsAsFactors = FALSE
+      ))
+    }
+
+    # bridgeInDegree:
+    if ("bridgeInDegree" %in% statistics){
+      tables$bridgeInDegree <- tibble::as_tibble(data.frame(
+        name = name,
+        type = "bridgeInDegree",
+        node1 = bridgeCentralityNames,
+        node2 = '',
+        value = cent[['bridgeInDegree']],
+        stringsAsFactors = FALSE
+      ))
+    }
+
+    # bridgeOutDegree:
+    if ("bridgeOutDegree" %in% statistics){
+      tables$bridgeOutDegree <- tibble::as_tibble(data.frame(
+        name = name,
+        type = "bridgeOutDegree",
+        node1 = bridgeCentralityNames,
+        node2 = '',
+        value = cent[['bridgeOutDegree']],
         stringsAsFactors = FALSE
       ))
     }
