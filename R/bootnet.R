@@ -93,15 +93,18 @@ bootnet <- function(
         message(paste("Note: bootnet will store only the following statistics: ",paste0(statistics, collapse=", ")))
     }
 
+    type <- match.arg(type)
+    if (type == "case") type <- "person"
+    model <- match.arg(model)
+
     # Check missing handling
-    if (!is.null(list(...)[["missing"]]) && type != "parametric"){
-      if(list(...)[["missing"]] == "stackedMI"){
+    if (identical(list(...)[["missing"]], "stackedMI") && type != "parametric"){
       message("============================================================\n",
               "============================================================\n",
               "Combining multiple imputation with bootstrapping, while potentially providing the most robust estimation, can be computationally very demanding. It is strongly recommended to first test the procedure using a small number of bootstraps ('nBoot') and imputations ('nimp') to ensure that the estimation runs without errors and to get an impression of the expected runtime. Once verified, the full analysis should be executed on a machine that can run uninterrupted for an extended period, potentially even several days.",
               "============================================================\n",
               "============================================================\n")
-    }}
+    }
 
     # Check bridgeArgs:
     if (!missing(communities)){
@@ -118,11 +121,7 @@ bootnet <- function(
     # Set a NULL sampleResult:
     sampleResult <- NULL
 
-
-    type <- match.arg(type)
     # datatype <- match.arg(datatype)
-    if (type == "case") type <- "person"
-    model <- match.arg(model)
 
     # If data is bootnetResult, extract:
 
