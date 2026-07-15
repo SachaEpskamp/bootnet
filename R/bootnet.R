@@ -264,12 +264,18 @@ bootnet <- function(
 
     }
 
+    # For graphicalVAR results, 'data' is the tsData-like list stored by
+    # estimateNetwork and must contain the 'vars' field:
+    if (datatype == "graphicalVAR" && (!is.list(data) || is.null(data$vars))){
+        stop("graphicalVAR data object lacks 'vars' field.")
+    }
+
     # subNodes and subCases:
     if (missing(subNodes)){
         if (datatype == "normal"){
             subNodes <- 2:(N-1)
         } else if (datatype == "graphicalVAR"){
-            subNodes <- 2:(length(vars)-1)
+            subNodes <- 2:(length(data$vars)-1)
         }
     }
 
@@ -530,7 +536,15 @@ bootnet <- function(
                     } else if (datatype == "graphicalVAR") {
                         bootData <- data
                         bootData$data_c <- bootData$data_c[,data$vars[inSample], drop = FALSE]
-                        bootData$data_l <- bootData$data_l[,c("1",grep(data$vars[inSample],names(data$data_l),value=TRUE)), drop = FALSE]
+                        # Keep the intercept column ("1") and the lag columns
+                        # (named "<var>_lag<k>") of the sampled variables only,
+                        # preserving the original column order:
+                        keep <- names(data$data_l) == "1" |
+                            sub("_lag[0-9]+$", "", names(data$data_l)) %in% data$vars[inSample]
+                        bootData$data_l <- bootData$data_l[, keep, drop = FALSE]
+                        # graphicalVAR::graphicalVAR() uses the 'vars' field to
+                        # locate the lag-1 columns, so subset it as well:
+                        bootData$vars <- data$vars[inSample]
                     }
 
                 } else {
@@ -719,7 +733,15 @@ bootnet <- function(
                     } else if (datatype == "graphicalVAR") {
                         bootData <- data
                         bootData$data_c <- bootData$data_c[,data$vars[inSample], drop = FALSE]
-                        bootData$data_l <- bootData$data_l[,c("1",grep(data$vars[inSample],names(data$data_l),value=TRUE)), drop = FALSE]
+                        # Keep the intercept column ("1") and the lag columns
+                        # (named "<var>_lag<k>") of the sampled variables only,
+                        # preserving the original column order:
+                        keep <- names(data$data_l) == "1" |
+                            sub("_lag[0-9]+$", "", names(data$data_l)) %in% data$vars[inSample]
+                        bootData$data_l <- bootData$data_l[, keep, drop = FALSE]
+                        # graphicalVAR::graphicalVAR() uses the 'vars' field to
+                        # locate the lag-1 columns, so subset it as well:
+                        bootData$vars <- data$vars[inSample]
                     }
 
                 } else {
