@@ -17,7 +17,7 @@ utils::globalVariables(c(
   "type", "value", "value1", "value2",
   "name", "mean", "sample",
   "node1", "node2",
-  "prop", "nPerson", "nNode", "nPeople",
+  "prop", "nPerson", "nNode",
   "stability", "original",
   "contain0", "lower", "upper", "significant",
   "rank", "include",

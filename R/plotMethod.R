@@ -318,7 +318,7 @@ plot.bootnet <- function(
           }
         } else {
 
-          g <- ggplot(Sum, aes(x = .data[["nPeople"]], y = .data[[meanVar]], group = .data[["id"]], colour = .data[["id"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["id"]])) +
+          g <- ggplot(Sum, aes(x = .data[["nPerson"]], y = .data[[meanVar]], group = .data[["id"]], colour = .data[["id"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["id"]])) +
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
@@ -326,7 +326,7 @@ plot.bootnet <- function(
             xlab("Sampled cases") + ylab("") +
             guides(fill=guide_legend(ncol=legendNcol),colour=guide_legend(ncol=legendNcol)) +
             scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) *  x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")),
-                            limits = c( ncol(x$sample$graph)-1, 1))
+                            limits = rev(range( Sum$nPerson)))
 
           if (panels){
             g <- g +   facet_grid(type ~ ., scales = "free")
@@ -358,15 +358,15 @@ plot.bootnet <- function(
             ylim(-1,1)
         } else {
 
-          g <- ggplot(Sum, aes(x = .data[["nPeople"]], y = .data[[meanVar]], group = .data[["type"]], colour = .data[["type"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["type"]])) +
+          g <- ggplot(Sum, aes(x = .data[["nPerson"]], y = .data[[meanVar]], group = .data[["type"]], colour = .data[["type"]],ymin = .data[[minArea]], ymax = .data[[maxArea]], fill = .data[["type"]])) +
             geom_errorbar(position =  position_dodge(width = 0.4)) +
             geom_point(position =  position_dodge(width = 0.4)) +
             geom_line(position =  position_dodge(width = 0.4)) +
             theme_bw() +
             geom_hline(yintercept = 0) +
             xlab("Sampled cases") + ylab("Average correlation with original sample") +
-            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) * ncol(x$sample$graph), labels=c(paste0(seq(90,10,by=-10),"%")),
-                            limits = c( ncol(x$sample$graph)-1, 1)) +
+            scale_x_reverse(breaks = seq(0.9,0.1,by=-0.1) *  x$sample$nPerson, labels=c(paste0(seq(90,10,by=-10),"%")),
+                            limits = rev(range( Sum$nPerson))) +
             ylim(-1,1)
 
         }
