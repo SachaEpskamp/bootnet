@@ -27,14 +27,14 @@ summary.bootnet <- function(
     object$sampleTable$value <- object$sampleTable$rank_avg
     
     object$bootTable$value_min <- object$bootTable$rank_min
-    object$sampleTable$rank_min <- object$sampleTable$rank_min
-    
+    object$sampleTable$value_min <- object$sampleTable$rank_min
+
     object$bootTable$value_max <- object$bootTable$rank_max
     object$sampleTable$value_max <- object$sampleTable$rank_max
   } else {
-    
+
     object$bootTable$value_min <- object$bootTable$value
-    object$sampleTable$rank_min <- object$sampleTable$value
+    object$sampleTable$value_min <- object$sampleTable$value
     
     object$bootTable$value_max <- object$bootTable$value
     object$sampleTable$value_max <- object$sampleTable$value
