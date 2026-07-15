@@ -120,23 +120,8 @@ plot.bootnet <- function(
   CIstyle <- match.arg(CIstyle)
   # CIwidth <- match.arg(CIwidth)
 
-  if (CIstyle=="default"){
-    if (rank){
-      CIstyle <- "quantiles"
-    } else {
-      if(x$type %in% c("person","node")){
-        CIstyle <- "quantiles"
-      } else {
-        # CIstyle <- ifelse(statistics %in% c("closeness","strength"),"SE","quantile")
-        CIstyle <- "quantile"
-      }
-    }
-
-  } else {
-    if (x$type=="node" & any(CIstyle == "SE")){
-      stop("'SE' style confidence intervals not supported for node dropping.")
-      CIstyle <- "quantile"
-    }
+  if (x$type=="node" & any(CIstyle == "SE")){
+    stop("'SE' style confidence intervals not supported for node dropping.")
   }
 
   # if (! x$type %in% c("person","node")){

@@ -11,6 +11,7 @@ Changes in Version 1.9
   - nCores now uses the requested number of worker processes; previously one fewer was used.
   - Fixed the 'exclude' condition filter in the internal simulation engine used by netSimulator()/replicationSimulator(): matching conditions were previously kept instead of excluded, so 'exclude' had the opposite of its intended effect. Excluded conditions are now correctly removed.
   - The internal copy of parSim used by netSimulator()/replicationSimulator() was renamed (to bootnet_parSim) so it no longer shadows the parSim package when both are loaded.
+  - Internal cleanups (no user-visible behavior change): removed a block of NULL namespace bindings named after base/stats functions (relying instead on proper stats imports and utils::globalVariables); dropped an unused 'data' element from the internal checkInput() result; the bootnet(default = "graphicalVAR") informative error now fires before match.arg() (previously unreachable); removed dead code in plot.bootnet()'s CIstyle handling; and the pcor/cor estimator verbose message now mentions psych::corr.p significance thresholding only when the user actually requested a character (significance) threshold.
 
 Changes in Version 1.8
   - Updated nonconvex regularization to use mantar instead of GGMncv

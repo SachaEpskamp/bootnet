@@ -23,5 +23,6 @@ utils::globalVariables(c(
   "rank", "include",
   "edge", "weight",
   "numericID", "ci", "var", "alpha",
-  ".xvar"
+  ".xvar",
+  "P", "fill", "label"
 ))

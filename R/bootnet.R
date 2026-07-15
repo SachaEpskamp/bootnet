@@ -71,12 +71,14 @@ bootnet <- function(
 ){
     construct <- "function"
     if (default[[1]]=="glasso") default <- "EBICglasso"
-    default <- match.arg(default)
 
-    # Check default:
-    if (default == "graphicalVAR" && !is(data,"bootnetResult")){
+    # Check default (before match.arg, which does not list 'graphicalVAR'
+    # as a valid choice and would otherwise mask this informative error):
+    if (!missing(default) && identical(default[[1]], "graphicalVAR") && !is(data,"bootnetResult")){
         stop("default = 'graphicalVAR' only supported for output of estimateNetwork()")
     }
+
+    default <- match.arg(default)
 
     # Check if statistics is all:
     if (any(statistics=="all")){

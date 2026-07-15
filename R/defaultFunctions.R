@@ -498,6 +498,10 @@ bootnet_pcor <- function(
   missing <- match.arg(missing)
   # sampleSize <- match.arg(sampleSize)
 
+  # Whether the user requested significance thresholding (evaluated on the
+  # original threshold value, before it is coerced from "none" to 0 below):
+  thresholding <- is.character(threshold) && !identical(threshold, "none")
+
   if (identical(threshold,"none")){
     threshold <- 0
   }
@@ -515,8 +519,8 @@ bootnet_pcor <- function(
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
     }
-    if (threshold != "none"){
-      if (threshold != "locfdr"){
+    if (thresholding){
+      if (!identical(threshold, "locfdr")){
         msg <- paste0(msg,"\n  - psych::corr.p for significance thresholding")
       } else {
         msg <- paste0(msg,"\n  - fdrtool for false discovery rate")
@@ -635,6 +639,10 @@ bootnet_cor <- function(
   missing <- match.arg(missing)
   # sampleSize <- match.arg(sampleSize)
 
+  # Whether the user requested significance thresholding (evaluated on the
+  # original threshold value, before it is coerced from "none" to 0 below):
+  thresholding <- is.character(threshold) && !identical(threshold, "none")
+
   if (identical(threshold,"none")){
     threshold <- 0
   }
@@ -652,8 +660,8 @@ bootnet_cor <- function(
     if (corMethod == "npn"){
       msg <- paste0(msg,"\n  - huge::huge.npn for nonparanormal transformation")
     }
-    if (threshold != "none"){
-      if (threshold != "locfdr"){
+    if (thresholding){
+      if (!identical(threshold, "locfdr")){
         msg <- paste0(msg,"\n  - psych::corr.p for significance thresholding")
       } else {
         msg <- paste0(msg,"\n  - fdrtool for false discovery rate")

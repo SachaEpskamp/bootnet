@@ -350,7 +350,6 @@ checkInput <- function(
 
   # Output:
   Output <- list(
-    data = data,
     default = default,
     estimator = Function,
     arguments = Args
