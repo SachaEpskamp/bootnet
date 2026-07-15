@@ -1,8 +1,5 @@
-library("dplyr")
-library("parallel")
-
 # Opzet:
-parSim <- function(
+bootnet_parSim <- function(
   ..., # Simulation conditions
   expression, # R expression ending in data.frame of results
   reps = 1,
@@ -27,7 +24,7 @@ parSim <- function(
       } else {
         ex <- rlang::parse_expr(ex)
       }
-      AllConditions <- AllConditions %>% filter(!!ex)
+      AllConditions <- AllConditions %>% filter(!(!!ex))
     }
   }
   

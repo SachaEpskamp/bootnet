@@ -153,8 +153,8 @@ replicationSimulator <- function(
       })),
       .dots)
 
-    Results <- do.call(parSim, Args)
-    
+    Results <- do.call(bootnet_parSim, Args)
+
     class(Results) <- c("replicationSimulator","data.frame")
     return(Results)
 }

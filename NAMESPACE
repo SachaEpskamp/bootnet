@@ -93,7 +93,7 @@ import(qgraph)
 import(ggplot2)
 importFrom("dplyr","anti_join","arrange","across","bind_rows","filter","group_by",
            "left_join","mutate","rename","select","summarize",
-           "tally","ungroup")
+           "tally","ungroup","%>%")
 importFrom("igraph", "get.adjacency","watts.strogatz.game")
 import(tidyr)
 importFrom(gtools, "mixedorder")

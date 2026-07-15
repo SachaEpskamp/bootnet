@@ -327,8 +327,8 @@ netSimulator <- function(
       })),
       .dots)
 
-    Results <- do.call(parSim, Args)
-    
+    Results <- do.call(bootnet_parSim, Args)
+
     class(Results) <- c("netSimulator","data.frame")
     return(Results)
 }
