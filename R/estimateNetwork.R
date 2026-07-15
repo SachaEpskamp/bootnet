@@ -28,9 +28,6 @@ estimateNetwork <- function(
   memorysaver = FALSE # If set to FALSE data, estimator and results are not stored.
 ){
   construct <- "function"
-  # Borsboom easter egg:
-  if (default[1] == "Borsboom") return(42)
-
   if (default[[1]]=="glasso") default <- "EBICglasso"
 
   if (default[[1]]=="GGMncv"){

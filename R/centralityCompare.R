@@ -26,20 +26,24 @@ differenceTest <- function(bootobject,x,y,measure = c("strength","closeness","be
   
   if (!missing(x2)){
     if (any(measure %in% c("edge","distance"))){
-      opts <- paste0(c(x,x2),"--",c(x2,x))
+      # Try both undirected ("--") and directed ("->") separators:
+      opts <- c(paste0(x,"--",x2), paste0(x2,"--",x),
+                paste0(x,"->",x2), paste0(x2,"->",x))
       x <- opts[opts%in%bootobject$sampleTable$id][1]
     } else {
       warning("'x2' ignored")
     }
-  }  
+  }
   if (!missing(y2)){
     if (any(measure %in% c("edge","distance"))){
-      opts <- paste0(c(y,y2),"--",c(y2,y))
+      # Try both undirected ("--") and directed ("->") separators:
+      opts <- c(paste0(y,"--",y2), paste0(y2,"--",y),
+                paste0(y,"->",y2), paste0(y2,"->",y))
       y <- opts[opts%in%bootobject$sampleTable$id][1]
     } else {
       warning("'y2' ignored")
     }
-  }  
+  }
   
   if (is.numeric(x)){
     if (any(measure %in% c("strength","betweenness","closeness"))){

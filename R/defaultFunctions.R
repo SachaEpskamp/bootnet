@@ -173,7 +173,7 @@ binarize <- function(x, split = "median", na.rm=TRUE, removeNArows = TRUE, verbo
       splitName <- split
     }
     if (verbose){
-      warning(paste("Splitting data by",splitName))
+      message(paste("Splitting data by",splitName))
     }
 
     if (is.character(split) || is.function(split)){
@@ -187,6 +187,18 @@ binarize <- function(x, split = "median", na.rm=TRUE, removeNArows = TRUE, verbo
 
     if (removeNArows){
       x <- x[apply(x,1,function(xx)all(!is.na(xx))),,drop=FALSE]
+    }
+
+    # Warn about constant (all-0 or all-1) columns: a median (or other) split
+    # can produce these, which breaks downstream estimation with cryptic errors.
+    constantCols <- sapply(x, function(xx){
+      xx <- xx[!is.na(xx)]
+      length(xx) > 0 && length(unique(xx)) == 1
+    })
+    if (any(constantCols)){
+      warning(paste0("Binarizing produced constant (all-0 or all-1) column(s): ",
+                     paste(names(x)[constantCols], collapse = ", "),
+                     ". This will likely cause errors in network estimation."))
     }
 
     return(x)

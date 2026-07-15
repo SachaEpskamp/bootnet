@@ -35,7 +35,7 @@ A data frame or matrix containing the raw data. Must be numeric, integer or orde
 Number of bootstraps
 }
   \item{default}{
-A string indicating the method to use. See documentation at \code{\link[bootnet]{estimateNetwork}}.
+A string indicating the method to use. See documentation at \code{\link[bootnet]{estimateNetwork}}. Note that the temporal and special defaults \code{"graphicalVAR"}, \code{"SVAR_lavaan"}, and \code{"piecewiseIsing"} are not among \code{bootnet()}'s own choices for this argument and cannot be requested here directly. To bootstrap a network estimated with one of these methods, first estimate it with \code{\link[bootnet]{estimateNetwork}} and pass the resulting object to \code{bootnet()}.
 }
 \item{type}{
  The kind of bootstrap method to use.

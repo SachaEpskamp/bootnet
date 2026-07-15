@@ -210,12 +210,17 @@ bootnet <- function(
         } else {
 
             # directed:
+            # Note: this branch is only reached for direct bootnet() calls
+            # (not for bootnetResult input), so 'default' has passed match.arg()
+            # above and can only be one of the choices listed in the 'default'
+            # argument. "graphicalVAR" and "DAG" are therefore unreachable here
+            # (a "graphicalVAR" default has already triggered the informative
+            # stop() above; both are only reachable when a bootnetResult carrying
+            # such a default is passed in, which is handled in the branch above).
             if (missing(directed)){
-                if (default == "graphicalVAR"){
-                    directed <- list(contemporaneous = FALSE, temporal = TRUE)
-                } else  if (default == "SVAR_lavaan"){
+                if (default == "SVAR_lavaan"){
                     directed <- list(contemporaneous = TRUE, temporal = TRUE)
-                } else if (!default %in% c("relimp","DAG")){
+                } else if (default != "relimp"){
                     directed <- FALSE
                 } else {
                     directed <- TRUE
