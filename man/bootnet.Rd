@@ -41,7 +41,7 @@ A string indicating the method to use. See documentation at \code{\link[bootnet]
  The kind of bootstrap method to use.
 }
 \item{nCores}{
-Number of cores to use in computing results. Set to 1 to not use parallel computing.
+Number of worker processes used in parallel computation. Set to 1 to not use parallel computing.
 }
 \item{statistics}{
 Vector indicating which statistics to store. Options are:

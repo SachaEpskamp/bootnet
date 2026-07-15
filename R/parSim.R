@@ -46,7 +46,7 @@ parSim <- function(
   expr <- as.expression(substitute(expression))
   
   if (nCores > 1){
-    nClust <- nCores - 1
+    nClust <- nCores
     
     
     ######################

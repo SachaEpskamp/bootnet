@@ -637,7 +637,10 @@ bootnet <- function(
             snow::setDefaultClusterOptions(setup_strategy = "sequential")
         }
 
-        nClust <- nCores - 1
+        if (nCores < 2){
+            stop("nCores must be >= 2 to use parallel computation")
+        }
+        nClust <- nCores
         cl <- snow::makeSOCKcluster(nClust)
         on.exit(stopCluster(cl), add = TRUE)
 

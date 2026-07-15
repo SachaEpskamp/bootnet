@@ -42,7 +42,7 @@ The sample sizes to test for.
 Number of repetitions per sampling level.
 }
   \item{nCores}{
-Number of cores to use. Set to more than 1 to use parallel computing.
+Number of worker processes used in parallel computation. Set to more than 1 to use parallel computing.
 }
   \item{default}{
 Default set used (see \code{\link{estimateNetwork}}). In most cases, this will set \code{dataGenerator} to the relevant generator.
