@@ -398,7 +398,7 @@ bootnet <- function(
             graph = graph,
             intercepts = intercepts,
             labels = labels,
-            nNodes = N,
+            nNode = N,
             nPerson = Np,
             estimator = inputCheck$estimator,
             arguments = inputCheck$arguments,

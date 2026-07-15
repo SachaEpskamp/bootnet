@@ -1,5 +1,6 @@
 Changes in Version 1.9
   - Fixed a crash on R >= 4.3 when 'missing' was supplied to bootnet() without an explicit 'type' argument (the missing-data check ran before match.arg(type), causing a "length = 6 in coercion to logical(1)" error)
+  - Fixed corStability() for node-drop bootstraps: it read x$sample$nNodes, but estimateNetwork() stores the field as nNode, so the drop proportion was NaN. The manual parametric bootstrap branch also stored nNodes instead of nNode (which additionally left bootTable$nNode empty); both are now consistently named nNode.
 
 Changes in Version 1.8
   - Updated nonconvex regularization to use mantar instead of GGMncv

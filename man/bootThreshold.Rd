@@ -31,7 +31,7 @@ A \code{bootnetResult} object with the following elements:
 \item{intercepts}{The intercepts}
 \item{results}{The results of the estimation procedure}
 \item{labels}{A vector with node labels}
-\item{nNodes}{Number of nodes in the network}
+\item{nNode}{Number of nodes in the network}
 \item{nPerson}{Number of persons in the network}
 \item{input}{Input used, including the result of the default set used}
 

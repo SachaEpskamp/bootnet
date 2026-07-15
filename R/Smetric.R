@@ -22,7 +22,7 @@ corStability <- function(x,cor=0.7, statistics = "all",
   statistics <- statistics[statistics%in%unique(x$bootTable$type)]
   
   if (x$type == "node"){
-    x$bootTable$prop <- 1 - (x$bootTable$nNode / x$sample$nNodes)
+    x$bootTable$prop <- 1 - (x$bootTable$nNode / x$sample$nNode)
   } else {
     x$bootTable$prop <- 1 - (x$bootTable$nPerson / x$sample$nPerson)
   }
