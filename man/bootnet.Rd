@@ -23,7 +23,7 @@ bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
                  directed, includeDiagonal = FALSE, communities,
                  useCommunities, bridgeArgs = list(), library =
                  .libPaths(), memorysaver = TRUE, ...,
-                 responses = c(0L, 1L))
+                 responses = c(0L, 1L), maxErrors = 10)
 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -122,6 +122,7 @@ List of arguments used in the 'bridge' function for computing bridge centrality
   Additional arguments used in the estimator function.
 }
 \item{responses}{The two possible response options of the data to use in the parametric Ising bootstrap (e.g., \code{c(-1L, 1L)}). Only used in the manual parametric bootstrap (when \code{data} is missing); when data are available the encoding is detected automatically.}
+\item{maxErrors}{The maximum number of retries per bootstrap sample when network estimation fails (a new bootstrap sample is drawn after each failure). When the limit is reached, \code{bootnet} stops with an error reporting the last estimation error. If any estimations failed and were resampled, a warning with the total number of failures is given at the end of the run.}
 }
 
 \value{

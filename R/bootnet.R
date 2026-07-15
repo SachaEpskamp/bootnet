@@ -67,7 +67,8 @@ bootnet <- function(
         ..., # Other arguments
         # edgeResample = FALSE # If true, only resample edges from original estimate
         # scaleAdjust = FALSE
-        responses = c(0L, 1L) # Response encoding for parametric Ising bootstrap. Detected from the data when available.
+        responses = c(0L, 1L), # Response encoding for parametric Ising bootstrap. Detected from the data when available.
+        maxErrors = 10 # Maximum number of retries per bootstrap sample when estimation fails.
 ){
     construct <- "function"
     if (default[[1]]=="glasso") default <- "EBICglasso"
@@ -463,6 +464,7 @@ bootnet <- function(
     #   ### Observation-wise bootstrapping!
     #   if (type == "observation"){
     # Bootstrap results:
+    totalRetries <- 0
     if (nCores == 1){
         bootResults <- vector("list", nBoots)
 
@@ -473,7 +475,7 @@ bootnet <- function(
 
         for (b in seq_len(nBoots)){
 
-            tryLimit <- 10
+            tryLimit <- maxErrors
             tryCount <- 0
             repeat{
 
@@ -605,15 +607,19 @@ bootnet <- function(
                                     memorysaver = memorysaver,
                                     directed = directed)
 
-                }))
+                }, silent = TRUE))
                 if (is(res, "try-error")){
 
                     if (tryCount == tryLimit) {
-                        stop("Maximum number of errors in bootstraps reached")
+                        cond <- attr(res, "condition")
+                        stop("Maximum number of retries reached in bootstrap ", b,
+                             ". Last estimation error: ",
+                             if (is.null(cond)) "unknown error" else conditionMessage(cond))
                     }
 
                     # warning("Error in bootstrap; retrying")
                     tryCount <- tryCount + 1
+                    totalRetries <- totalRetries + 1
                 } else {
                     break
                 }
@@ -673,7 +679,7 @@ bootnet <- function(
             # Set library:
             .libPaths(library)
 
-            tryLimit <- 10
+            tryLimit <- maxErrors
             tryCount <- 0
             repeat{
 
@@ -804,11 +810,14 @@ bootnet <- function(
                                     memorysaver = memorysaver,
                                     directed = directed)
 
-                }))
+                }, silent = TRUE))
                 if (is(res, "try-error")){
 
                     if (tryCount == tryLimit) {
-                        stop("Maximum number of errors in bootstraps reached")
+                        cond <- attr(res, "condition")
+                        stop("Maximum number of retries reached in bootstrap ", b,
+                             ". Last estimation error: ",
+                             if (is.null(cond)) "unknown error" else conditionMessage(cond))
                     }
 
                     # warning("Error in bootstrap; retrying")
@@ -819,8 +828,18 @@ bootnet <- function(
 
             }
 
-            return(res)
+            # Wrap the result together with the retry count; unwrapped directly
+            # after the pblapply call below so downstream code sees the same
+            # structure as before:
+            return(list(res = res, tries = tryCount))
         }, cl = cl)
+
+        totalRetries <- sum(vapply(bootResults, function(o) o$tries, numeric(1)))
+        bootResults <- lapply(bootResults, "[[", "res")
+    }
+
+    if (totalRetries > 0){
+        warning(sprintf("%d bootstrap estimation(s) failed and were resampled.", totalRetries))
     }
 
 
