@@ -64,9 +64,10 @@ bootnet <- function(
         library = .libPaths(),
         memorysaver = TRUE,
         # datatype = c("normal","graphicalVAR"), # Extracted from object or given
-        ... # Other arguments
+        ..., # Other arguments
         # edgeResample = FALSE # If true, only resample edges from original estimate
         # scaleAdjust = FALSE
+        responses = c(0L, 1L) # Response encoding for parametric Ising bootstrap. Detected from the data when available.
 ){
     construct <- "function"
     if (default[[1]]=="glasso") default <- "EBICglasso"
@@ -426,6 +427,30 @@ bootnet <- function(
     #   stop("bootnet does not support directed graphs")
     # }
 
+    # Parametric bootstrap checks (run once, before the bootstrap loops):
+    if (type == "parametric"){
+
+        # Detect the Ising response encoding from the data (e.g., -1/+1 instead of
+        # 0/1). Estimators such as bootnet_IsingFit transform the estimated network
+        # back to the original encoding, so parametric bootstrap samples must be
+        # drawn using that same encoding:
+        if (model == "Ising" && !manual && !is.null(data)){
+            enc <- sort(unique(unlist(data)))
+            if (length(enc) == 2 && !identical(as.numeric(enc), c(0, 1))){
+                responses <- enc
+            }
+        }
+
+        # The GGM parametric bootstrap treats the graph as a partial-correlation
+        # network; correlation networks (default = "cor", or "TMFG" unless run with
+        # graphType = "pcor") cannot be used:
+        if (model == "GGM" && !is.null(sampleResult$default) &&
+            sampleResult$default %in% c("cor","TMFG") &&
+            !(sampleResult$default == "TMFG" && identical(sampleResult$arguments$graphType, "pcor"))){
+            stop("Parametric bootstrap with model = 'GGM' requires a partial-correlation network; default = '",
+                 sampleResult$default, "' estimates a correlation network.")
+        }
+    }
 
     #   ### Observation-wise bootstrapping!
     #   if (type == "observation"){
@@ -461,7 +486,12 @@ bootnet <- function(
                     } else if (type == "parametric"){
                         nPerson <- Np
                         if (model == "Ising"){
-                            bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts)
+                            if (identical(as.numeric(responses), c(0, 1))){
+                                # Default 0/1 encoding; call kept identical to earlier versions:
+                                bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts)
+                            } else {
+                                bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts, responses = responses)
+                            }
 
                         } else if (model == "GGM") {
                             g <- -sampleResult$graph
@@ -645,7 +675,12 @@ bootnet <- function(
                     } else if (type == "parametric"){
                         nPerson <- Np
                         if (model == "Ising"){
-                            bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts)
+                            if (identical(as.numeric(responses), c(0, 1))){
+                                # Default 0/1 encoding; call kept identical to earlier versions:
+                                bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts)
+                            } else {
+                                bootData <- IsingSampler(round(propBoot*Np), noDiag(sampleResult$graph), sampleResult$intercepts, responses = responses)
+                            }
 
                         } else if (model == "GGM") {
                             g <- -sampleResult$graph

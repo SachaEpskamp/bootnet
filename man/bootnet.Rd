@@ -22,7 +22,8 @@ bootnet(data, nBoots = 1000, default = c("none", "EBICglasso",
                  TRUE, graph, sampleSize, intercepts, weighted, signed,
                  directed, includeDiagonal = FALSE, communities,
                  useCommunities, bridgeArgs = list(), library =
-                 .libPaths(), memorysaver = TRUE, ...)
+                 .libPaths(), memorysaver = TRUE, ...,
+                 responses = c(0L, 1L))
 
 }
 %- maybe also 'usage' for other objects documented here.
@@ -120,6 +121,7 @@ List of arguments used in the 'bridge' function for computing bridge centrality
 \item{\dots}{
   Additional arguments used in the estimator function.
 }
+\item{responses}{The two possible response options of the data to use in the parametric Ising bootstrap (e.g., \code{c(-1L, 1L)}). Only used in the manual parametric bootstrap (when \code{data} is missing); when data are available the encoding is detected automatically.}
 }
 
 \value{
