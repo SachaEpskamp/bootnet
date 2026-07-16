@@ -2,6 +2,5 @@
 ^\.Rproj\.user$
 ^\.github$
 ^\.claude$
-^cran-comments\.md$
 ^.*\.Rcheck$
 ^.*\.tar\.gz$
