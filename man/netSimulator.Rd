@@ -75,7 +75,7 @@ Res <- netSimulator(trueNetwork, nReps = 10)
 Res
 
 
-\donttest{
+\dontrun{
 # Plot:
 plot(Res)
 
