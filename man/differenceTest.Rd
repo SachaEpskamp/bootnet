@@ -61,7 +61,7 @@ bfiSub <- bfi[,1:25]
 Network <- estimateNetwork(bfiSub, default = "EBICglasso")
 
 # Bootstrap 1000 values, using 8 cores:
-Results1 <- bootnet(Network, nBoots = 1000, nCores = 8)
+Results <- bootnet(Network, nBoots = 1000, nCores = 8)
 
 # Test for difference in strength between node "A1" and "C2":
 differenceTest(Results,  "A1", "C2", "strength")

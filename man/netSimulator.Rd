@@ -144,12 +144,13 @@ Sim3
 # Plot results:
 plot(Sim3, color = "corMethod")
 
-\dontrun{
 # Ising model:
-trueNetwork <- read.csv('http://sachaepskamp.com/files/weiadj.csv')[,-1]
-trueNetwork <- as.matrix(trueNetwork)
-Symptoms <- rownames(trueNetwork) <- colnames(trueNetwork)
-Thresholds <- read.csv('http://sachaepskamp.com/files/thr.csv')[,-1]
+# Simulate a network to use as the true model:
+trueNetwork <- genGGM(10, p = 0.2, propPositive = 0.8)
+Symptoms <- rownames(trueNetwork) <- colnames(trueNetwork) <- paste0("S", 1:10)
+
+# Thresholds centering the marginal distributions:
+Thresholds <- -rowSums(trueNetwork) / 2
 
 # Create an input list (intercepts now needed)
 input <- list(graph=trueNetwork,intercepts=Thresholds)
@@ -182,6 +183,5 @@ Sim5
 
 # Plot:
 plot(Sim5, yfacet = "rule")
-}
 }
 }

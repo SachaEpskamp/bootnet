@@ -51,7 +51,7 @@ data(bfi)
 bfiSub <- bfi[1:250,1:25]
 
 # Estimate ggmModSelect networks (not stepwise to increase speed):
-Network <- estimateNetwork(bfiSub], default = "ggmModSelect", corMethod = "cor",
+Network <- estimateNetwork(bfiSub, default = "ggmModSelect", corMethod = "cor",
               stepwise = FALSE)
 
 # Bootstrap 100 values, using 8 cores (100 to incease speed, preferably 1000+):
