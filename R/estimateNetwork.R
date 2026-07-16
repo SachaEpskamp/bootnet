@@ -216,6 +216,23 @@ estimateNetwork <- function(
     sampleResult$labels  <- outdata$vars
   }
 
+  # With corMethod = "cor_mantar" and network_vars, the estimated network only
+  # contains the network variables; use their names as labels:
+  # network_vars is only used by corMethod = "cor_mantar"; corMethod may be
+  # absent from the stored arguments when the estimator's default is used:
+  if (is.null(.input$arguments$corMethod) ||
+      identical(.input$arguments$corMethod, "cor_mantar")){
+    netVars <- .input$arguments$network_vars
+    if (is.null(netVars)) netVars <- .input$arguments$corArgs$network_vars
+    if (!is.null(netVars)){
+      if (!is.null(colnames(sampleResult$graph))){
+        sampleResult$labels <- colnames(sampleResult$graph)
+      } else {
+        sampleResult$labels <- netVars
+      }
+    }
+  }
+
   # Memory save:
   if(memorysaver)
   {

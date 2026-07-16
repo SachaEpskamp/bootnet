@@ -18,10 +18,11 @@ principalDirection_noCor <- function(data){
 
 
 # Function for sampleSize:
-sampleSize_pairwise <- function(data, type = c( "pairwise_average",
-                                                "maximum",
-                                                "minimum",
-                                                "pairwise_maximum",
+sampleSize_pairwise <- function(data, type = c("pairwise_average",
+                                               "pairwise_average_mantar",
+                                               "maximum",
+                                               "minimum",
+                                               "pairwise_maximum",
                                                "pairwise_minimum",
                                                "pairwise_average_v1.5",
                                                "pairwise_maximum_v1.5",
@@ -49,12 +50,14 @@ sampleSize_pairwise <- function(data, type = c( "pairwise_average",
       sampleSize <- min(misMatrix[lower.tri(misMatrix)])
     } else  if (type == "pairwise_average"){
       sampleSize <- mean(misMatrix[lower.tri(misMatrix)])
+    } else  if (type == "pairwise_average_mantar"){
+      sampleSize <- mean(misMatrix[lower.tri(misMatrix, diag = TRUE)])
     } else if (type == "pairwise_maximum_v1.5"){
-        sampleSize <- max(misMatrix)
+      sampleSize <- max(misMatrix)
     } else  if (type == "pairwise_minimum_v1.5"){
-        sampleSize <- min(misMatrix)
+      sampleSize <- min(misMatrix)
     } else  if (type == "pairwise_average_v1.5"){
-        sampleSize <- mean(misMatrix)
+      sampleSize <- mean(misMatrix)
     }
 
 
@@ -103,6 +106,8 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","cor_m
         args[[names(corArgs)[[i]]]] <- corArgs[[i]]
       }
     }
+    imputed_data <- NULL
+    meanVec <- NULL
     corMat <- do.call(qgraph::cor_auto,args)
   } else if  (corMethod == "cor_mantar"){
     args <- list(data=data,missing=missing,verbose=verbose)
@@ -119,7 +124,11 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","cor_m
       tmp <- suppressWarnings(suppressMessages(do.call(mantar::cor_calc, args))),
       type = "output"
     ))
+    meanVec <- tmp$means
     corMat <- tmp$mat
+    if(args$missing_handling == "stacked-mi"){
+      imputed_data <- tmp$imputed_data
+    } else imputed_data <- NULL
   } else if (corMethod%in%c("cor","cov","spearman")){
     # Normal correlations
 
@@ -138,6 +147,8 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","cor_m
       corMethod <- "cor"
     }
 
+    meanVec <- NULL
+    imputed_data <- NULL
     corMat <- do.call(corMethod,args)
   } else stop ("Correlation method is not supported.")
 
@@ -147,7 +158,7 @@ bootnet_correlate <- function(data, corMethod =  c("cor","cor_auto","cov","cor_m
     }
   }
 
-  return(corMat)
+  return(list(corMat = corMat, meanVec = meanVec, imputed_data = imputed_data))
 }
 
 
@@ -237,6 +248,7 @@ bootnet_EBICglasso <- function(
   corMethod = c("cor","cov","cor_auto","cor_mantar","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
+                   "pairwise_average_mantar",
                   "maximum",
                   "minimum",
                   "pairwise_maximum",
@@ -314,12 +326,15 @@ bootnet_EBICglasso <- function(
   }
 
   # Correlate data:
-  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+  tmp <- bootnet_correlate(data = data, corMethod =  corMethod,
                                 corArgs = corArgs, missing = missing,
                                 verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+  corMat <- tmp$corMat
 
-
-
+  # Reduce data to the network variables
+  if (corMethod == "cor_mantar" && !is.null(corArgs$network_vars)){
+    data <- data[, corArgs$network_vars, drop = FALSE]
+  }
 
   # Sample size:
   if (missing == "listwise"){
@@ -344,6 +359,11 @@ bootnet_EBICglasso <- function(
                                 threshold=threshold,
                                 ...)
 
+  # Add imputed data sets to the output when multiple imputation is used, allowing their reuse in subsequent analyses
+  if (corMethod == "cor_mantar" & missing == "stackedMI"){
+    Results$imputed_data <- tmp$imputed_data
+  }
+
   # Return:
   return(list(graph=Results$optnet,results=Results))
 }
@@ -357,6 +377,7 @@ bootnet_ggmModSelect <- function(
   corMethod = c("cor","cov","cor_auto","cor_mantar","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
+                   "pairwise_average_mantar",
                    "maximum",
                    "minimum",
                    "pairwise_maximum",
@@ -433,9 +454,15 @@ bootnet_ggmModSelect <- function(
   }
 
   # Correlate data:
-  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+  tmp <- bootnet_correlate(data = data, corMethod =  corMethod,
                               corArgs = corArgs, missing = missing,
                               verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+  corMat <- tmp$corMat
+
+  # Reduce data to the network variables
+  if (corMethod == "cor_mantar" && !is.null(corArgs$network_vars)){
+    data <- data[, corArgs$network_vars, drop = FALSE]
+  }
 
   # Sample size:
   if (missing == "listwise"){
@@ -463,6 +490,12 @@ bootnet_ggmModSelect <- function(
                                   verbose = verbose,
                                   nCores = 1,
                                   ...)
+
+  # Add imputed data sets to the output when multiple imputation is used, allowing their reuse in subsequent analyses
+  if (corMethod == "cor_mantar" & missing == "stackedMI"){
+    Results$imputed_data <- tmp$imputed_data
+  }
+
   # Return:
   return(list(graph=as.matrix(Results$graph),results=Results))
 }
@@ -473,6 +506,7 @@ bootnet_pcor <- function(
   corMethod = c("cor","cov","cor_auto","cor_mantar","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
+                   "pairwise_average_mantar",
                    "maximum",
                    "minimum",
                    "pairwise_maximum",
@@ -566,9 +600,15 @@ bootnet_pcor <- function(
   }
 
   # Correlate data:
-  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+  tmp <- bootnet_correlate(data = data, corMethod =  corMethod,
                               corArgs = corArgs, missing = missing,
                               verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+  corMat <- tmp$corMat
+
+  # Reduce data to the network variables
+  if (corMethod == "cor_mantar" && !is.null(corArgs$network_vars)){
+    data <- data[, corArgs$network_vars, drop = FALSE]
+  }
 
   # Sample size:
   if (missing == "listwise"){
@@ -589,7 +629,7 @@ bootnet_pcor <- function(
 
   # Estimate network:
   if (missing(adjacency)){
-    Results <- getWmat(qgraph::qgraph(corMat,graph = "pcor",DoNotPlot = TRUE,threshold=threshold,alpha=alpha, sampleSize = sampleSize))
+    graph <- getWmat(qgraph::qgraph(corMat,graph = "pcor",DoNotPlot = TRUE,threshold=threshold,alpha=alpha, sampleSize = sampleSize))
   } else {
     if (is.character(threshold)){
       stop("Significance thresholding not supported with fixed structure ('adjacency' is not missing). Obtain significance via bootstraps.")
@@ -600,13 +640,17 @@ bootnet_pcor <- function(
     if(!requireNamespace("glasso")) stop("'glasso' package needs to be installed.")
     glas <- suppressWarnings(glasso::glasso(corMat,rho = 0, zero = zeroes)$wi)
 
-    Results <- as.matrix(qgraph::wi2net(glas))
-    Results <- 0.5*(Results + t(Results))
+    graph <- as.matrix(qgraph::wi2net(glas))
+    graph <- 0.5*(graph + t(graph))
+  }
+  Results <- list(graph = graph)
+  # Add imputed data sets to the output when multiple imputation is used, allowing their reuse in subsequent analyses
+  if (corMethod == "cor_mantar" & missing == "stackedMI"){
+    Results$imputed_data <- tmp$imputed_data
   }
 
-
   # Return:
-  return(list(graph=Results,results=Results))
+  return(list(graph=graph,results=Results))
 }
 
 
@@ -616,6 +660,7 @@ bootnet_cor <- function(
   corMethod = c("cor","cov","cor_auto","cor_mantar","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
+                   "pairwise_average_mantar",
                    "maximum",
                    "minimum",
                    "pairwise_maximum",
@@ -706,9 +751,15 @@ bootnet_cor <- function(
     }
   }
 
-  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+  tmp <- bootnet_correlate(data = data, corMethod =  corMethod,
                               corArgs = corArgs, missing = missing,
                               verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+  corMat <- tmp$corMat
+
+  # Reduce data to the network variables
+  if (corMethod == "cor_mantar" && !is.null(corArgs$network_vars)){
+    data <- data[, corArgs$network_vars, drop = FALSE]
+  }
 
   # Sample size:
   if (missing == "listwise"){
@@ -728,10 +779,15 @@ bootnet_cor <- function(
   }
 
   # Estimate network:
-  Results <- getWmat(qgraph::qgraph(corMat,graph = "cor",DoNotPlot = TRUE,threshold=threshold, sampleSize = sampleSize, alpha=alpha))
+  graph <- getWmat(qgraph::qgraph(corMat,graph = "cor",DoNotPlot = TRUE,threshold=threshold, sampleSize = sampleSize, alpha=alpha))
+  Results <- list(graph = graph)
+  # Add imputed data sets to the output when multiple imputation is used, allowing their reuse in subsequent analyses
+  if (corMethod == "cor_mantar" & missing == "stackedMI"){
+    Results$imputed_data <- tmp$imputed_data
+  }
 
   # Return:
-  return(list(graph=Results,results=Results))
+  return(list(graph=graph,results=Results))
 }
 
 
@@ -1475,9 +1531,10 @@ bootnet_TMFG <- function(
   }
 
   # Correlate data:
-  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+  tmp <- bootnet_correlate(data = data, corMethod =  corMethod,
                               corArgs = corArgs, missing = missing,
                               verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+  corMat <- tmp$corMat
 
   # Principal direction:
   if (principalDirection){
@@ -1493,6 +1550,11 @@ bootnet_TMFG <- function(
 
   # Estimate network:
   Results <- NetworkToolbox::TMFG(corMat)
+
+  # Add imputed data sets to the output when multiple imputation is used, allowing their reuse in subsequent analyses
+  if (corMethod == "cor_mantar" & missing == "stackedMI"){
+    Results$imputed_data <- tmp$imputed_data
+  }
 
   # Return:
   return(list(graph=Results$A,results=Results))
@@ -1570,9 +1632,10 @@ bootnet_LoGo <- function(
   }
 
   # Correlate data:
-  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+  tmp <- bootnet_correlate(data = data, corMethod =  corMethod,
                               corArgs = corArgs, missing = missing,
                               verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+  corMat <- tmp$corMat
 
   # Principal direction:
   if (principalDirection){
@@ -1581,10 +1644,16 @@ bootnet_LoGo <- function(
 
 
   # Estimate network:
-  Results <- NetworkToolbox::LoGo(corMat,normal = FALSE,partial=TRUE,standardize = TRUE,...)
+  graph <- NetworkToolbox::LoGo(corMat,normal = FALSE,partial=TRUE,standardize = TRUE,...)
+  Results <- list(graph=graph)
+
+  # Add imputed data sets to the output when multiple imputation is used, allowing their reuse in subsequent analyses
+  if (corMethod == "cor_mantar" & missing == "stackedMI"){
+    Results$imputed_data <- tmp$imputed_data
+  }
 
   # Return:
-  return(Results)
+  return(list(graph=graph, results = Results))
 }
 
 
@@ -2134,11 +2203,13 @@ bootnet_ncvRegularize <- function(
   data, # Dataset used
   penalty = c("atan","selo","exp","log","sica","scad","mcp","glasso"),
   tuning = NULL,
+  likelihood_comp = NULL,
   lambda.min.ratio = 0.01,
   nlambda = NULL,
   corMethod = c("cor_mantar","cor","cov","cor_auto","npn","spearman"), # Correlation method
   missing = c("pairwise","listwise","fiml","stackedMI","stop"),
   sampleSize =  c( "pairwise_average",
+                   "pairwise_average_mantar",
                    "maximum",
                    "minimum",
                    "pairwise_maximum",
@@ -2170,7 +2241,29 @@ bootnet_ncvRegularize <- function(
   ic_type <- dots[["ic_type"]]
   n_lambda <- dots[["n_lambda"]]
   lambda_min_ratio <- dots[["lambda_min_ratio"]]
-  dots[c("n_lambda", "extended_gamma", "ic_type","lambda_min_ratio")] <- NULL
+  likelihood <- dots[["likelihood"]]
+  dots[c("n_lambda", "extended_gamma", "ic_type","lambda_min_ratio", "likelihood")] <- NULL
+
+  # check whether variable arguments are specified both in dots and corArgs
+  cor_arg_names <- c("network_vars", "auxiliary_vars")
+  duplicated_args <- cor_arg_names[
+    cor_arg_names %in% names(dots) &
+      cor_arg_names %in% names(corArgs)
+  ]
+
+  if (length(duplicated_args) > 0) {
+    stop(
+      "The following arguments were supplied both via `...` and `corArgs`: ",
+      paste(duplicated_args, collapse = ", "), "."
+    )
+  }
+
+  # move arguments from dots to corArgs
+  cor_args_from_dots <- dots[names(dots) %in% cor_arg_names]
+  corArgs <- modifyList(corArgs, cor_args_from_dots)
+
+  # remove transferred arguments from dots
+  dots <- dots[!names(dots) %in% cor_arg_names]
 
   if (is.null(lambda_min_ratio)){
     lambda_min_ratio <- lambda.min.ratio
@@ -2196,7 +2289,6 @@ bootnet_ncvRegularize <- function(
     }
   }
 
-
   if (!is.null(n_lambda) && !is.null(nlambda)) {
     stop("'n_lambda' and 'nlambda' specify the same argument in the mantar implementation. Please provide only one.")
   } else if (is.null(n_lambda) && !is.null(nlambda)) {
@@ -2221,6 +2313,22 @@ bootnet_ncvRegularize <- function(
   corMethod <- match.arg(corMethod)
   missing <- match.arg(missing)
   # sampleSize <- match.arg(sampleSize)
+
+  # Resolve the likelihood computation method:
+  if(!is.null(likelihood_comp) && !is.null(likelihood)){
+    stop("'likelihood_comp' and 'likelihood' specify the same argument in the mantar implementation. Please provide only one.")
+  } else if (is.null(likelihood_comp) && !is.null(likelihood)) {
+    likelihood_comp <- likelihood
+  } else if (is.null(likelihood_comp)) {
+    # Default: observation-based likelihood for cor_mantar (recommended for
+    # continuous data); matrix-based likelihood otherwise (the only supported
+    # option, and the behavior of bootnet < 1.9):
+    likelihood_comp <- if (corMethod == "cor_mantar") "obs_based" else "mat_based"
+  }
+
+  if (likelihood_comp == "obs_based" && corMethod != "cor_mantar"){
+    stop("The 'obs_based' likelihood computation method is only compatible with 'cor_mantar' correlation method.")
+  }
 
   # Message:
   if (verbose){
@@ -2262,9 +2370,17 @@ bootnet_ncvRegularize <- function(
   }
 
   # Correlate data:
-  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+  tmp <- bootnet_correlate(data = data, corMethod =  corMethod,
                               corArgs = corArgs, missing = missing,
                               verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+
+  corMat <- tmp$corMat
+  meanVec <- tmp$meanVec
+
+  # Reduce data to the network variables
+  if (corMethod == "cor_mantar" && !is.null(corArgs$network_vars)){
+    data <- data[, corArgs$network_vars, drop = FALSE]
+  }
 
   # Sample size:
   if (missing == "listwise"){
@@ -2284,18 +2400,35 @@ bootnet_ncvRegularize <- function(
   }
 
   # Estimate network:
-  Results <- do.call(
-    mantar::regularization_net,
-    c(list(mat = corMat,
-           ns =  sampleSize,
-           likelihood = "mat_based",
-           ic_type = ic_type,
-           extended_gamma = extended_gamma,
-           penalty = penalty,
-           lambda_min_ratio = lambda_min_ratio,
-           n_lambda = n_lambda),
+  Results <- withCallingHandlers(
+    do.call(
+      mantar::regularization_net,
+      c(list(
+        data = data,
+        mat = corMat,
+        means = meanVec,
+        ns = sampleSize,
+        likelihood = likelihood_comp,
+        ic_type = ic_type,
+        extended_gamma = extended_gamma,
+        penalty = penalty,
+        lambda_min_ratio = lambda_min_ratio,
+        n_lambda = n_lambda
+      ),
       dots)
+    ),
+    message = function(m) {
+      if (grepl("Both 'data' and 'mat' are provided", conditionMessage(m), fixed = TRUE)) {
+        invokeRestart("muffleMessage")
+      }
+    }
   )
+
+  # Add imputed data sets to the output when multiple imputation is used, allowing their reuse in subsequent analyses
+  if (corMethod == "cor_mantar" & missing == "stackedMI"){
+    Results$imputed_data <- tmp$imputed_data
+  }
+
   # Return:
   return(list(graph=as.matrix(Results$pcor),results=Results))
 }
@@ -2354,6 +2487,27 @@ bootnet_nodeRegresIC <- function(
   pcor_merge_rule <- dots[["pcor_merge_rule"]]
   dots[c("ns", "n_calc", "ic_type", "pcor_merge_rule")] <- NULL
 
+  # check whether variable arguments are specified both in dots and corArgs
+  cor_arg_names <- c("network_vars", "auxiliary_vars")
+  duplicated_args <- cor_arg_names[
+    cor_arg_names %in% names(dots) &
+      cor_arg_names %in% names(corArgs)
+  ]
+
+  if (length(duplicated_args) > 0) {
+    stop(
+      "The following arguments were supplied both via `...` and `corArgs`: ",
+      paste(duplicated_args, collapse = ", "), "."
+    )
+  }
+
+  # move arguments from dots to corArgs
+  cor_args_from_dots <- dots[names(dots) %in% cor_arg_names]
+  corArgs <- modifyList(corArgs, cor_args_from_dots)
+
+  # remove transferred arguments from dots
+  dots <- dots[!names(dots) %in% cor_arg_names]
+
   if (is.null(n_calc)){
     n_calc <- regressionSampleSize
   }
@@ -2405,9 +2559,15 @@ bootnet_nodeRegresIC <- function(
   }
 
   # Correlate data:
-  corMat <- bootnet_correlate(data = data, corMethod =  corMethod,
+  tmp <- bootnet_correlate(data = data, corMethod =  corMethod,
                               corArgs = corArgs, missing = missing,
                               verbose = verbose,nonPositiveDefinite=nonPositiveDefinite)
+  corMat <- tmp$corMat
+
+  # Reduce data to the network variables
+  if (corMethod == "cor_mantar" && !is.null(corArgs$network_vars)){
+    data <- data[, corArgs$network_vars, drop = FALSE]
+  }
 
   # Sample size:
   if (is.null(ns)){
@@ -2437,6 +2597,12 @@ bootnet_nodeRegresIC <- function(
                             ic_type = ic_type,
                             pcor_merge_rule = pcor_merge_rule),
                        dots))
+
+  # Add imputed data sets to the output when multiple imputation is used, allowing their reuse in subsequent analyses
+  if (corMethod == "cor_mantar" & missing == "stackedMI"){
+    Results$imputed_data <- tmp$imputed_data
+  }
+
   # Return:
   return(list(graph=as.matrix(Results$pcor),results=Results))
 }

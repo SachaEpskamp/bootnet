@@ -110,6 +110,15 @@ bootnet <- function(
               "============================================================\n")
     }
 
+    # corMethod may be supplied directly (...) or stored in an estimateNetwork result:
+    usedCorMethod <- list(...)[["corMethod"]]
+    if (is.null(usedCorMethod) && !missing(data) && is(data, "bootnetResult")){
+      usedCorMethod <- data$arguments$corMethod
+    }
+    if (identical(usedCorMethod, "cor_mantar") && type == "node"){
+      stop("corMethod = 'cor_mantar' is not supported for node-wise bootstrapping. Please use a different correlation method or a different bootstrap type.")
+    }
+
     # Check bridgeArgs:
     if (!missing(communities)){
         bridgeArgs$communities <- communities
@@ -512,6 +521,12 @@ bootnet <- function(
                             g <- -sampleResult$graph
                             diag(g) <- 1
                             bootData <- mvtnorm::rmvnorm(round(propBoot*Np), sigma = corpcor::pseudoinverse(g))
+                            # Simulated data only contains the network variables; name the
+                            # columns after them and drop any auxiliary variables (used for
+                            # missing-data handling with corMethod = "cor_mantar") from the
+                            # estimation arguments:
+                            colnames(bootData) <- sampleResult$labels
+                            inputCheck$arguments$corArgs$auxiliary_vars <- inputCheck$arguments$auxiliary_vars <- NULL
 
                         } else if (model == "graphicalVAR"){
 
@@ -716,6 +731,12 @@ bootnet <- function(
                             g <- -sampleResult$graph
                             diag(g) <- 1
                             bootData <- mvtnorm::rmvnorm(round(propBoot*Np), sigma = corpcor::pseudoinverse(g))
+                            # Simulated data only contains the network variables; name the
+                            # columns after them and drop any auxiliary variables (used for
+                            # missing-data handling with corMethod = "cor_mantar") from the
+                            # estimation arguments:
+                            colnames(bootData) <- sampleResult$labels
+                            inputCheck$arguments$corArgs$auxiliary_vars <- inputCheck$arguments$auxiliary_vars <- NULL
 
                         } else if (model == "graphicalVAR"){
 

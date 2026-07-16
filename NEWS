@@ -1,4 +1,8 @@
 Changes in Version 1.9
+  - Enabled the use of network variables in cor_mantar()
+  - Enabled the use of auxiliary variables for missing data handling in cor_mantar()
+  - Enabled observation-based likelihood computation in the nonconvex regularization methods via the new 'likelihood_comp' argument. By default, the observed-data likelihood is used when corMethod = "cor_mantar" (the default) and the matrix-based likelihood (the behavior of earlier versions) otherwise.
+  - Added the sampleSize option "pairwise_average_mantar" for methods using correlation matrices with missing data. This option computes the mean sample size across all pairwise correlations and variances, mimicking the behavior of the mantar package.
   - Documentation examples fixed: the example in ?bootInclude had a syntax error ("estimateNetwork(bfiSub]"), ?differenceTest assigned its bootstrap results to 'Results1' but then used 'Results', and ?netSimulator had a nested \dontrun{} block that made its code unparseable when extracted.
   - The Ising example in ?netSimulator now simulates its true network with genGGM() instead of downloading two .csv files that are no longer available.
   - Fixed a crash on R >= 4.3 when 'missing' was supplied to bootnet() without an explicit 'type' argument (the missing-data check ran before match.arg(type), causing a "length = 6 in coercion to logical(1)" error).
