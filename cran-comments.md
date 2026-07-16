@@ -1,8 +1,8 @@
-# bootnet 1.9
+# CRAN comments for bootnet 1.9
 
-This is a version update of the existing CRAN package bootnet, maintained by
-Sacha Epskamp <mail@sachaepskamp.com>. Version 1.9 is a major bug-fix release;
-Adela Maria Isvoranu has been added as a contributor in Authors@R.
+This is a version update of the existing CRAN package bootnet. The current
+CRAN release is 1.8. Version 1.9 is a major bug-fix release; Adela-Maria
+Isvoranu has been added as a contributor in Authors@R.
 
 ## Release summary
 
@@ -34,26 +34,33 @@ Adela Maria Isvoranu has been added as a contributor in Authors@R.
 
 ## Dependencies
 
-The `IsingSampler (>= 0.2.3)` requirement is unchanged. The package was
-tested against CRAN IsingSampler 0.4.0's API and additionally against the
-pending IsingSampler 0.5.0 bug-fix release.
+The `IsingSampler (>= 0.2.3)` requirement is unchanged and still holds: the
+parametric Ising bootstrap calls `IsingSampler()` with `n`, `graph`,
+`thresholds` and `responses` only, all of which are present in the current
+CRAN release of IsingSampler (0.2.4). The package has additionally been
+checked against the pending IsingSampler 0.5.0 bug-fix release, whose
+behaviour changes (the `method = "direct"` return type, and the honouring of
+`constrain` and `beta`) do not affect any code path used by bootnet, which
+calls `IsingSampler()` with the default `method = "MH"` and `EstimateIsing()`
+with the default `beta = 1`.
 
 ## Test environments
 
-* Local: macOS 26.4.1 (Apple Silicon), R 4.6.1 (2026-06-24)
-* Checked with `R CMD check --as-cran --no-manual`
-  (`--no-manual` because pdflatex is not installed locally, so the PDF
-  manual could not be built; the Rd files pass checkRd without warnings)
+* Local: macOS Sonoma 14.2.1 (aarch64-apple-darwin20), R 4.5.3 (2026-03-11)
 
-## R CMD check results
+## R CMD check --as-cran results
 
-Status: 1 NOTE (0 ERRORs, 0 WARNINGs)
+0 ERRORs, 0 WARNINGs, 1 NOTE.
 
-* checking top-level files ... NOTE
-  "Files 'README.md' or 'NEWS.md' cannot be checked without 'pandoc' being
-  installed."
+The NOTE is a property of the local test machine rather than of the package:
 
-  This is a local-toolchain NOTE only: pandoc is not installed on the check
-  machine, so README.md could not be validated locally. It does not indicate
-  a problem with the package and will not occur on CRAN's builders, which
-  have pandoc available.
+```
+* checking HTML version of manual ... NOTE
+Skipping checking HTML validation: 'tidy' doesn't look like recent enough
+HTML Tidy.
+```
+
+macOS ships an outdated HTML Tidy, so this check is skipped locally; it is
+expected to pass on the CRAN build machines.
+
+All 14 test scripts and all examples pass.
