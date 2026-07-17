@@ -127,7 +127,8 @@ bootnet_graphicalVAR(data, tuning = 0.5, verbose = TRUE, principalDirection
 bootnet_ggmModSelect(data, tuning = 0, corMethod = c("cor", "cov",
                     "cor_auto", "cor_mantar", "npn", "spearman"), missing =
                     c("pairwise", "listwise", "fiml", "stackedMI", "stop"),
-                    sampleSize = c("pairwise_average", "pairwise_average_mantar", "maximum",
+                    sampleSize = c("pairwise_average",
+                    "pairwise_average_mantar", "maximum",
                     "minimum", "pairwise_maximum", "pairwise_minimum",
                     "pairwise_average_v1.5", "pairwise_maximum_v1.5",
                     "pairwise_minimum_v1.5"), verbose = TRUE, corArgs =
