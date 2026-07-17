@@ -1,4 +1,4 @@
-Changes in Version 1.9
+Changes in Version 1.9.1
   - Enabled the use of network variables in cor_mantar()
   - Enabled the use of auxiliary variables for missing data handling in cor_mantar()
   - Enabled observation-based likelihood computation in the nonconvex regularization methods via the new 'likelihood_comp' argument. By default, the observed-data likelihood is used when corMethod = "cor_mantar" (the default) and the matrix-based likelihood (the behavior of earlier versions) otherwise.
